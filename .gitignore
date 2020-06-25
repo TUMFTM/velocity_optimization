@@ -4,3 +4,9 @@ logs/
 .idea/
 
 src/__pycache__/
+
+dist/
+
+build/
+
+velocity_optimization_mpSQP.egg-info/
