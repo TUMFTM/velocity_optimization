@@ -1,2 +1,2 @@
-import vp_qp.src
-import vp_qp.opt_postproc
+import src
+import opt_postproc
