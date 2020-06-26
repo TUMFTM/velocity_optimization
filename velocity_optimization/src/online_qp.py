@@ -4,7 +4,7 @@ import time
 import datetime
 import json
 
-from src.VelQP import VelQP
+from velocity_optimization.src.VelQP import VelQP
 
 
 def online_qp(velqp: VelQP,

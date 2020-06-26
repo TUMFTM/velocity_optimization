@@ -5,7 +5,7 @@ import numpy as np
 # custom modules
 mod_local_trajectory_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(mod_local_trajectory_path)
-from vp_qp.opt_postproc.vis.VisBenchmarkLogs import VisVP_Logs
+from velocity_optimization.opt_postproc.vis.VisBenchmarkLogs import VisVP_Logs
 
 
 if __name__ == "__main__":

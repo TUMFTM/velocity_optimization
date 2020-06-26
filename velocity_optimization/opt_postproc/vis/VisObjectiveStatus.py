@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from vp_qp.opt_postproc.src.CalcObjective import CalcObjective
+from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
 try:
     import tikzplotlib
 except ImportError:

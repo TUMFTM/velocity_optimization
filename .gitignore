@@ -3,10 +3,20 @@ logs/
 
 .idea/
 
-src/__pycache__/
+velocity_optimization/.idea/
 
 dist/
 
 build/
 
 velocity_optimization_mpSQP.egg-info/
+
+velocity_optimization/__pycache__/
+
+velocity_optimization/opt_postproc/__pycache__/
+
+velocity_optimization/opt_postproc/vis/__pycache__/
+
+velocity_optimization/src/__pycache__/
+
+velocity_optimization/opt_postproc/src/__pycache__/

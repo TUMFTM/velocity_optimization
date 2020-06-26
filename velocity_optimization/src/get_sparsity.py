@@ -2,7 +2,7 @@ import numpy as np
 import os
 import logging
 import sympy
-from src.SymQP import SymQP
+from velocity_optimization.src.SymQP import SymQP
 
 
 def log_sparsity(symbolics: sympy.ImmutableDenseMatrix,

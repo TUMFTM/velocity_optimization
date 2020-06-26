@@ -1,3 +1,6 @@
 numpy>=1.18.1
 osqp==0.6.1
 sympy>=1.6
+matplotlib
+casadi>=3.5.1
+tikzplotlib>=0.8.7

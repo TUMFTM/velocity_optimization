@@ -3,8 +3,8 @@ import datetime
 import time
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider, Button
-from vp_qp.src.params_vp_sqp import params_vp_sqp
-from vp_qp.opt_postproc.src.CalcObjective import CalcObjective
+from velocity_optimization.src.params_vp_sqp import params_vp_sqp
+from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
 
 # Font sizes
 SMALL_SIZE = 12

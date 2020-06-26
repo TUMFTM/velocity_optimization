@@ -12,9 +12,9 @@ import logging
 import configparser
 import json
 
-from src.params_vp_sqp import params_vp_sqp
-from src.VarPower import VarPowerLimits
-from src.get_sparsity import calc_sparsity
+from velocity_optimization.src.params_vp_sqp import params_vp_sqp
+from velocity_optimization.src.VarPower import VarPowerLimits
+from velocity_optimization.src.get_sparsity import calc_sparsity
 
 
 class VelQP:

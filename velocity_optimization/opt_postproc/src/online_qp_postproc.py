@@ -1,6 +1,6 @@
 import numpy as np
-from vp_qp.src.VelQP import VelQP
-from vp_qp.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
+from velocity_optimization.src.VelQP import VelQP
+from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
 
 
 def online_qp_postproc(velqp: VelQP,

@@ -6,7 +6,7 @@ try:
     import tikzplotlib
 except ImportError:
     print('Warning: No module tikzplotlib found. Not necessary on car but for development.')
-# from vp_qp.opt_postproc.src.read_ltpl_raw import read_ltpl_raw
+# from velocity_optimization.opt_postproc.src.read_ltpl_raw import read_ltpl_raw
 
 # Line width
 LW = 1.5

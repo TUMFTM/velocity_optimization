@@ -5,15 +5,15 @@ import datetime
 import time
 from matplotlib import pyplot as plt
 import linecache
-from vp_qp.src.VelQP import VelQP
-from vp_qp.opt_postproc.src.VOptIPOPT import VOptIPOPT
-from vp_qp.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
-from vp_qp.opt_postproc.src.online_qp_postproc import online_qp_postproc
-from vp_qp.opt_postproc.src.CalcObjective import CalcObjective
-from vp_qp.opt_postproc.vis.VisGUI import VisVP_Logs_GUI
-from vp_qp.opt_postproc.vis.VisObjectiveStatus import VisVP_ObjStatus
-from vp_qp.opt_postproc.vis.VisRuntime import VisVP_Runtime
-from vp_qp.opt_postproc.vis.VisGlobalVals import VisVP_GlobalVals
+from velocity_optimization.src.VelQP import VelQP
+from velocity_optimization.opt_postproc.src.VOptIPOPT import VOptIPOPT
+from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
+from velocity_optimization.opt_postproc.src.online_qp_postproc import online_qp_postproc
+from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
+from velocity_optimization.opt_postproc.vis.VisGUI import VisVP_Logs_GUI
+from velocity_optimization.opt_postproc.vis.VisObjectiveStatus import VisVP_ObjStatus
+from velocity_optimization.opt_postproc.vis.VisRuntime import VisVP_Runtime
+from velocity_optimization.opt_postproc.vis.VisGlobalVals import VisVP_GlobalVals
 try:
     import tikzplotlib
 except ImportError:

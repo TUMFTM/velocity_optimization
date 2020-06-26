@@ -1,6 +1,6 @@
-from src.VelQP import VelQP
-from src.online_qp import online_qp
-from src.params_vp_sqp import params_vp_sqp
+from velocity_optimization.src.VelQP import VelQP
+from velocity_optimization.src.online_qp import online_qp
+from velocity_optimization.src.params_vp_sqp import params_vp_sqp
 
 """
 Python version: 3.5
