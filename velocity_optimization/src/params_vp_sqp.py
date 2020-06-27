@@ -4,7 +4,8 @@ import os
 
 
 def params_vp_sqp(m: int,
-                  sid: str) -> tuple:
+                  sid: str,
+                  params_path: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/') -> tuple:
 
     """
     Python version: 3.5
@@ -40,7 +41,7 @@ def params_vp_sqp(m: int,
 
     # load config files
     sqp_config = configparser.ConfigParser()
-    if not sqp_config.read(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/' + 'sqp_config.ini'):
+    if not sqp_config.read(params_path + 'sqp_config.ini'):
         raise ValueError('Specified config file does not exist or is empty!')
 
     # --- SQP settings

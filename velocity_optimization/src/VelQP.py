@@ -21,6 +21,7 @@ class VelQP:
 
     __slots__ = ('sqp_stgs',
                  'm',
+                 'params_path',
                  'slack_every_v',
                  'n',
                  'ev_vel_w',
@@ -70,6 +71,7 @@ class VelQP:
 
     def __init__(self,
                  m: int,
+                 params_path: str,
                  sid: str = 'optimizerID',
                  logging_path: str = os.environ['HOME'] + '/logs',
                  ci: bool = False):
@@ -89,8 +91,11 @@ class VelQP:
 
         # --- Retrieve SQP settings from parameter-file
         self.sqp_stgs = params_vp_sqp(m=m,
-                                      sid=sid)[0]
+                                      sid=sid,
+                                      params_path=params_path)[0]
 
+        # Store params_path
+        self.params_path = params_path
         # number of velocity optimization variables
         self.m = m
         # counter for how many velocity variables one slack is valid
@@ -166,8 +171,7 @@ class VelQP:
         # load QP config sparsity patterns
         sqp_sparsity = configparser.ConfigParser()
 
-        if not sqp_config.read(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
-                               + 'sqp_config.ini'):
+        if not sqp_config.read(self.params_path + 'sqp_config.ini'):
             raise ValueError('Specified SQP config file does not exist or is empty!')
 
         # check whether we are running in CI/CD job
@@ -343,7 +347,8 @@ class VelQP:
             ay_max, \
             err, \
             err_inf = params_vp_sqp(m=self.m,
-                                    sid=self.sid)
+                                    sid=self.sid,
+                                    params_path=self.params_path)
 
         # SQP termination criterion: RMSE
         self.err = err

@@ -14,6 +14,7 @@ class VOptIPOPT:
                  'n',
                  'sid',
                  'slack_every_v',
+                 'params_path',
                  'b_warm',
                  'trj',
                  'solver',
@@ -33,6 +34,7 @@ class VOptIPOPT:
                  m: int,
                  sid: str,
                  slack_every_v: int,
+                 params_path: str =
                  b_warm: bool = False):
         """
         Python version: 3.5
@@ -69,6 +71,8 @@ class VOptIPOPT:
         self.lam_x0 = None
         self.lam_g0 = None
 
+        self.params_path = params_path
+
         self.sol_init()
 
     def sol_init(self):
@@ -88,9 +92,7 @@ class VOptIPOPT:
         b_warm = self.b_warm
 
         opt_config = configparser.ConfigParser()
-        if not opt_config.read(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/../params/'
-                + 'sqp_config.ini'):
+        if not opt_config.read(self.params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
 
         ################################################################################################################

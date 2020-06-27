@@ -70,7 +70,8 @@ class VisVP_Logs_GUI:
     def __init__(self,
                  vis_handler,
                  m: int,
-                 vis_options: dict):
+                 vis_options: dict,
+                 params_path: str = ):
 
         """
         Python version: 3.5
@@ -91,7 +92,8 @@ class VisVP_Logs_GUI:
         self.main_fig = None
 
         self.params_opt = params_vp_sqp(m=m,
-                                        sid=vis_handler.sid)[0]
+                                        sid=vis_handler.sid,
+                                        params_path=params_path)[0]
 
         self.constants_opt = CalcObjective(csv_name='empty',
                                            log_lines=0,

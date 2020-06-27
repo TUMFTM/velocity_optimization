@@ -10,6 +10,7 @@ class SymQP:
     __slots__ = ('m',
                  'n',
                  'sid',
+                 'params_path',
                  'sqp_stgs',
                  'sym_sc',
                  'sym_sc_',
@@ -73,7 +74,8 @@ class SymQP:
 
     def __init__(self,
                  m: int,
-                 sid: str):
+                 sid: str,
+                 params_path: str):
 
         """
         Python version: 3.5
@@ -93,9 +95,13 @@ class SymQP:
         # ID ob optimizer object
         self.sid = sid
 
+        # Parameter files path
+        self.params_path = params_path
+
         # SQP settings
         self.sqp_stgs = params_vp_sqp(m=m,
-                                      sid=sid)[0]
+                                      sid=sid,
+                                      params_path=self.params_path)[0]
 
         # Number of slack variables
         self.n = int(np.ceil(m / self.sqp_stgs['slack_every_v']))
@@ -106,8 +112,7 @@ class SymQP:
 
         sqp_config = configparser.ConfigParser()
         if not sqp_config.read(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/params/'
-                + 'sqp_config.ini'):
+                os.path.dirname(self.params_path + 'sqp_config.ini')):
             raise ValueError('Specified cost config file does not exist or is empty!')
 
         # --- SQP settings

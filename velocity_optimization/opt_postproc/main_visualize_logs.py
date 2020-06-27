@@ -3,8 +3,8 @@ import sys
 import numpy as np
 
 # custom modules
-mod_local_trajectory_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(mod_local_trajectory_path)
+vel_opt_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(vel_opt_path)
 from velocity_optimization.opt_postproc.vis.VisBenchmarkLogs import VisVP_Logs
 
 
@@ -17,8 +17,8 @@ if __name__ == "__main__":
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
 
-    csv_name = mod_local_trajectory_path + '/logs/vp_sqp/sqp_emerg_2020_04_23_10_33.log'
-    csv_name_ltpl = mod_local_trajectory_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
+    csv_name = vel_opt_path + '/logs/vp_sqp/sqp_emerg_2020_04_23_10_33.log'
+    csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
     # Number of velocity points
     m = 50

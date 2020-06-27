@@ -14,12 +14,15 @@ Documentation: Main script to test the velocity planner SQP.
 # --- Global settings for the main SQP test
 m = 115
 sid = 'PerfSQP'
+# params path
+params_path = os.path.dirname(os.path.abspath(__file__)) + '/params/'
 # logging path
-logging_path = os.environ['HOME'] + '/logs'
+logging_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/logs'
 
 # --- Create SymQP-instance
 velqp = VelQP(m=m,
               sid=sid,
+              params_path=params_path,
               logging_path=logging_path)
 
 # --- Codegen
@@ -39,7 +42,9 @@ sqp_stgs,\
     ax_max,\
     ay_max,\
     err,\
-    err_inf = params_vp_sqp(m=m, sid=sid)
+    err_inf = params_vp_sqp(m=m,
+                            sid=sid,
+                            params_path=params_path)
 
 v_op, s_t_op, qp_status = online_qp(velqp=velqp,
                                     v_ini=v_ini,

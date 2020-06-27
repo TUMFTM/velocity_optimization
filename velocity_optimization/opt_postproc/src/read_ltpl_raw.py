@@ -11,8 +11,8 @@ except ImportError:
     print('Warning: No module tikzplotlib found. Not necessary on car but for development.')
 
 # custom modules
-mod_local_trajectory_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(mod_local_trajectory_path)
+vel_opt_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(vel_opt_path)
 
 
 def read_ltpl_raw(csv_name: str) -> tuple:

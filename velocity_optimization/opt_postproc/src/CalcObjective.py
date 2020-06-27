@@ -8,6 +8,7 @@ import configparser
 class CalcObjective:
 
     __slots__ = ('csv_name',
+                 'params_path',
                  'log_lines',
                  'J_vvmax',
                  'J_eps_tre_lin',
@@ -21,7 +22,8 @@ class CalcObjective:
     def __init__(self,
                  csv_name: str,
                  log_lines: int,
-                 sid: str):
+                 sid: str,
+                 params_path: str = ):
         """
         Python version: 3.5
         Created by: Thomas Herrmann (thomas.herrmann@tum.de)
@@ -37,6 +39,8 @@ class CalcObjective:
         """
 
         self.csv_name = csv_name
+
+        self.params_path =
 
         # Parameter for repeating log variables after number of lines
         self.log_lines = log_lines
@@ -70,9 +74,7 @@ class CalcObjective:
         """
 
         sqp_config = configparser.ConfigParser()
-        if not sqp_config.read(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/../params/'
-                + 'sqp_config.ini'):
+        if not sqp_config.read(self.params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
 
         if sid == 'PerfSQP':

@@ -55,7 +55,8 @@ class VisVP_Logs:
                  vis_options: dict,
                  m: int,
                  sid: str = 'PerfSQP',
-                 log_lines: int = 4):
+                 log_lines: int = 4,
+                 params_path: str = ):
 
         """
         Python version: 3.5
@@ -98,7 +99,8 @@ class VisVP_Logs:
         # --- Create visualization GUI object
         self.vis_gui = VisVP_Logs_GUI(vis_handler=self,
                                       m=m,
-                                      vis_options=vis_options)
+                                      vis_options=vis_options,
+                                      params_path=params_path)
 
         # --- Create OSQP solver object
         self.velqp = VelQP(m=m,

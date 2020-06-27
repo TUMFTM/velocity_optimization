@@ -75,7 +75,8 @@ def calc_sparsity(m_perf: int = 115,
 
     # --- Create SymQP-instance
     symqp = SymQP(m=m,
-                  sid=sid)
+                  sid=sid,
+                  params_path=params_path)
 
     log_sparsity(symqp.F_ini_cst_jac[:, 1:], 'symqp.F_sym_ini_cst_jac_:_1:', logger)
     log_sparsity(symqp.F_cst_jac[1:, 1:], 'symqp.F_sym_cst_jac_1:_1:', logger)
