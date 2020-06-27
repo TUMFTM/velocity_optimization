@@ -71,6 +71,7 @@ class VelQP:
     def __init__(self,
                  m: int,
                  sid: str = 'optimizerID',
+                 logging_path: str = os.environ['HOME'] + '/logs',
                  ci: bool = False):
 
         """
@@ -130,13 +131,10 @@ class VelQP:
         # create logger for Performance SQP
         self.logger_perf = logging.getLogger('sqp_logger_perf')
         self.logger_perf.setLevel(logging.DEBUG)
-        toppath_sqp = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-        # create logs folder
-        logging_path = '/logs'
-        os.makedirs(toppath_sqp + logging_path, exist_ok=True)
+        os.makedirs(logging_path, exist_ok=True)
 
-        fh_perf = logging.FileHandler(toppath_sqp + logging_path + '/sqp_perf_'
+        fh_perf = logging.FileHandler(logging_path + '/sqp_perf_'
                                       + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
                                       + datetime.datetime.now().strftime("%H_%M")
                                       + '.log')
@@ -149,7 +147,7 @@ class VelQP:
         self.logger_emerg = logging.getLogger('sqp_logger_emerg')
         self.logger_emerg.setLevel(logging.DEBUG)
         toppath_sqp = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        fh_emerg = logging.FileHandler(toppath_sqp + logging_path + '/sqp_emerg_'
+        fh_emerg = logging.FileHandler(logging_path + '/sqp_emerg_'
                                        + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
                                        + datetime.datetime.now().strftime("%H_%M")
                                        + '.log')

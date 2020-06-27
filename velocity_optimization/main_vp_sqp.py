@@ -1,3 +1,4 @@
+import os
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.src.online_qp import online_qp
 from velocity_optimization.src.params_vp_sqp import params_vp_sqp
@@ -13,10 +14,13 @@ Documentation: Main script to test the velocity planner SQP.
 # --- Global settings for the main SQP test
 m = 115
 sid = 'PerfSQP'
+# logging path
+logging_path = os.environ['HOME'] + '/logs'
 
 # --- Create SymQP-instance
 velqp = VelQP(m=m,
-              sid=sid)
+              sid=sid,
+              logging_path=logging_path)
 
 # --- Codegen
 # symqp.sol_osqp.codegen('code', parameters='matrices', project_type='Unix Makefiles', force_rewrite=True)
