@@ -2,7 +2,6 @@ try:
     import casadi as cs
 except ImportError:
     print('Warning: No module CasADi found. Not necessary on car but for development.')
-import os
 import numpy as np
 import time
 import configparser

@@ -47,12 +47,14 @@ class VisVP_Logs:
                  'b_vis_triggered',
                  'dt_ipopt_arr',
                  'dt_sqp_qpoases_arr',
-                 'P_max')
+                 'P_max',
+                 'glob_val_vis')
 
     def __init__(self,
                  csv_name: str,
                  csv_name_ltpl: str,
                  params_path: str,
+                 input_path: str,
                  vis_options: dict,
                  m: int,
                  sid: str = 'PerfSQP',
@@ -90,7 +92,8 @@ class VisVP_Logs:
         # --- Create objective calculation object
         self.calc_objective = CalcObjective(csv_name=csv_name,
                                             log_lines=log_lines,
-                                            sid=sid)
+                                            sid=sid,
+                                            params_path=params_path)
         self.calc_objective.calc_objective()
 
         # --- Create runtime histogram object
@@ -105,17 +108,20 @@ class VisVP_Logs:
         # --- Create OSQP solver object
         self.velqp = VelQP(m=m,
                            sid=sid,
-                           params_path=params_path)
+                           params_path=params_path,
+                           input_path=input_path)
 
         self.velqp_bench = VelQP(m=m,
                                  sid=sid,
-                                 params_path=params_path)
+                                 params_path=params_path,
+                                 input_path=input_path)
 
         # --- Create IPOPT solver object
         self.vp_ipopt = VOptIPOPT(m=m,
                                   sid=sid,
                                   slack_every_v=self.velqp.slack_every_v,
-                                  b_warm=False)
+                                  b_warm=False,
+                                  params_path=params_path)
 
         # --- Create qpOASES solver object
         self.vp_qpOASES = VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
@@ -130,6 +136,9 @@ class VisVP_Logs:
 
         # Store max. power values
         self.P_max = None
+
+        # Global value visualization
+        self.glob_val_vis = None
 
         # --- Do some plots extra to main debug window
         self.pre_debug_plots()

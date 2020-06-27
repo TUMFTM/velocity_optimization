@@ -1,4 +1,3 @@
-import os
 import csv
 import json
 import numpy as np

@@ -17,13 +17,16 @@ if __name__ == "__main__":
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
 
-    csv_name = vel_opt_path + '/logs/vp_sqp/sqp_emerg_2020_04_23_10_33.log'
+    csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
     csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
     # Number of velocity points
-    m = 50
+    m = 115
     # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
-    sid = 'EmergSQP'
+    sid = 'PerfSQP'
+
+    params_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
+    input_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/inputs/'
 
     # Number of log lines spanning one data block
     log_lines = 4
@@ -69,7 +72,9 @@ if __name__ == "__main__":
                     m=m,
                     sid=sid,
                     log_lines=log_lines,
-                    vis_options=vis_options)
+                    vis_options=vis_options,
+                    params_path=params_path,
+                    input_path=input_path)
 
     # --- Start GUI
     rL.vis_log(int(0))

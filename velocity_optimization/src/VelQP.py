@@ -74,7 +74,7 @@ class VelQP:
                  sid: str,
                  params_path: str,
                  input_path: str,
-                 logging_path: str = os.environ['HOME'] + '/logs',
+                 logging_path: str = None,
                  ci: bool = False):
 
         """
@@ -134,32 +134,34 @@ class VelQP:
         ################################################################################################################
         # --- Initialize Logging
         ################################################################################################################
-        # create logger for Performance SQP
-        self.logger_perf = logging.getLogger('sqp_logger_perf')
-        self.logger_perf.setLevel(logging.DEBUG)
 
-        os.makedirs(logging_path, exist_ok=True)
+        if logging_path is not None:
+            # create logger for Performance SQP
+            self.logger_perf = logging.getLogger('sqp_logger_perf')
+            self.logger_perf.setLevel(logging.DEBUG)
 
-        fh_perf = logging.FileHandler(logging_path + '/sqp_perf_'
-                                      + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
-                                      + datetime.datetime.now().strftime("%H_%M")
-                                      + '.log')
-        fh_perf.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(message)s')
-        fh_perf.setFormatter(formatter)
-        self.logger_perf.addHandler(fh_perf)
+            os.makedirs(logging_path, exist_ok=True)
 
-        # create logger for Emergency SQP
-        self.logger_emerg = logging.getLogger('sqp_logger_emerg')
-        self.logger_emerg.setLevel(logging.DEBUG)
-        fh_emerg = logging.FileHandler(logging_path + '/sqp_emerg_'
-                                       + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
-                                       + datetime.datetime.now().strftime("%H_%M")
-                                       + '.log')
-        fh_emerg.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(message)s')
-        fh_emerg.setFormatter(formatter)
-        self.logger_emerg.addHandler(fh_emerg)
+            fh_perf = logging.FileHandler(logging_path + '/sqp_perf_'
+                                          + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
+                                          + datetime.datetime.now().strftime("%H_%M")
+                                          + '.log')
+            fh_perf.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(message)s')
+            fh_perf.setFormatter(formatter)
+            self.logger_perf.addHandler(fh_perf)
+
+            # create logger for Emergency SQP
+            self.logger_emerg = logging.getLogger('sqp_logger_emerg')
+            self.logger_emerg.setLevel(logging.DEBUG)
+            fh_emerg = logging.FileHandler(logging_path + '/sqp_emerg_'
+                                           + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
+                                           + datetime.datetime.now().strftime("%H_%M")
+                                           + '.log')
+            fh_emerg.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(message)s')
+            fh_emerg.setFormatter(formatter)
+            self.logger_emerg.addHandler(fh_emerg)
 
         ################################################################################################################
         # --- Assign numeric values to hard-coded parameters in QP

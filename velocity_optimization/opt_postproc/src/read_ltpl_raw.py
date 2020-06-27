@@ -85,6 +85,6 @@ def read_ltpl_raw(csv_name: str) -> tuple:
 
 if __name__ == '__main__':
 
-    csv_name = mod_local_trajectory_path + '/../logs/ltpl/2020_04_01/18_47_51_data.csv'
+    csv_name = vel_opt_path + '/../logs/ltpl/2020_04_01/18_47_51_data.csv'
 
     read_ltpl_raw(csv_name=csv_name)

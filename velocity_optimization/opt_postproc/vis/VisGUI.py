@@ -97,7 +97,8 @@ class VisVP_Logs_GUI:
 
         self.constants_opt = CalcObjective(csv_name='empty',
                                            log_lines=0,
-                                           sid=vis_handler.sid)
+                                           sid=vis_handler.sid,
+                                           params_path=params_path)
 
         # number of slack variables
         self.n = np.int(np.ceil(m / self.params_opt['slack_every_v']))

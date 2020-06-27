@@ -264,7 +264,7 @@ def online_qp(velqp: VelQP,
         print(velqp.sid + " | SQP time [ms]: " + str(dt * 1000))
 
     # Only write to log-file after SQP-iterations
-    if velqp.sid == 'PerfSQP':
+    if velqp.sid == 'PerfSQP' and velqp.logger_perf is not None:
         velqp.logger_perf.debug('%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s',
                                 str(datetime.datetime.now().time()),
                                 s_glob,
@@ -287,7 +287,7 @@ def online_qp(velqp: VelQP,
 
         velqp.logger_perf.debug('%s;%s', ax_max_log, ay_max_log)
 
-    elif velqp.sid == 'EmergSQP':
+    elif velqp.sid == 'EmergSQP' and velqp.logger_emerg is not None:
         velqp.logger_emerg.debug('%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s',
                                  str(datetime.datetime.now().time()),
                                  s_glob,
