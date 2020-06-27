@@ -4,3 +4,4 @@ sympy>=1.6
 matplotlib
 casadi>=3.5.1
 tikzplotlib>=0.8.7
+scipy

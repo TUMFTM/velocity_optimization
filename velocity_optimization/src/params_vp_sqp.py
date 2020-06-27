@@ -1,6 +1,5 @@
 import numpy as np
 import configparser
-import os
 
 
 def params_vp_sqp(m: int,

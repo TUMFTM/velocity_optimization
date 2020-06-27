@@ -111,9 +111,8 @@ class SymQP:
         ################################################################################################################
 
         sqp_config = configparser.ConfigParser()
-        if not sqp_config.read(
-                os.path.dirname(self.params_path + 'sqp_config.ini')):
-            raise ValueError('Specified cost config file does not exist or is empty!')
+        if not sqp_config.read(self.params_path + 'sqp_config.ini'):
+            raise ValueError('Specified sqp config file does not exist or is empty!')
 
         # --- SQP settings
         if self.sid == 'PerfSQP':

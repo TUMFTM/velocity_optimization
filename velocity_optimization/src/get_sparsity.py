@@ -95,7 +95,8 @@ def calc_sparsity(params_path: str,
 
     # --- Create SymQP-instance
     symqp = SymQP(m=m,
-                  sid=sid)
+                  sid=sid,
+                  params_path=params_path)
 
     # --- Create logger for results
     logger = logging.getLogger('sqp_logger_emerg')
@@ -122,4 +123,9 @@ def calc_sparsity(params_path: str,
 
 
 if __name__ == '__main__':
-    calc_sparsity()
+    params_path_ = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
+    logging_path_ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/logs'
+    calc_sparsity(params_path=params_path_,
+                  logging_path=logging_path_,
+                  m_perf=5,
+                  m_emerg=5)
