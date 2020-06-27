@@ -34,7 +34,7 @@ class VOptIPOPT:
                  m: int,
                  sid: str,
                  slack_every_v: int,
-                 params_path: str =
+                 params_path: str,
                  b_warm: bool = False):
         """
         Python version: 3.5

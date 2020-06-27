@@ -71,8 +71,9 @@ class VelQP:
 
     def __init__(self,
                  m: int,
+                 sid: str,
                  params_path: str,
-                 sid: str = 'optimizerID',
+                 input_path: str,
                  logging_path: str = os.environ['HOME'] + '/logs',
                  ci: bool = False):
 
@@ -151,7 +152,6 @@ class VelQP:
         # create logger for Emergency SQP
         self.logger_emerg = logging.getLogger('sqp_logger_emerg')
         self.logger_emerg.setLevel(logging.DEBUG)
-        toppath_sqp = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         fh_emerg = logging.FileHandler(logging_path + '/sqp_emerg_'
                                        + datetime.datetime.now().strftime("%Y_%m_%d") + '_'
                                        + datetime.datetime.now().strftime("%H_%M")
@@ -176,7 +176,10 @@ class VelQP:
 
         # check whether we are running in CI/CD job
         if ci:
-            calc_sparsity(m_perf=m, m_emerg=m)
+            calc_sparsity(params_path=params_path,
+                          logging_path=logging_path,
+                          m_perf=m,
+                          m_emerg=m)
 
             src = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + \
                 '/logs/vp_sqp/sparsity/.'
@@ -185,8 +188,7 @@ class VelQP:
 
             os.system("cp -r -n " + src + " " + dst)
 
-        if not sqp_sparsity.read(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
-                                 + 'sqp_sparsity_' + sid + str(m) + '.ini'):
+        if not sqp_sparsity.read(self.params_path + 'sqp_sparsity_' + sid + str(m) + '.ini'):
             raise ValueError('Specified SQP sparsity file does not exist or is empty!')
 
         # --- Performance SQP settings
@@ -308,7 +310,7 @@ class VelQP:
         ################################################################################################################
         # --- Get variable power handler class
         ################################################################################################################
-        self.vpl = VarPowerLimits()
+        self.vpl = VarPowerLimits(input_path=input_path)
 
         ################################################################################################################
         # --- Construct QP solver object (OSQP)

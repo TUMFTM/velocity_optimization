@@ -16,6 +16,8 @@ m = 115
 sid = 'PerfSQP'
 # params path
 params_path = os.path.dirname(os.path.abspath(__file__)) + '/params/'
+# inputs path
+input_path = os.path.dirname(os.path.abspath(__file__)) + '/inputs/'
 # logging path
 logging_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/logs'
 
@@ -23,7 +25,8 @@ logging_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/l
 velqp = VelQP(m=m,
               sid=sid,
               params_path=params_path,
-              logging_path=logging_path)
+              input_path=input_path,
+              logging_path=logging_path,)
 
 # --- Codegen
 # symqp.sol_osqp.codegen('code', parameters='matrices', project_type='Unix Makefiles', force_rewrite=True)

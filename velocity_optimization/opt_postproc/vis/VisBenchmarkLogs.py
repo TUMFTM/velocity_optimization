@@ -52,11 +52,11 @@ class VisVP_Logs:
     def __init__(self,
                  csv_name: str,
                  csv_name_ltpl: str,
+                 params_path: str,
                  vis_options: dict,
                  m: int,
                  sid: str = 'PerfSQP',
-                 log_lines: int = 4,
-                 params_path: str = ):
+                 log_lines: int = 4):
 
         """
         Python version: 3.5
@@ -104,10 +104,12 @@ class VisVP_Logs:
 
         # --- Create OSQP solver object
         self.velqp = VelQP(m=m,
-                           sid=sid)
+                           sid=sid,
+                           params_path=params_path)
 
         self.velqp_bench = VelQP(m=m,
-                                 sid=sid)
+                                 sid=sid,
+                                 params_path=params_path)
 
         # --- Create IPOPT solver object
         self.vp_ipopt = VOptIPOPT(m=m,

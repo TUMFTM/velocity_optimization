@@ -71,7 +71,7 @@ class VisVP_Logs_GUI:
                  vis_handler,
                  m: int,
                  vis_options: dict,
-                 params_path: str = ):
+                 params_path: str):
 
         """
         Python version: 3.5

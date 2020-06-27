@@ -23,7 +23,7 @@ class CalcObjective:
                  csv_name: str,
                  log_lines: int,
                  sid: str,
-                 params_path: str = ):
+                 params_path: str):
         """
         Python version: 3.5
         Created by: Thomas Herrmann (thomas.herrmann@tum.de)
@@ -40,7 +40,7 @@ class CalcObjective:
 
         self.csv_name = csv_name
 
-        self.params_path =
+        self.params_path = params_path
 
         # Parameter for repeating log variables after number of lines
         self.log_lines = log_lines

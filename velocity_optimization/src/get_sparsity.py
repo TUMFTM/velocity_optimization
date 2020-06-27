@@ -32,7 +32,9 @@ def log_sparsity(symbolics: sympy.ImmutableDenseMatrix,
     logger.debug('%s', 'c=' + str(c.tolist()))
 
 
-def calc_sparsity(m_perf: int = 115,
+def calc_sparsity(params_path: str,
+                  logging_path: str,
+                  m_perf: int = 115,
                   m_emerg: int = 50):
     """
     Python version: 3.5
@@ -58,13 +60,12 @@ def calc_sparsity(m_perf: int = 115,
     # --- Create logger for results
     logger = logging.getLogger('sqp_logger_perf')
     logger.setLevel(logging.DEBUG)
-    toppath_sqp = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
     # create logs folder
-    logging_path = '/../logs/vp_sqp/sparsity'
-    os.makedirs(toppath_sqp + logging_path, exist_ok=True)
+    logging_path += '/sparsity'
+    os.makedirs(logging_path, exist_ok=True)
 
-    fh = logging.FileHandler(toppath_sqp + logging_path + '/sqp_sparsity_'
+    fh = logging.FileHandler(logging_path + '/sqp_sparsity_'
                              + sid
                              + str(m)
                              + '.ini')
@@ -99,13 +100,11 @@ def calc_sparsity(m_perf: int = 115,
     # --- Create logger for results
     logger = logging.getLogger('sqp_logger_emerg')
     logger.setLevel(logging.DEBUG)
-    toppath_sqp = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
     # create logs folder
-    logging_path = '/../logs/vp_sqp/sparsity'
-    os.makedirs(toppath_sqp + logging_path, exist_ok=True)
+    os.makedirs(logging_path, exist_ok=True)
 
-    fh = logging.FileHandler(toppath_sqp + logging_path + '/sqp_sparsity_'
+    fh = logging.FileHandler(logging_path + '/sqp_sparsity_'
                              + sid
                              + str(m)
                              + '.ini')

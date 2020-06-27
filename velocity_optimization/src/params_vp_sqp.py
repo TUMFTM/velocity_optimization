@@ -5,7 +5,7 @@ import os
 
 def params_vp_sqp(m: int,
                   sid: str,
-                  params_path: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/') -> tuple:
+                  params_path: str) -> tuple:
 
     """
     Python version: 3.5

@@ -7,12 +7,14 @@ import csv
 
 class VarPowerLimits:
 
-    __slots__ = ('__s_var_pwr',
+    __slots__ = ('input_path',
+                 '__s_var_pwr',
                  's_max_var_pwr',
                  '__P_var_pwr',
                  'f_pwr_intp')
 
-    def __init__(self):
+    def __init__(self,
+                 input_path: str):
 
         """
         Python version: 3.5
@@ -23,7 +25,7 @@ class VarPowerLimits:
         variable P_max constraint.
         """
 
-        toppath_sqp = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        self.input_path = input_path
 
         # s coordinate [m]
         self.__s_var_pwr = []
@@ -32,7 +34,7 @@ class VarPowerLimits:
         # max. power values [kW]
         self.__P_var_pwr = []
 
-        with open(toppath_sqp + '/inputs/var_power_db.csv', newline='\n') as csvfile:
+        with open(self.input_path + 'var_power_db.csv', newline='\n') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             for row in reader:
                 self.__s_var_pwr = np.append(self.__s_var_pwr, json.loads(row[0]))
