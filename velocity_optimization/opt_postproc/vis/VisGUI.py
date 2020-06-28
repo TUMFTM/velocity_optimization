@@ -84,6 +84,7 @@ class VisVP_Logs_GUI:
         vis_handler: main visualization handler object of type 'VisVP_Logs'
         m: number of velocity optimization variables
         vis_options: user specified visualization options
+        params_path: absolute path to folder containing config file .ini
         """
 
         self.m = m

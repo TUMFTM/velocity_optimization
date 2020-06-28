@@ -47,6 +47,7 @@ class VOptIPOPT:
         m: number of optimization velocity points
         sid: ID of optimizer object 'EmergSQP' or 'PerfSQP'
         slack_every_v: how many velocity variables used one slack variable
+        params_path: absolute path to folder containing config file .ini
         b_warm: allow warm-start of IPOPT solver
         """
 

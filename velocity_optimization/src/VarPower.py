@@ -22,6 +22,9 @@ class VarPowerLimits:
 
         Documentation: Class to store and interpolate variable power limits to be used during driving to feed into the
         variable P_max constraint.
+
+        Inputs:
+        input_path: absolute path to folder containing variable vehicle and track information
         """
 
         self.input_path = input_path

@@ -1,2 +1,3 @@
+import velocity_optimization.main_vp_sqp
 import velocity_optimization.src
 import velocity_optimization.opt_postproc

@@ -102,9 +102,6 @@ def calc_sparsity(params_path: str,
     logger = logging.getLogger('sqp_logger_emerg')
     logger.setLevel(logging.DEBUG)
 
-    # create logs folder
-    os.makedirs(logging_path, exist_ok=True)
-
     fh = logging.FileHandler(logging_path + '/sqp_sparsity_'
                              + sid
                              + str(m)
@@ -123,8 +120,10 @@ def calc_sparsity(params_path: str,
 
 
 if __name__ == '__main__':
+
     params_path_ = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
     logging_path_ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/logs'
+
     calc_sparsity(params_path=params_path_,
                   logging_path=logging_path_,
                   m_perf=5,

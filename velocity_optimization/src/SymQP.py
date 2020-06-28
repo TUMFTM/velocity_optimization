@@ -87,6 +87,7 @@ class SymQP:
         Inputs:
         m: number of velocity points
         sid: ID of SQP object to be created 'PerfSQP' or 'EmergSQP'
+        params_path: absolute path to folder containing config file .ini
         """
 
         # Number of velocity points

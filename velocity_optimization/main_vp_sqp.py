@@ -26,7 +26,7 @@ velqp = VelQP(m=m,
               sid=sid,
               params_path=params_path,
               input_path=input_path,
-              logging_path=logging_path,)
+              logging_path=logging_path)
 
 # --- Codegen
 # symqp.sol_osqp.codegen('code', parameters='matrices', project_type='Unix Makefiles', force_rewrite=True)

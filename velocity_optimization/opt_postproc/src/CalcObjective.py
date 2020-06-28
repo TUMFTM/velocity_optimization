@@ -35,6 +35,7 @@ class CalcObjective:
         csv_name: Path and file name to log-file
         log_lines: Number of lines in log file that build one data-block
         sid: ID 'PerfSQP' or 'EmergSQP' of SQP optimization object
+        params_path: absolute path to folder containing config file .ini
         """
 
         self.csv_name = csv_name

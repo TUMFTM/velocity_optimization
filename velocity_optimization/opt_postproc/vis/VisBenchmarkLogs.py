@@ -70,6 +70,8 @@ class VisVP_Logs:
         Inputs:
         csv_name: log data path & file
         csv_name_ltpl: raw lof file of ltpl module
+        params_path: absolute path to folder containing config file .ini
+        input_path: absolute path to folder containing variable vehicle and track information
         vis_options: user specified visualization options of the debugging tool
         m: number of velocity optimization variables
         sid: ID of the velocity planner 'PerfSQP' or 'EmergSQP'

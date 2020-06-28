@@ -87,6 +87,8 @@ class VelQP:
         Inputs:
         m: number of velocity points
         sid: optimized ID 'PerfSQP' or 'EmergSQP'
+        params_path: absolute path to folder containing config file .ini
+        input_path: absolute path to folder containing variable vehicle and track information
         ci: switch to construct an object of this class used within the CI/CD jobs
         """
 
