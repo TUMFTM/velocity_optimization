@@ -1,17 +1,17 @@
 import setuptools
 
-with open("Readme.md", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="velocity-optimization-mpSQP",
-    version="0.1",
+    name="velocity_optimization",
+    version="0.3",
     author="Thomas Herrmann",
     author_email="thomas.herrmann@tum.de",
     description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and runtime-variable input parameters.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="",
+    url="https://github.com/TUMFTM/velocity_optimization",
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=[
