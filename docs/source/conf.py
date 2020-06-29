@@ -31,7 +31,11 @@ release = '0.3'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.autodoc',
-              'sphinx_rtd_theme']
+              'sphinx_rtd_theme',
+              'sphinx.ext.intersphinx',
+              'sphinx.ext.ifconfig',
+              'sphinx.ext.viewcode',
+              'sphinx.ext.githubpages']
 
 # The master toctree document.
 master_doc = 'index'

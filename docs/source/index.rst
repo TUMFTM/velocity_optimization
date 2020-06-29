@@ -3,28 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Installation
-************
-
-bla
-
-Code
-****
+***********************************
+Velocity Optimization Documentation
+***********************************
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 2
+   :caption: Contents
 
-Main
-====
-.. automodule:: velocity_optimization.main_vp_sqp
-   :members:
-
-Source
-======
-.. automodule:: velocity_optimization.src
-   :members:
-
+   introduction
+   problem_formulation
+   installation
+   modules
+   examples
+   citing
 
 Indices and tables
 ==================

@@ -1,15 +1,11 @@
+"""Main script to test the velocity planner SQP.
+.. moduleauthor:: Thomas Herrmann <thomas.herrmann@tum.de>
+"""
+
 import os
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.src.online_qp import online_qp
 from velocity_optimization.src.params_vp_sqp import params_vp_sqp
-
-"""
-Python version: 3.5
-Created by: Thomas Herrmann (thomas.herrmann@tum.de)
-Created on: 01.11.2019
-
-Documentation: Main script to test the velocity planner SQP.
-"""
 
 # --- Global settings for the main SQP test
 m = 115
