@@ -1,2 +1,3 @@
 include velocity_optimization/inputs/*
 include velocity_optimization/params/*
+recursive-include docs/source/*

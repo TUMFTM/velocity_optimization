@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="velocity_optimization",
-    version="0.3",
+    version="0.4",
     author="Thomas Herrmann",
     author_email="thomas.herrmann@tum.de",
     description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and runtime-variable input parameters.",
@@ -14,11 +14,7 @@ setuptools.setup(
     url="https://github.com/TUMFTM/velocity_optimization",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=[
-        "numpy>=1.18.1",
-        "osqp==0.6.1",
-        "sympy>=1.6"
-    ],
+    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",

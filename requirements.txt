@@ -5,3 +5,6 @@ matplotlib
 casadi>=3.5.1
 tikzplotlib>=0.8.7
 scipy
+Sphinx>=3.1.1
+sphinx-rtd-theme>=0.5.0
+alabaster>=0.7.12
