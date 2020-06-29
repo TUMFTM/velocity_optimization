@@ -76,20 +76,19 @@ class VelQP:
                  input_path: str,
                  logging_path: str = None,
                  ci: bool = False):
+        """Class to construct QP-optimizer by a manually designed vector matrix notation.
 
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann (thomas.herrmann@tum.de)
-        Created on: 01.11.2019
+        :param m: number of velocity points
+        :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
+        :param params_path: absolute path to folder containing config file .ini
+        :param input_path: absolute path to folder containing variable vehicle and track information
+        :param ci: switch to construct an object of this class used within the CI/CD jobs
 
-        Documentation: Class to construct QP-optimizer by a manually designed vector matrix notation.
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
 
-        Inputs:
-        m: number of velocity points
-        sid: optimized ID 'PerfSQP' or 'EmergSQP'
-        params_path: absolute path to folder containing config file .ini
-        input_path: absolute path to folder containing variable vehicle and track information
-        ci: switch to construct an object of this class used within the CI/CD jobs
+        :Created on:
+            01.11.2019
         """
 
         # --- Retrieve SQP settings from parameter-file
@@ -327,14 +326,18 @@ class VelQP:
         self.osqp_init()
 
     def osqp_init(self):
+        """Initializes the QP solver OSQP and does the solver settings.\n
+        OSQP solves the problem
 
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.11.2019
+        .. math::
+            1/2~x^T P x + q^T x \n
+            \mathrm{s.t.} \quad l \leq Ax \leq u
 
-        Documentation: Initializes the QP solver OSQP and does the solver settings.
-        OSQP solves the problem [1/2 * x.T P x + q.T x; s.t. l <= Ax <= u]
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.11.2019
         """
 
         # --- Retrieve some initialization values for solver (depending on variable power and variable friction pot.)
@@ -404,19 +407,17 @@ class VelQP:
 
     def osqp_solve(self) -> tuple:
 
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.11.2019
+        """Solves the constructed QP and returns the solution as well as OSQP status information.
 
-        Documentation: Solves the constructed QP and returns the solution as well as OSQP status information.
+        :return: sol.x: optimization variable values\n
+            sol.info.iter: iteration number of OSQP solver\n
+            sol.info.status_val: status of OSQP solver
 
-        Inputs:
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
 
-        Outputs:
-        sol.x: optimization variable values
-        sol.info.iter: iteration number of OSQP solver
-        sol.info.status_val: status of OSQP solver
+        :Created on:
+            01.11.2019
         """
 
         # --- Solve constructed QP
@@ -454,27 +455,27 @@ class VelQP:
                            ay_max: np.ndarray = None,
                            vmax_cstr: np.ndarray = None):
 
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.11.2019
+        """Updates the matrices in the constructed QP.
 
-        Documentation: Updates the matrices in the constructed QP.
+        :param x0_v: initial guess velocity [m/s]
+        :param x0_s_t: initial guess slack variables tire [-]
+        :param v_ini: initial hard constrained velocity [m/s]
+        :param v_max: max. allowed velocity (in objective function) [m/s]
+        :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
+        :param F_ini: hard constrained initial force [kN]
+        :param kappa: curvature profile of given path [rad/m]
+        :param delta_s: discretization step length of given path [m]
+        :param P_max: max. allowed power [kW]
+        :param ax_max: max. allowed longitudinal acceleration [m/s^2]
+        :param ay_max: max. allowed lateral accelereation [m/s]
+        :param vmax_cstr: max. allowed spatially dependend velocity (hard constraint) [m/s^2]; can be used for
+            e.g. adaptive cruise control (following)
 
-        Inputs:
-        x0_v: initial guess velocity [m/s]
-        x0_s_t: initial guess slack variables tire [-]
-        v_ini: initial hard constrained velocity [m/s]
-        v_max: max. allowed velocity (in objective function) [m/s]
-        v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
-        F_ini: hard constrained initial force [kN]
-        kappa: curvature profile of given path [rad/m]
-        delta_s: discretization step length of given path [m]
-        P_max: max. allowed power [kW]
-        ax_max: max. allowed longitudinal acceleration [m/s^2]
-        ay_max: max. allowed lateral accelereation [m/s]
-        vmax_cstr: max. allowed spatially dependend velocity (hard constraint) [m/s^2]; can be used for
-        e.g. adaptive cruise control (following)
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.11.2019
         """
 
         if (self.sqp_stgs['b_var_friction'] and ax_max is None) or (self.sqp_stgs['b_var_friction'] and ay_max is None):
@@ -501,36 +502,35 @@ class VelQP:
                      ay_max: np.ndarray = None,
                      v_max_cstr: np.ndarray = None) -> tuple:
 
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.11.2019
-
-        Documentation: Constructs necessary QP matrices from the linearized versions of the physically necessary
+        """Constructs necessary QP matrices from the linearized versions of the physically necessary
         equations for the velocity optimization of a vehicle.
 
-        Inputs:
-        x0_v: initial guess velocity [m/s]
-        x0_s_t: initial guess slack variables tire [-]
-        v_ini: initial hard constrained velocity [m/s]; currently unused here as we remove the first velocity point
-        from the optimization problem and and set it manually afterwards
-        v_max: max. allowed velocity (in objective function) [m/s]
-        v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
-        F_ini: hard constrained initial force [kN]
-        kappa: curvature profile of given path [rad/m]
-        delta_s: discretization step length of given path [m]
-        P_max: max. allowed power [kW]
-        ax_max: max. allowed longitudinal acceleration [m/s^2]
-        ay_max: max. allowed lateral accelereation [m/s^2]
-        vmax_cstr: max. allowed spatially dependend velocity (hard constraint) [m/s]; can be used for
-        e.g. adaptive cruise control (following)
+        :param x0_v: initial guess velocity [m/s]
+        :param x0_s_t: initial guess slack variables tire [-]
+        :param v_ini: initial hard constrained velocity [m/s]; currently unused here as we remove the first velocity
+            point from the optimization problem and and set it manually afterwards
+        :param v_max: max. allowed velocity (in objective function) [m/s]
+        :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
+        :param F_ini: hard constrained initial force [kN]
+        :param kappa: curvature profile of given path [rad/m]
+        :param delta_s: discretization step length of given path [m]
+        :param P_max: max. allowed power [kW]
+        :param ax_max: max. allowed longitudinal acceleration [m/s^2]
+        :param ay_max: max. allowed lateral accelereation [m/s^2]
+        :param vmax_cstr: max. allowed spatially dependend velocity (hard constraint) [m/s]; can be used for
+            e.g. adaptive cruise control (following)
 
-        Outputs:
-        P: Sparse version of Hessian matrix of nonlinear objective function J
-        q: Jacobian of nonlinear objective function J
-        Am_csc: Sparse version of jacobian of nonlinear constraints
-        lo: lower boundaries of linearized constraints
-        up: upper boundaries of linearized constraints
+        :return: P: Sparse version of Hessian matrix of nonlinear objective function J\n
+            q: Jacobian of nonlinear objective function J\n
+            Am_csc: Sparse version of jacobian of nonlinear constraints\n
+            lo: lower boundaries of linearized constraints\n
+            up: upper boundaries of linearized constraints
+
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.11.2019
         """
 
         m = self.m
