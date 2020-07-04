@@ -9,7 +9,10 @@ from matplotlib import pyplot as plt
 import linecache
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.opt_postproc.src.VOptIPOPT import VOptIPOPT
+from velocity_optimization.opt_postproc.src.VOptMOSEK import VOptMOSEK
+from velocity_optimization.opt_postproc.src.VOptOSQP import VOptOSQP
 from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
+from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES2
 from velocity_optimization.opt_postproc.src.online_qp_postproc import online_qp_postproc
 from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
 from velocity_optimization.opt_postproc.vis.VisGUI import VisVP_Logs_GUI
@@ -152,6 +155,7 @@ class VisVP_Logs:
                 self.sol_options[key].update({'Create_Solver': VOptIPOPT(m=m,
                                                                           sid=sid,
                                                                           slack_every_v=self.velqp.slack_every_v,
+                                                                          params_path=params_path,
                                                                           b_warm=False,
                                                                           model='point_mass',
                                                                           vis_options=vis_options,
@@ -170,6 +174,7 @@ class VisVP_Logs:
             if self.sol_options[key]['Solver'] == "MOSEK":
                 self.sol_options[key].update({'Create_Solver': VOptMOSEK(m=m,
                                                                           sid=sid,
+                                                                          param_path=params_path,
                                                                           vis_options=vis_options,
                                                                           sol_options=sol_options,
                                                                           key=key

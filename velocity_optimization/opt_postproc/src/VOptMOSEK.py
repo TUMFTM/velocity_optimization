@@ -22,7 +22,8 @@ class VOptMOSEK:
     def __init__(self, 
                  m: int, 
                  sid: str,
-                 vis_options: str,
+                 param_path: str,
+                 vis_options: dict,
                  sol_options: dict,
                  key: str):
         """
@@ -48,7 +49,7 @@ class VOptMOSEK:
         self.sol_options = sol_options
         self.key = key
 
-        self.Car = Car()
+        self.Car = Car(param_path=param_path)
 
         # Select Vehicle Dynamic Model
         if self.sol_options[self.key]['Model'] == "PM":
@@ -1427,11 +1428,11 @@ class VOptMOSEK:
 
 class Car:
 
-    def __init__(self):
+    def __init__(self,
+                 param_path: str):
+
         opt_config = configparser.ConfigParser()
-        if not opt_config.read(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/../params/'
-                + 'sqp_config.ini'):
+        if not opt_config.read(param_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
 
         # Load Car Paramter

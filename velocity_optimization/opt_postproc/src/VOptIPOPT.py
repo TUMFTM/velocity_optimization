@@ -610,7 +610,7 @@ class VOptIPOPT:
             F_p = m_t * acc + c_res * (v ** 2)[0: m - 1] * 0.001
 
             # Steer Angle
-            delta = atan2(kappa_param * (l_f + l_r), 1)
+            delta = cs.atan2(kappa_param * (l_f + l_r), 1)
 
             # --- Force
             # F_min <= F_p__1, ..., F_p__n <= F_max, first point in F excluded as it is F_initial
@@ -997,10 +997,10 @@ class VOptIPOPT:
             F_roll_r = f_r * m_t * grav * l_f / (l_r + l_f)
 
             # tire slip angle (front & rear)
-            alpha_f = delta - atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * sin(beta[: - 1])),
-                                    v[: - 1] * cos(beta[: - 1]))
-            alpha_r = atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * sin(beta[: - 1]),
-                            v[: - 1] * cos(beta[: - 1]))
+            alpha_f = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
+                                    v[: - 1] * cs.cos(beta[: - 1]))
+            alpha_r = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
+                            v[: - 1] * cs.cos(beta[: - 1]))
 
             # air resistance
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
@@ -1021,21 +1021,21 @@ class VOptIPOPT:
                    rho * A * v[: - 1] ** 2
 
             # force in y-direction at axle (front & rear)
-            F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * sin(
-                C_f * atan2(B_f * alpha_f - E_f * (B_f * alpha_f - atan2(B_f * alpha_f, 1)), 1))
-            F_yr = D_r * (1 + eps_r * F_zr / F_z0) * F_zr / F_z0 * sin(
-                C_r * atan2(B_r * alpha_r - E_r * (B_r * alpha_r - atan2(B_r * alpha_r, 1)), 1))
+            F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
+                C_f * cs.atan2(B_f * alpha_f - E_f * (B_f * alpha_f - cs.atan2(B_f * alpha_f, 1)), 1))
+            F_yr = D_r * (1 + eps_r * F_zr / F_z0) * F_zr / F_z0 * cs.sin(
+                C_r * cs.atan2(B_r * alpha_r - E_r * (B_r * alpha_r - cs.atan2(B_r * alpha_r, 1)), 1))
 
             # total lateral accelaration at CoG
-            ma_y = F_yr + F_xf * sin(delta) + F_yf * cos(delta)
+            ma_y = F_yr + F_xf * cs.sin(delta) + F_yf * cs.cos(delta)
 
             ################################################################################################################
             # Equality Constraints
             ################################################################################################################
             # --- dot_v = ....
             v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] * (1 / m_t * (
-                    + F_xr * cos(beta[: - 1]) + F_xf * cos(delta - beta[: - 1]) + F_yr * sin(beta[: - 1]) - F_yf * sin(
-                delta - beta[: - 1]) - F_d * cos(beta[: - 1])))
+                    + F_xr * cs.cos(beta[: - 1]) + F_xf * cs.cos(delta - beta[: - 1]) + F_yr * cs.sin(beta[: - 1]) - F_yf * cs.sin(
+                delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1043,15 +1043,15 @@ class VOptIPOPT:
             # --- dot_beta = ...
             beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) * (
                         -kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1]) * (
-                        - F_xr * sin(beta[:-1]) + F_xf * sin(delta - beta[:-1]) + F_yr * cos(beta[:-1]) + F_yf *
-                        cos(delta - beta[:-1]) + F_d * sin(beta[:-1])))
+                        - F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1]) + F_yr * cs.cos(beta[:-1]) + F_yf *
+                        cs.cos(delta - beta[:-1]) + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
             omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] * (
-                    1 / I_zz * (F_xf * sin(delta) * l_f + F_yf * cos(delta) * l_f - F_yr * l_r))
+                    1 / I_zz * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1334,15 +1334,15 @@ class VOptIPOPT:
             F_roll_rr = 0.5 * f_r * m_t * grav * l_f / (l_r + l_f)
 
             # tire slip angle (front & rear/ left & right) [rad]
-            alpha_fl = delta - atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * sin(beta[: - 1])),
-                                     v[: - 1] * cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
-            alpha_fr = delta - atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * sin(beta[: - 1])),
-                                     v[: - 1] * cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
+                                     v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
+                                     v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
-            alpha_rl = atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * sin(beta[: - 1]),
-                             v[: - 1] * cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
-            alpha_rr = atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * sin(beta[: - 1]),
-                             v[: - 1] * cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
+                             v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_rr = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
+                             v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
             # air resistance [kN]
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
@@ -1380,28 +1380,28 @@ class VOptIPOPT:
 
             # tire force in y-direction (front & rear/ left & right) [kN]
             F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 * \
-                    sin(C_f * atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - atan2(B_f * alpha_fl, 1)), 1))
+                    cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
             F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 * \
-                    sin(C_f * atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - atan2(B_f * alpha_fr, 1)), 1))
+                    cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
             F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 * \
-                    sin(C_r * atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - atan2(B_r * alpha_rl, 1)), 1))
+                    cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
             F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 * \
-                    sin(C_r * atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - atan2(B_r * alpha_rr, 1)), 1))
+                    cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
-            ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * sin(delta) + (F_yfl + F_yfr) * cos(delta)
+            ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
 
             ################################################################################################################
             # Equality Constraints
             ################################################################################################################
             # --- dot_v = ....
             v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] * \
-                        (1 / m_t * (+ (F_xrl + F_xrr) * cos(beta[:-1])
-                                    + (F_xfl + F_xfr) * cos(delta - beta[:-1])
-                                    + (F_yrl + F_yrr) * sin(beta[:-1])
-                                    - (F_yfl + F_yfr) * sin(delta - beta[:-1])
-                                    - F_d * cos(beta[:-1])))
+                        (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
+                                    + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
+                                    + (F_yrl + F_yrr) * cs.sin(beta[:-1])
+                                    - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
+                                    - F_d * cs.cos(beta[:-1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1410,11 +1410,11 @@ class VOptIPOPT:
             beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) * \
                            (-kappa[: - 1] * v[: - 1]
                             + 1 / (m_t * v[:-1])
-                            * (- (F_xrl + F_xrr) * sin(beta[:-1])
-                               + (F_xfl + F_xfr) * sin(delta - beta[:-1])
-                               + (F_yrl + F_yrr) * cos(beta[:-1])
-                               + (F_yfl + F_yfr) * cos(delta - beta[:-1])
-                               + F_d * sin(beta[:-1])))
+                            * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
+                               + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
+                               + (F_yrl + F_yrr) * cs.cos(beta[:-1])
+                               + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
+                               + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1424,8 +1424,8 @@ class VOptIPOPT:
                             (1 / I_zz *
                              (+ (F_xrr - F_xrl) * tw_r / 2
                               - (F_yrl + F_yrr) * l_r
-                              + ((F_xfr - F_xfl) * cos(delta) + (F_yfl - F_yfr) * sin(delta)) * tw_f/2
-                              + ((F_yfl + F_yfr) * cos(delta) + (F_xfl + F_xfr) * sin(delta)) * l_f
+                              + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(delta)) * tw_f/2
+                              + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(delta)) * l_f
                               ))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
@@ -1994,10 +1994,10 @@ class VOptIPOPT:
             F_roll_f = f_r * m_t * grav * l_r / (l_r + l_f)
             F_roll_r = f_r * m_t * grav * l_f / (l_r + l_f)
 
-            alpha_f = delta - atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * sin(beta[: - 1])),
-                                    v[: - 1] * cos(beta[: - 1]))
-            alpha_r = atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * sin(beta[: - 1]),
-                            v[: - 1] * cos(beta[: - 1]))
+            alpha_f = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
+                                    v[: - 1] * cs.cos(beta[: - 1]))
+            alpha_r = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
+                            v[: - 1] * cs.cos(beta[: - 1]))
 
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
 
@@ -2013,12 +2013,12 @@ class VOptIPOPT:
                     l_r + l_f) * ma_x + 0.5 * c_lr * \
                    rho * A * v[: - 1] ** 2
 
-            F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * sin(
-                C_f * atan2(B_f * alpha_f - E_f * (B_f * alpha_f - atan2(B_f * alpha_f, 1)), 1))
-            F_yr = D_r * (1 + eps_r * F_zr / F_z0) * F_zr / F_z0 * sin(
-                C_r * atan2(B_r * alpha_r - E_r * (B_r * alpha_r - atan2(B_r * alpha_r, 1)), 1))
+            F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
+                C_f * cs.atan2(B_f * alpha_f - E_f * (B_f * alpha_f - cs.atan2(B_f * alpha_f, 1)), 1))
+            F_yr = D_r * (1 + eps_r * F_zr / F_z0) * F_zr / F_z0 * cs.sin(
+                C_r * cs.atan2(B_r * alpha_r - E_r * (B_r * alpha_r - cs.atan2(B_r * alpha_r, 1)), 1))
 
-            ma_y = F_yr + F_xf * sin(delta) + F_yf * cos(delta)
+            ma_y = F_yr + F_xf * cs.sin(delta) + F_yf * cs.cos(delta)
 
             ax = []
             ay = []
@@ -2137,15 +2137,15 @@ class VOptIPOPT:
             F_roll_rr = 0.5 * f_r * m_t * grav * l_f / (l_r + l_f)
 
             # tire slip angle (front & rear/ left & right) [rad]
-            alpha_fl = delta - atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * sin(beta[: - 1])),
-                                     v[: - 1] * cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
-            alpha_fr = delta - atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * sin(beta[: - 1])),
-                                     v[: - 1] * cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
+                                     v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
+                                     v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
-            alpha_rl = atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * sin(beta[: - 1]),
-                             v[: - 1] * cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
-            alpha_rr = atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * sin(beta[: - 1]),
-                             v[: - 1] * cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
+                             v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+            alpha_rr = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
+                             v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
             # air resistance [kN]
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
@@ -2183,17 +2183,17 @@ class VOptIPOPT:
 
             # tire force in y-direction (front & rear/ left & right) [kN]
             F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 * \
-                    sin(C_f * atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - atan2(B_f * alpha_fl, 1)), 1))
+                    cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
             F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 * \
-                    sin(C_f * atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - atan2(B_f * alpha_fr, 1)), 1))
+                    cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
             F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 * \
-                    sin(C_r * atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - atan2(B_r * alpha_rl, 1)), 1))
+                    cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
             F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 * \
-                    sin(C_r * atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - atan2(B_r * alpha_rr, 1)), 1))
+                    cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
-            ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * sin(delta) + (F_yfl + F_yfr) * cos(delta)
+            ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
 
             ax = ma_x / m_t
             ay = ma_y / m_t
