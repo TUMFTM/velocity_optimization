@@ -22,8 +22,8 @@ Deploy:
   stage: pypi_deploy
   tags:
     - CI_TrackPerformanceLRZ
-  rules:
-      - if: $CI_COMMIT_BRANCH == "master"
+  only:
+      - master
   script:
     - ${CI_JOB_ID}-env/bin/python3 -m pip install --upgrade setuptools wheel
     - ${CI_JOB_ID}-env/bin/python3 setup.py sdist bdist_wheel
