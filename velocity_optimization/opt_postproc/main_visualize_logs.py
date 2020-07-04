@@ -116,7 +116,8 @@ if __name__ == "__main__":
                     log_lines=log_lines,
                     vis_options=vis_options,
                     params_path=params_path,
-                    input_path=input_path)
+                    input_path=input_path,
+                    sol_options=sol_options)
 
     # --- Start GUI
     rL.vis_log(int(0))
