@@ -13,6 +13,7 @@ if __name__ == "__main__":
     Python version: 3.5
     Created by: Thomas Herrmann (thomas.herrmann@tum.de)
     Created on: 01.02.2020
+    Modified by: Tobias Klotz
 
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
@@ -22,6 +23,7 @@ if __name__ == "__main__":
 
     # Number of velocity points
     m = 115
+
     # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
     sid = 'PerfSQP'
 
@@ -33,19 +35,35 @@ if __name__ == "__main__":
 
     # visualize all logs consecutively?
     b_movie = False
-
     # re-calculate QP from log-input?
     b_run_OSQP = True
 
     # run qpOASES solver?
     b_calc_qpOASES = True
 
+    # Constant(True)/Variable(False) Power
+    b_con_power = True
+
+    # Choose Starting Idx of Log-File
+    b_idx = 0
+    # Save the plots?
+    b_save_tikz_MA = False
+    # Plot Race Course with planning horizon
+    b_plot_course = False
+    # Select Legend Item (Model, Solver, Friction, Alpha)
+    b_vis_model_name = False
+    b_vis_solver_name = True
+    b_vis_fric_model = False
+    b_vis_alpha = False
+    b_vis_var_friction = False
+    # Plot Calculation Time
+    b_vis_calc_time = False
+    # Plot Front/ Rear Tire Friction Circle (only for dynamic bicycle model)
+    b_vis_dynamic_model = False
+
     # do global plot of states for entire log?
     b_global_plot = True
     glob_lim = np.inf
-
-    # calculate solution from log input using NLP solver IPOPT?
-    b_calc_IPOPT = True
 
     # plot immediately or only solver data replay?
     b_immediate_plot_update = True
