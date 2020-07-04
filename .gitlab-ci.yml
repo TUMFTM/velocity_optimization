@@ -1,7 +1,6 @@
 before_script:
   - rm -rf "*-env"; virtualenv -p python3 ${CI_JOB_ID}-env
   - ${CI_JOB_ID}-env/bin/pip3 install -r requirements.txt
-  - ${CI_JOB_ID}-env/bin/python3 CI/setup_ci.py
 
 after_script:
   - 'killall --user $USER'
