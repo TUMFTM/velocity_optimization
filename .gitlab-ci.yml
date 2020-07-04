@@ -15,4 +15,4 @@ Flake8Checks:
     - CI_TrackPerformanceLRZ
   script:
     - ${CI_JOB_ID}-env/bin/flake8
-  allow_failure: true
+  allow_failure: false
