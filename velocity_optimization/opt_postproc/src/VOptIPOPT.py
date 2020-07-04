@@ -43,12 +43,12 @@ class VOptIPOPT:
                  m: int,
                  sid: str,
                  slack_every_v: int,
+                 params_path: str,
                  model: str,
                  vis_options: dict,
                  sol_dict: dict,
                  key: str,
-                 b_warm: bool = False
-                 ):
+                 b_warm: bool = False):
         """
         Python version: 3.5
         Created by: Thomas Herrmann (thomas.herrmann@tum.de)
