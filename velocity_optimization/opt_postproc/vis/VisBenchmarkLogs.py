@@ -73,6 +73,8 @@ class VisVP_Logs:
     def __init__(self,
                  csv_name: str,
                  csv_name_ltpl: str,
+                 params_path: str,
+                 input_path:str,
                  vis_options: dict,
                  sol_options: dict,
                  m: int,
@@ -126,7 +128,8 @@ class VisVP_Logs:
         self.vis_gui = VisVP_Logs_GUI(vis_handler=self,
                                       m=m,
                                       vis_options=vis_options,
-                                      params_path=params_path)
+                                      params_path=params_path,
+                                      sol_options=sol_options)
 
         # --- Create OSQP solver object
         self.velqp = VelQP(m=m,
