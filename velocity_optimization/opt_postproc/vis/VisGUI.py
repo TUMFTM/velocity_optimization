@@ -92,7 +92,8 @@ class VisVP_Logs_GUI:
                  vis_handler,
                  m: int,
                  vis_options: dict,
-                 params_path: str):
+                 params_path: str,
+                 sol_options: dict):
 
         """
         Python version: 3.5
@@ -107,6 +108,7 @@ class VisVP_Logs_GUI:
         m: number of velocity optimization variables
         vis_options: user specified visualization options
         params_path: absolute path to folder containing config file .ini
+        sol_options: user specified solver options
         """
 
         self.m = m
