@@ -22,7 +22,7 @@ class VOptMOSEK:
     def __init__(self, 
                  m: int, 
                  sid: str,
-                 param_path: str,
+                 params_path: str,
                  vis_options: dict,
                  sol_options: dict,
                  key: str):
@@ -49,18 +49,19 @@ class VOptMOSEK:
         self.sol_options = sol_options
         self.key = key
 
-        self.Car = Car(param_path=param_path)
+        self.Car = Car(param_path=params_path)
 
         # Select Vehicle Dynamic Model
         if self.sol_options[self.key]['Model'] == "PM":
-            self.sol_init_pm()
+            self.sol_init_pm(params_path=params_path)
         if self.sol_options[self.key]['Model'] == "KM":
-            self.sol_init_km()
+            self.sol_init_km(params_path=params_path)
         if self.sol_options[self.key]['Model'] == "DM":
-            self.sol_init_dm()
+            self.sol_init_dm(params_path=params_path)
 
     # Point-mass model
-    def sol_init_pm(self):
+    def sol_init_pm(self,
+                    params_path: str):
         """
         Python version: 3.5
         Created by: Tobias Klotz
@@ -74,14 +75,16 @@ class VOptMOSEK:
         N = self.m
 
         # Open lambdified Functions
-        mod_local_trajectory_path = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        sys.path.append(mod_local_trajectory_path)
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Mosek" + "_" + "point_mass" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
             file = "Mosek" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+        else:
+            print("No valid friction model specified!")
+            file = None
+
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
 
         try:
             f = open(filename)
@@ -311,7 +314,10 @@ class VOptMOSEK:
             elif self.sol_options[self.key]['Friction'] == "Diamond":
                 file = "Mosek" + "_" + "point_mass" + "_" + str(N) + "_" + str(
                     self.sol_options[self.key]['Friction']) + ".pkl"
-            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+
+            filepath = params_path + '/Lambdify_Function/'
+            filename = filepath + file
+            os.makedirs(filepath, exist_ok=True)
 
             dill.settings['recurse'] = True
             dill.dump([cval_lam, csubj, qval_lam, qsubi, qsubj, aval_lam, asubi,
@@ -319,7 +325,8 @@ class VOptMOSEK:
                       open(filename, "wb"))
 
     # Kinematic bicycle model
-    def sol_init_km(self):
+    def sol_init_km(self,
+                    params_path: str):
         """
         Python version: 3.5
         Created by: Tobias Klotz
@@ -332,14 +339,13 @@ class VOptMOSEK:
         N = self.m
 
         # Open Lambdify Matrix and Vectors if available
-        mod_local_trajectory_path = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        sys.path.append(mod_local_trajectory_path)
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Mosek" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
             file = "Mosek" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
 
         try:
             f = open(filename)
@@ -598,7 +604,8 @@ class VOptMOSEK:
                       open(filename, "wb"))
 
     # Dynamic bicycle model
-    def sol_init_dm(self):
+    def sol_init_dm(self,
+                    params_path: str):
         """
         Python version: 3.5
         Created by: Tobias Klotz
@@ -612,11 +619,10 @@ class VOptMOSEK:
         N = self.m
 
         # Open Lambdify Matrix and Vector if available
-        mod_local_trajectory_path = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        sys.path.append(mod_local_trajectory_path)
         file = "Mosek" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
-        filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
+        os.makedirs(filepath, exist_ok=True)
 
         try:
             f = open(filename)
@@ -996,7 +1002,10 @@ class VOptMOSEK:
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             sys.path.append(mod_local_trajectory_path)
             file = "Mosek" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
-            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+
+            filepath = params_path + '/Lambdify_Function/'
+            filename = filepath + file
+            os.makedirs(filepath, exist_ok=True)
 
             dill.settings['recurse'] = True
             dill.dump([cval_lam, csubj, qval_lam, qsubi, qsubj, aval_lam, asubi,

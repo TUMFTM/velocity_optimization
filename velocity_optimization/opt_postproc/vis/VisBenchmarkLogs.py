@@ -166,6 +166,7 @@ class VisVP_Logs:
                 self.sol_options[key].update({'Create_Solver': VOptOSQP(m=m,
                                                                          sid=sid,
                                                                          model="point_mass",
+                                                                         params_path=params_path,
                                                                          fric_model="circle",
                                                                          sol_options=sol_options,
                                                                          key=key
@@ -174,7 +175,7 @@ class VisVP_Logs:
             if self.sol_options[key]['Solver'] == "MOSEK":
                 self.sol_options[key].update({'Create_Solver': VOptMOSEK(m=m,
                                                                           sid=sid,
-                                                                          param_path=params_path,
+                                                                          params_path=params_path,
                                                                           vis_options=vis_options,
                                                                           sol_options=sol_options,
                                                                           key=key
@@ -183,6 +184,7 @@ class VisVP_Logs:
             if self.sol_options[key]['Solver'] == "qpOASES":
                 self.sol_options[key].update({'Create_Solver': VOpt_qpOASES2(m=m,
                                                                              sid=sid,
+                                                                             params_path=params_path,
                                                                              sol_options=sol_options,
                                                                              key=key
                                                                              )})

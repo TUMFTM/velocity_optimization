@@ -132,6 +132,7 @@ class VOpt_qpOASES2:
     def __init__(self,
                  m: int,
                  sid: str,
+                 params_path: str,
                  sol_options: dict,
                  key: str):
         """
@@ -155,21 +156,22 @@ class VOpt_qpOASES2:
         self.sol_options = sol_options
         self.key = key
 
-        self.Car = Car()
+        self.Car = Car(params_path=params_path)
 
         # --- Select vehicle dynamic model
         # Point mass model
         if self.sol_options[self.key]['Model'] == "PM":
-            self.sol_init_pm()
+            self.sol_init_pm(params_path=params_path)
         # Kinematic bicycle model
         if self.sol_options[self.key]['Model'] == "KM":
-            self.sol_init_km()
+            self.sol_init_km(params_path=params_path)
         # Dynamic bicycle model
         if self.sol_options[self.key]['Model'] == "DM":
-            self.sol_init_dm()
+            self.sol_init_dm(params_path=params_path)
 
     # Point mass model
-    def sol_init_pm(self):
+    def sol_init_pm(self,
+                    params_path: str):
         """
         Python version: 3.5
         Created by: Tobias Klotz
@@ -216,7 +218,7 @@ class VOpt_qpOASES2:
             # Optimization Variables
             ############################################################################################################
             # velocity [m/s]
-            v = symbols('v0:%d' % (N))
+            v = sym.symbols('v0:%d' % (N))
             # Optimization Vector
             var = v
 
@@ -224,23 +226,23 @@ class VOpt_qpOASES2:
             # Online Parameters
             ############################################################################################################
             # curvature [1/m]
-            kappa = symbols('kappa0:%d' % (N))
+            kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
-            ds = symbols('ds:0%d' % (N - 1))
+            ds = sym.symbols('ds:0%d' % (N - 1))
             # initial velocity [m/s]
-            v_ini = symbols('v_ini')
+            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
-            v_end = symbols('v_end')
+            v_end = sym.symbols('v_end')
             # max. velocity [m/s]
-            v_max = symbols('v_max0:%d' % (N))
+            v_max = sym.symbols('v_max0:%d' % (N))
             # initial force [kN]
-            F_ini = symbols('F_ini')
+            F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = symbols('P_max0:%d' % (N - 1))
+            P_max = sym.symbols('P_max0:%d' % (N - 1))
             # max. acceleration in x-direction of the vehicle [m/s²]
-            ax_max = symbols('ax_max0:%d' % (N))
+            ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
-            ay_max = symbols('ay_max0:%d' % (N))
+            ay_max = sym.symbols('ay_max0:%d' % (N))
 
             ############################################################################################################
             # Objective function
@@ -352,20 +354,20 @@ class VOpt_qpOASES2:
 
             # Save Lambdified_Function
             print('Save Matrix to File')
-            mod_local_trajectory_path = os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            sys.path.append(mod_local_trajectory_path)
             if self.sol_options[self.key]['Friction'] == "Circle":
                 file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + ".pkl"
             elif self.sol_options[self.key]['Friction'] == "Diamond":
                 file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
-            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+            filepath = params_path + '/Lambdify_Function/'
+            filename = filepath + file
+            os.makedirs(filepath, exist_ok=True)
 
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
 
     # Kinematic bicycle model
-    def sol_init_km(self):
+    def sol_init_km(self,
+                    params_path: str):
         """
         Python version: 3.5
         Created by: Tobias Klotz
@@ -377,9 +379,6 @@ class VOpt_qpOASES2:
         # Planing horizon
         N = self.m
 
-        mod_local_trajectory_path = os.path.dirname(
-            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        sys.path.append(mod_local_trajectory_path)
         if self.sol_options[self.key]['Friction'] == "Circle":
             # if self.fric_model == "circle":
             file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
@@ -387,7 +386,7 @@ class VOpt_qpOASES2:
             # elif self.fric_model == "diamond":
             file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + str(
                 self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+        filename = params_path + 'Lambdify_Function/' + file
         try:
             f = open(filename)
             available = True
@@ -413,7 +412,7 @@ class VOpt_qpOASES2:
             # Optimization Variables
             ############################################################################################################
             # velocity [m/s]
-            v = symbols('v0:%d' % (N))
+            v = sym.symbols('v0:%d' % (N))
             # Optimization Vector
             var = v  # + delta + F_dr + v_delta
 
@@ -421,23 +420,23 @@ class VOpt_qpOASES2:
             # Parameter
             ############################################################################################################
             # curvature [1/m]
-            kappa = symbols('kappa0:%d' % (N))
+            kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
-            ds = symbols('ds:0%d' % (N - 1))
+            ds = sym.symbols('ds:0%d' % (N - 1))
             # initial velocity [m/s]
-            v_ini = symbols('v_ini')
+            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
-            v_end = symbols('v_end')
+            v_end = sym.symbols('v_end')
             # max. velocity [m/s]
-            v_max = symbols('v_max0:%d' % (N))
+            v_max = sym.symbols('v_max0:%d' % (N))
             # initial force [kN]
-            F_ini = symbols('F_ini')
+            F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = symbols('P_max0:%d' % (N))
+            P_max = sym.symbols('P_max0:%d' % (N))
             # max. acceleration in x-direction of the vehicle [m/s²]
-            ax_max = symbols('ax_max0:%d' % (N))
+            ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
-            ay_max = symbols('ay_max0:%d' % (N))
+            ay_max = sym.symbols('ay_max0:%d' % (N))
 
             ############################################################################################################
             # Objective function
@@ -466,7 +465,7 @@ class VOpt_qpOASES2:
             # Calculate Steer Angle
             delta = []
             for k in range(N):
-                delta.append(atan2(kappa[k] * self.Car.L, 1))
+                delta.append(sym.atan2(kappa[k] * self.Car.L, 1))
             # Calculate Time Step
             dt = []
             for k in range(N - 1):
@@ -571,8 +570,9 @@ class VOpt_qpOASES2:
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
 
-    # Dynamci bicycle model
-    def sol_init_dm(self):
+    # Dynamic bicycle model
+    def sol_init_dm(self,
+                    params_path: str):
         # Planing horizon
         N = self.m
 
@@ -606,17 +606,17 @@ class VOpt_qpOASES2:
             # Optimization Variables
             ############################################################################################################
             # velocity [m/s]
-            v = symbols('v0:%d' % (N))
+            v = sym.symbols('v0:%d' % (N))
             # Slip Angle [rad]
-            beta = symbols('beta0:%d' % N)
+            beta = sym.symbols('beta0:%d' % N)
             # Gear Rate [rad/s]
             # omega = symbols('omega0:%d' % N)
             # Driving Force [kN]
-            F_dr = symbols('F_dr0:%d' % (N - 1))
+            F_dr = sym.symbols('F_dr0:%d' % (N - 1))
             # Braking Force [kN]
-            F_br = symbols('F_br0:%d' % (N - 1))
+            F_br = sym.symbols('F_br0:%d' % (N - 1))
             # Steer Angle [rad]
-            delta = symbols('delta0:%d' % (N - 1))
+            delta = sym.symbols('delta0:%d' % (N - 1))
             # Optimization Vector
             var = v + beta + F_dr + F_br + delta
 
@@ -624,23 +624,23 @@ class VOpt_qpOASES2:
             # Online Parameters
             ############################################################################################################
             # curvature [1/m]
-            kappa = symbols('kappa0:%d' % (N))
+            kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
-            ds = symbols('ds:0%d' % (N - 1))
+            ds = sym.symbols('ds:0%d' % (N - 1))
             # initial velocity [m/s]
-            v_ini = symbols('v_ini')
+            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
-            v_end = symbols('v_end')
+            v_end = sym.symbols('v_end')
             # max. velocity [m/s]
-            v_max = symbols('v_max0:%d' % (N))
+            v_max = sym.symbols('v_max0:%d' % (N))
             # initial force [kN]
-            F_ini = symbols('F_ini')
+            F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = symbols('P_max0:%d' % (N))
+            P_max = sym.symbols('P_max0:%d' % (N))
             # max. acceleration in x-direction of the vehicle [m/s²]
-            ax_max = symbols('ax_max0:%d' % (N))
+            ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
-            ay_max = symbols('ay_max0:%d' % (N))
+            ay_max = sym.symbols('ay_max0:%d' % (N))
 
             ############################################################################################################
             # Objective function
@@ -726,11 +726,11 @@ class VOpt_qpOASES2:
             for k in range(N - 1):
                 # tire slip angle (front & rear)
                 alpha_f = np.append(alpha_f,
-                                    delta[k] - atan2(
-                                        (self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sin(beta[k])),
-                                        (v[k] * cos(beta[k]))))
-                alpha_r = np.append(alpha_r, atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sin(beta[k])),
-                                                   (v[k] * cos(beta[k]))))
+                                    delta[k] - sym.atan2(
+                                        (self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sym.sin(beta[k])),
+                                        (v[k] * sym.cos(beta[k]))))
+                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sym.sin(beta[k])),
+                                                   (v[k] * sym.cos(beta[k]))))
 
                 # aerodynamic resistance [kN]
                 F_d = np.append(F_d, 0.5 * self.Car.c_w * self.Car.rho * self.Car.A * v[k] ** 2)
@@ -754,69 +754,69 @@ class VOpt_qpOASES2:
 
                 # force at axle in y-direction (front & rear)
                 F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[
-                    k] / self.Car.F_z0 * sin(
-                    self.Car.C_f * atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
-                            self.Car.B_f * alpha_f[k] - atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
+                    k] / self.Car.F_z0 * sym.sin(
+                    self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
+                            self.Car.B_f * alpha_f[k] - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
                 F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[
-                    k] / self.Car.F_z0 * sin(
-                    self.Car.C_r * atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
-                            self.Car.B_r * alpha_r[k] - atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                    k] / self.Car.F_z0 * sym.sin(
+                    self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
+                            self.Car.B_r * alpha_r[k] - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
-                ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sin(delta[k]) + F_yf[k] * cos(delta[k]))
+                ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sym.sin(delta[k]) + F_yf[k] * sym.cos(delta[k]))
 
             # --- EQUALITY CONSTRAINTS (Velocity, Slip Angle)
             for k in range(N - 1):
                 h = np.append(h, [# Derivation of Velocity (Christ Eq. 5.2)
                                   v[k + 1] - v[k] - ds[k] / v[k] *
-                                  (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
-                                                     + F_xf[k] * cos(delta[k] - beta[k])
-                                                     + F_yr[k] * sin(beta[k])
-                                                     - F_yf[k] * sin(delta[k] - beta[k])
-                                                     - F_d[k] * cos(beta[k]))),
+                                  (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                     + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                     + F_yr[k] * sym.sin(beta[k])
+                                                     - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                     - F_d[k] * sym.cos(beta[k]))),
                                   # Derivation of Slip Angle (Christ Eq. 5.3)
                                   (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
                                   (-kappa[k] * v[k]
                                    + 1 / (self.Car.m * v[k]) *
-                                   (- F_xr[k] * sin(beta[k])
-                                    + F_xf[k] * sin(delta[k] - beta[k])
-                                    + F_yr[k] * cos(beta[k])
-                                    + F_yf[k] * cos(delta[k] - beta[k])
-                                    + F_d[k] * sin(beta[k]))), ])
+                                   (- F_xr[k] * sym.sin(beta[k])
+                                    + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                    + F_yr[k] * sym.cos(beta[k])
+                                    + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                    + F_d[k] * sym.sin(beta[k]))), ])
                 # Lower Bound
                 lb = np.append(lb, [# Derivation of Velocity (Christ Eq. 5.2)
                                     v[k + 1] - v[k] - ds[k] / v[k] *
-                                    (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
-                                                       + F_xf[k] * cos(delta[k] - beta[k])
-                                                       + F_yr[k] * sin(beta[k])
-                                                       - F_yf[k] * sin(delta[k] - beta[k])
-                                                       - F_d[k] * cos(beta[k]))),
+                                    (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                       + F_yr[k] * sym.sin(beta[k])
+                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                       - F_d[k] * sym.cos(beta[k]))),
                                     # Derivation of Slip Angle (Christ Eq. 5.3)
                                     (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
                                     (-kappa[k] * v[k]
                                      + 1 / (self.Car.m * v[k]) *
-                                     (- F_xr[k] * sin(beta[k])
-                                      + F_xf[k] * sin(delta[k] - beta[k])
-                                      + F_yr[k] * cos(beta[k])
-                                      + F_yf[k] * cos(delta[k] - beta[k])
-                                      + F_d[k] * sin(beta[k]))), ])
+                                     (- F_xr[k] * sym.sin(beta[k])
+                                      + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                      + F_yr[k] * sym.cos(beta[k])
+                                      + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                      + F_d[k] * sym.sin(beta[k]))), ])
                 # Upper Bound
                 ub = np.append(ub, [# Derivation of Velocity (Christ Eq. 5.2)
                                     v[k + 1] - v[k] - ds[k] / v[k] *
-                                    (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
-                                                       + F_xf[k] * cos(delta[k] - beta[k])
-                                                       + F_yr[k] * sin(beta[k])
-                                                       - F_yf[k] * sin(delta[k] - beta[k])
-                                                       - F_d[k] * cos(beta[k]))),
+                                    (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                       + F_yr[k] * sym.sin(beta[k])
+                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                       - F_d[k] * sym.cos(beta[k]))),
                                     # Derivation of Slip Angle (Christ Eq. 5.3)
                                     (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
                                     (-kappa[k] * v[k]
                                      + 1 / (self.Car.m * v[k]) *
-                                     (- F_xr[k] * sin(beta[k])
-                                      + F_xf[k] * sin(delta[k] - beta[k])
-                                      + F_yr[k] * cos(beta[k])
-                                      + F_yf[k] * cos(delta[k] - beta[k])
-                                      + F_d[k] * sin(beta[k]))), ])
+                                     (- F_xr[k] * sym.sin(beta[k])
+                                      + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                      + F_yr[k] * sym.cos(beta[k])
+                                      + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                      + F_d[k] * sym.sin(beta[k]))), ])
 
             # INEQUALITY CONSTRAINTS
             # Friction Coefficient
@@ -916,13 +916,13 @@ class VOpt_qpOASES2:
             A = sym.Matrix([-h]).jacobian(var)
             print('Matrix A solved.')
             print('Lambdify Matrix')
-            A_lam = lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], A,
+            A_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], A,
                              'numpy')
             print('a_lam lambdified.')
-            lb_lam = lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], lb,
+            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], lb,
                               modules=['numpy', 'math'])
             print('lbo_lam lambdified.')
-            ub_lam = lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], ub,
+            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], ub,
                               modules=['numpy', 'math'])
             print('lbo lambdified.')
 
@@ -938,7 +938,9 @@ class VOpt_qpOASES2:
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             sys.path.append(mod_local_trajectory_path)
             file = "qpOASES" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
-            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+            filepath = params_path + '/Lambdify_Function/'
+            filename = filepath + file
+            os.makedirs(filepath, exist_ok=True)
 
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
@@ -1379,11 +1381,11 @@ class VOpt_qpOASES2:
             for k in range(N - 1):
                 # tire slip angle (front & rear)
                 alpha_f = np.append(alpha_f,
-                                    delta[k] - atan2(
-                                        (self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sin(beta[k])),
-                                        (v[k] * cos(beta[k]))))
-                alpha_r = np.append(alpha_r, atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sin(beta[k])),
-                                                   (v[k] * cos(beta[k]))))
+                                    delta[k] - sym.atan2(
+                                        (self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sym.sin(beta[k])),
+                                        (v[k] * sym.cos(beta[k]))))
+                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sym.sin(beta[k])),
+                                                   (v[k] * sym.cos(beta[k]))))
 
                 # aerodynamic resistance [kN]
                 F_d = np.append(F_d, 0.5 * self.Car.c_w * self.Car.rho * self.Car.A * v[k] ** 2)
@@ -1408,16 +1410,16 @@ class VOpt_qpOASES2:
 
                 # force at axle in y-direction (front & rear)
                 F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[
-                    k] / self.Car.F_z0 * sin(
-                    self.Car.C_f * atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
-                            self.Car.B_f * alpha_f[k] - atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
+                    k] / self.Car.F_z0 * sym.sin(
+                    self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
+                            self.Car.B_f * alpha_f[k] - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
                 F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[
-                    k] / self.Car.F_z0 * sin(
-                    self.Car.C_r * atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
-                            self.Car.B_r * alpha_r[k] - atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                    k] / self.Car.F_z0 * sym.sin(
+                    self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
+                            self.Car.B_r * alpha_r[k] - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
-                ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sin(delta[k]) + F_yf[k] * cos(delta[k]))
+                ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sym.sin(delta[k]) + F_yf[k] * sym.cos(delta[k]))
                 ay = ma_y/self.Car.m
 
                 F = F_dr + F_br
@@ -1474,11 +1476,10 @@ class VOpt_qpOASES2:
 
 class Car:
 
-    def __init__(self):
+    def __init__(self,
+                 params_path: str):
         opt_config = configparser.ConfigParser()
-        if not opt_config.read(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/../params/'
-                + 'sqp_config.ini'):
+        if not opt_config.read(params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
 
         # Load Car Paramter
