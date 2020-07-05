@@ -30,3 +30,15 @@ Deploy:
     - ${CI_JOB_ID}-env/bin/pip3 install --upgrade twine
     - ${CI_JOB_ID}-env/bin/python3 -m twine upload --repository-url ${PYPI_SERVER} --username ${PYPI_USER} --password ${PYPI_PASSWORD} dist/*
   allow_failure: false
+
+Documentation:
+  stage: pypi_deploy
+  tags:
+    - CI_TrackPerformanceLRZ
+  # only:
+  #     - master
+  script:
+    - cd docs
+    - ${CI_JOB_ID}-env/bin/sphinx-apidoc -o ./source ../velocity_optimization
+    - make clean html
+  allow_failure: false
