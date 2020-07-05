@@ -3,6 +3,10 @@
 """
 
 import os
+import sys
+
+vel_opt_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(vel_opt_path)
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.src.online_qp import online_qp
 from velocity_optimization.src.params_vp_sqp import params_vp_sqp
