@@ -39,6 +39,6 @@ Documentation:
   #     - master
   script:
     - cd docs
-    - ${CI_JOB_ID}-env/bin/sphinx-apidoc -o ./source ../velocity_optimization
+    - sphinx-apidoc -o ./source ../velocity_optimization
     - make clean html
   allow_failure: false
