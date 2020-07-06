@@ -11,5 +11,6 @@ dill
 mosek
 Sphinx>=3.1.1
 sphinx-rtd-theme>=0.5.0
+sphinx-automodapi
 alabaster>=0.7.12
 flake8==3.7.9
