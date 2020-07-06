@@ -42,6 +42,6 @@ Documentation:
     - ${CI_JOB_ID}-env/bin/sphinx-build -b html docs/source docs/build
   artifacts:
     when: always
-      paths:
-        - docs/build
+    paths:
+      - docs/build
   allow_failure: false
