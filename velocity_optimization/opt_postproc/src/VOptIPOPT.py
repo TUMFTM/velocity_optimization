@@ -1183,11 +1183,6 @@ class VOptIPOPT:
             else:
                 self.solver = cs.nlpsol('solver', 'ipopt', nlp, opts_IPOPT)
 
-            '''self.trj = cs.Function('trj',
-                                   [x, param_vec],
-                                   [F_p, tire_cst1, acc, pwr_cst],
-                                   ['x', 'kappa_param'],
-                                   ['F_p', 'tire_cst', 'acc', 'pwr_cst'])'''
             self.trj = []
             self.x = x
             self.x0 = x0
@@ -1290,13 +1285,6 @@ class VOptIPOPT:
             g.append(beta_cst)
             ubg.append([beta_max] * m)
             lbg.append([- beta_max] * m)
-
-            '''# --- Gear rate
-            # - omega_max <= [omega__0, ..., omega__N] <= omega_max
-            omega_cst = omega
-            g.append(omega_cst)
-            ubg.append([omega_max] * m)
-            lbg.append([- omega_max] * m)'''
 
             # --- Drive force
             # 0 <= [F_dr__0, ..., F_dr__N-1] <= F_dr_max
@@ -1521,10 +1509,6 @@ class VOptIPOPT:
             x0 = np.concatenate(x0)
 
             # Formatting lower and upper bounds of optimization variables if available
-            '''
-            lbx = np.concatenate(lbx)
-            ubx = np.concatenate(ubx)
-            '''
             # Formatting constraints
             g = cs.vertcat(*g)
             lbg = cs.vertcat(*lbg)
@@ -1579,11 +1563,6 @@ class VOptIPOPT:
             else:
                 self.solver = cs.nlpsol('solver', 'ipopt', nlp, opts_IPOPT)
 
-            '''self.trj = cs.Function('trj',
-                                   [x, param_vec],
-                                   [F_p, tire_cst1, acc, pwr_cst],
-                                   ['x', 'kappa_param'],
-                                   ['F_p', 'tire_cst', 'acc', 'pwr_cst'])'''
             self.trj = []
             self.x = x
             self.x0 = x0
@@ -1839,7 +1818,7 @@ class VOptIPOPT:
                       sol: dict,
                       param_vec_: np.ndarray,
                       vis_options: dict) -> tuple:
-        """Function to solve the constructed QP.
+        """Function to recalculat the optimization variables of the QP.
 
         :param sol: solution of the QP
         :param param_vec: paramter vector

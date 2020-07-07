@@ -26,16 +26,20 @@ class VOpt_qpOASES:
     def __init__(self,
                  Hm: np.ndarray,
                  Am: np.ndarray):
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann (thomas.herrmann@tum.de)
-        Created on: 01.01.2020
+        """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
-        Documentation: Class to optimize a velocity profile for a given path using the solver qpOASES.
+        .. math::
+            \mathrm{min} \frac{1}{2}x^TH_mx + g_vx \n
+            \mathrm{s.t.} \quad lba \leq A_mx \leq uba
 
-        Inputs:
-        Hm: Hessian problem matrix
-        Am: Linearized constraints matrix (Jacobian)
+        :param Hm: Hessian problem matrix
+        :param Am: Linearized constraints matrix (Jacobian)
+
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         self.solver = None
@@ -47,16 +51,16 @@ class VOpt_qpOASES:
     def sol_init(self,
                  Hm: np.ndarray,
                  Am: np.ndarray):
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
+        """Function to initialize the qpOASES solver.
 
-        Documentation: qpOASES solver initialization.
+        :param Hm: Hessian problem matrix
+        :param Am: Linearized constraints matrix (Jacobian)
 
-        Inputs:
-        Hm: Hessian problem matrix
-        Am: Linearized constraints matrix (Jacobian)
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         opts_qpOASES = {"terminationTolerance": 1e-2,
@@ -83,23 +87,22 @@ class VOpt_qpOASES:
               Am: np.ndarray,
               lba: np.ndarray,
               uba: np.ndarray) -> list:
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
+        """Function to solve qpOASES optimization problem.
 
-        Documentation: Solve qpOASES optimization problem.
+        :param x0: initial guess of optimization variables,
+        :param Hm: Hessian problem matrix
+        :param gv: Jacobian of problem's objective function,
+        :param Am: Linearized constraints matrix
+        :param lba: lower boundary vector constraints
+        :param uba: upper boundary vector constraints
 
-        Inputs:
-        x0: initial guess of optimization variables,
-        Hm: Hessian problem matrix
-        gv: Jacobian of problem's objective function,
-        Am: Linearized constraints matrix
-        lba: lower boundary vector constraints
-        uba: upper boundary vector constraints
+        :return: x_opt: optimized qpOASES solution vector
 
-        Outputs:
-        x_opt: optimized qpOASES solution vector
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         # Hessian is constant, no need to overwrite
@@ -135,19 +138,24 @@ class VOpt_qpOASES2:
                  params_path: str,
                  sol_options: dict,
                  key: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
-        Documentation: Class to optimize a velocity profile for a given path using the solver qpOASES. This class
-        supports variable power limitations and variable friction.
+        .. math::
+            \mathrm{min} \frac{1}{2}x^TPx + qx \n
+            \mathrm{s.t.} \quad lb \leq Ax \leq ub
 
-        Inputs:
-        m: number of optimization velocity points
-        sid: ID of optimizer object 'EmergSQP' or 'PerfSQP'
-        sol_options: user specified solver options of the debugging tool
-        key: determines which specified solver in sol_options is used
+        :param m: number of velocity points
+        :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
+        :param params_path: absolute path to folder containing config file .ini
+        :param sol_options: user specified solver options of the debugging tool
+        :param key: key of the used solver
+
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         self.m = m
@@ -172,14 +180,19 @@ class VOpt_qpOASES2:
     # Point mass model
     def sol_init_pm(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the qpOASES solver by defining the objective function \n
+        and constraints with the CasADi modeling language for the point-mass model.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the point-mass model to describe the
-        vehicle dynamics for the qpOASES Solver.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
+
         # Length of planning horizion
         N = self.m
 
@@ -368,13 +381,17 @@ class VOpt_qpOASES2:
     # Kinematic bicycle model
     def sol_init_km(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the qpOASES solver by defining the objective function \n
+        and constraints with the CasADi modeling language for the kinematic-bicycle model.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the kinematic bicycle model to
-        describe the vehicle dynamics for the qpOASES Solver.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
         # Planing horizon
         N = self.m
@@ -573,6 +590,19 @@ class VOpt_qpOASES2:
     # Dynamic bicycle model
     def sol_init_dm(self,
                     params_path: str):
+        """Function to initialize the qpOASES solver by defining the objective function \n
+        and constraints with the CasADi modeling language for the dynamic-bicycle model.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
+
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
+        """
+
         # Planing horizon
         N = self.m
 
@@ -948,6 +978,19 @@ class VOpt_qpOASES2:
     def create_solver(self,
                       Hm: np.ndarray,
                       Am: np.ndarray):
+        """Function to initialize the qpOASES solver.
+
+        :param Hm: Hessian problem matrix
+        :param Am: Linearized constraints matrix (Jacobian)
+
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
+        """
+
         self.solver = None
 
         opts_qpOASES = {"terminationTolerance": 1e-3,
@@ -974,23 +1017,22 @@ class VOpt_qpOASES2:
               Am: np.ndarray,
               lba: np.ndarray,
               uba: np.ndarray) -> list:
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
+        """Function to solve qpOASES optimization problem.
 
-        Documentation: Solve qpOASES optimization problem.
+        :param x0: initial guess of optimization variables,
+        :param Hm: Hessian problem matrix
+        :param gv: Jacobian of problem's objective function,
+        :param Am: Linearized constraints matrix
+        :param lba: lower boundary vector constraints
+        :param uba: upper boundary vector constraints
 
-        Inputs:
-        x0: initial guess of optimization variables,
-        Hm: Hessian problem matrix
-        gv: Jacobian of problem's objective function,
-        Am: Linearized constraints matrix
-        lba: lower boundary vector constraints
-        uba: upper boundary vector constraints
+        :return: x_opt: optimized qpOASES solution vector
 
-        Outputs:
-        x_opt: optimized qpOASES solution vector
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         Hm = cs.DM(Hm)
@@ -1028,29 +1070,29 @@ class VOpt_qpOASES2:
                     v_max: np.ndarray = None,
                     v_end: float = None,
                     F_ini: float = None):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to update the paramter vector and initial guess for the solution.
 
-        Documentation: Builds parameter and initialization vectors for qpOASES solver
+        :param N: number of velocity points
+        :param ds: discretization step length of given path [m]
+        :param kappa: curvature profile of given path [rad/m]
+        :param P_max: max. allowed power [kW]
+        :param ax_max: max. allowed longitudinal acceleration [m/s^2]
+        :param ay_max: max. allowed lateral accelereation [m/s]
+        :param x0_v: initial guess velocity [m/s]
+        :param v_max: max. allowed velocity (in objective function) [m/s]
+        :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
+        :param F_ini: hard constrained initial force [kN]
 
-        Inputs:
-        N: length of planning horizon []
-        kappa: curvature profile [rad/m]
-        ds: discretization steplength [m]
-        v_max: max. velocity [m/s]
-        P_max: max. power limit [kW]
-        v_end: end velocity within optimization horizon [m/s]
-        x0_v: initial velocity guess [m/s]
-        ax_max: max. longitudinal acceleration limit [m/s^2]
-        ay_max: max. lateral acceleration limit [m/s^2]
-        F_ini: initial force constraint [kN]
+        :return: sol: solution of the QP \n
+            dt_qpOASES: runtime of the solver qpOASES [ms] \n
+            sol_status: status of the solution (solved, infeasible, etc.)
 
-        Outputs:
-        sol: optimized qpOASES output
-        dt_ipopt: qpOASES runtimed [ms]
-        sol_status: Solution status of the qpOASES solver
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         # Calculate orientation along the planning horizon of the vehicle from the discretization step length and
@@ -1325,6 +1367,25 @@ class VOpt_qpOASES2:
         return v, F, P, ax, ay, t_total, sol_status['success']
 
     def transform_results(self, sol, ds, kappa, N):
+        """Function to recalculat the optimization variables of the QP.
+
+        :param sol: solution of the QP
+        :param ds: discretization step length of given path [m]
+        :param kappa: curvature profile of given path [rad/m]
+        :param N: number of velocity points
+
+        :return: v: optimized velocity [m/s] \n
+            F: optimize powertrain force [kN] \n
+            P: optimized power force [kW] \n
+            ax: acceleration in x-direction of CoG [m/s²] \n
+            ay: acceleration in y-direction of CoG [m/s²]
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
+        """
         if self.sol_options[self.key]['Model'] == "PM":
             v = np.asarray(sol)
 
@@ -1478,6 +1539,16 @@ class Car:
 
     def __init__(self,
                  params_path: str):
+        """Class to initialize the car parameter.
+
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
+        """
         opt_config = configparser.ConfigParser()
         if not opt_config.read(params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
