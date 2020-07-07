@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TUMFTM/velocity_optimization",
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(),  # TODO: only necessary packages to run code on vehicle
     include_package_data=True,
     install_requires=[line.strip() for line in open("requirements.txt").readlines()],
     classifiers=[
