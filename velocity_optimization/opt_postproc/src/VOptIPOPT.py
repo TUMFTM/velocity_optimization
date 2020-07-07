@@ -20,7 +20,6 @@ class VOptIPOPT:
                  'slack_every_v',
                  'params_path',
                  'b_warm',
-                 'model',
                  'vis_options',
                  'sol_dict',
                  'key',
@@ -44,30 +43,28 @@ class VOptIPOPT:
                  sid: str,
                  slack_every_v: int,
                  params_path: str,
-                 model: str,
                  vis_options: dict,
                  sol_dict: dict,
                  key: str,
                  b_warm: bool = False):
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann (thomas.herrmann@tum.de)
-        Created on: 01.01.2020
-        Modified by: Tobias Klotz
+        """Class to construct the Interior-Point QP-optimizer IPOPT by defining the objective function \n
+        and constraints to optimize a velocity profile for a given path.
 
-        Documentation: Class to optimize a velocity profile for a given path using the solver IPOPT interfaced by
-        CasADi. This class supports variable power limitations and variable friction.
+        :param m: number of velocity points
+        :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
+        :param slack_every_v: slack variable for every n velocity points
+        :param params_path: absolute path to folder containing config file .ini
+        :param vis_options: user specified visualization options of the debugging tool
+        :param sol_options: user specified solver options of the debugging tool
+        :param key: key of the used solver
+        :param b_warm: allow or disallow the use of a warm start
 
-        Inputs:
-        m: number of optimization velocity points
-        sid: ID of optimizer object 'EmergSQP' or 'PerfSQP'
-        slack_every_v: how many velocity variables used one slack variable
-        params_path: absolute path to folder containing config file .ini
-        b_warm: allow warm-start of IPOPT solver
-        model: name of vehicle dynamic model
-        vis_options: user specified visualization options of the debugging tool
-        sol_dict: user specified solver options of the debugging tool
-        key: determines which specified solver in sol_dict is used
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         self.m = m
@@ -76,7 +73,6 @@ class VOptIPOPT:
         self.slack_every_v = slack_every_v
         self.unit_eps_tre = 0
         self.b_warm = b_warm
-        self.model = model
         self.vis_options = vis_options
         self.sol_dict = sol_dict
         self.key = key
@@ -99,13 +95,19 @@ class VOptIPOPT:
         self.sol_init()
 
     def sol_init(self):
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
-        Modified by: Tobias Klotz
+        """Function to initialize the IPOPT solver by defining the objective function \n
+        and constraints with the CasADi modeling language.
 
-        Documentation: Builds optimization problem using CasADi modeling language.
+        .. math::
+            \mathrm{min} f(x) \n
+            \mathrm{s.t.} \quad g(x) \leq 0
+
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         ################################################################################################################
@@ -1606,32 +1608,31 @@ class VOptIPOPT:
                      x0_s_t: np.ndarray,
                      ax_max: np.ndarray,
                      ay_max: np.ndarray) -> tuple:
+        """Function to update the paramter vector and initial guess for the solution.
 
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
-        Modified by: Tobias Klotz
+        :param v_ini: initial hard constrained velocity [m/s]
+        :param kappa: curvature profile of given path [rad/m]
+        :param delta_s: discretization step length of given path [m]
+        :param v_max: max. allowed velocity (in objective function) [m/s]
+        :param F_ini: hard constrained initial force [kN]
+        :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
+        :param P_max: max. allowed power [kW]
+        :param x0_v: initial guess velocity [m/s]
+        :param x0_s_t: initial guess slack variables tire [-]
+        :param ax_max: max. allowed longitudinal acceleration [m/s^2]
+        :param ay_max: max. allowed lateral accelereation [m/s]
 
-        Documentation: Builds parameter and initialization vectors for IPOPT solver
+        :return: sol: solution of the QP \n
+            param_vec: parameter vector \n
+            dt_ipopt: runtime of the solver IPOPT [ms] \n
+            sol_status: status of the solution (solved, infeasible, etc.)
 
-        Inputs:
-        v_ini: initial velocity [m/s]
-        kappa: curvature profile [rad/m]
-        delta_s: discretization steplength [m]
-        v_max: max. velocity [m/s]
-        F_ini: initial force constraint [kN]
-        P_max: max. power limit [kW]
-        v_end: end velocity within optimization horizon [m/s]
-        x0_v: initial velocity guess [m/s]
-        x0_s_t: initial guess for slack variables on tires [-]
-        ax_max: max. longitudinal acceleration limit [m/s^2]
-        ay_max: max. lateral acceleration limit [m/s^2]
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+            Tobias Klotz <tobias.klotz@tum.de>
 
-        Outputs:
-        sol: optimized IPOPT output
-        param_vec: variable parameter vector
-        dt_ipopt: IPOPT runtimed [ms]
+        :Created on:
+            01.01.2020
         """
 
         # --- Parameter vector for NLP
@@ -1786,20 +1787,21 @@ class VOptIPOPT:
     def solve(self,
               x0: np.ndarray,
               param_vec: np.ndarray) -> tuple:
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
+        """Function to solve the constructed QP.
 
-        Documentation: Solves velocity opt. problem using IPOPT
+        :param x0: initial guess of the solution
+        :param param_vec: paramter vector
 
-        Inputs:
-        x0: initial guess of the opt. variables
-        param_vec: multi-parametric input to opt. problem
+        :return: sol: solution of the QP \n
+            dt_ipopt: runtime of the Solver IPOPT [ms] \n
+            sol_status: status of the solution (solved, infeasible, etc.)
 
-        Outputs:
-        sol: optimization output from IPOPT,
-        (t1 - t0) * 1000: IPOPT solver runtime [ms]
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         b_warm = self.b_warm
@@ -1829,31 +1831,33 @@ class VOptIPOPT:
         t1 = time.perf_counter()
         print("IPOPT time in ms: " + str((t1 - t0) * 1000) + " with status: " + solver.stats()['return_status'])
 
-        return sol, (t1 - t0) * 1000, solver.stats()['return_status']
+        dt_ipopt = (t1 - t0) * 1000
+        sol_status = solver.stats()['return_status']
+        return sol, dt_ipopt, sol_status
 
     def transform_sol(self,
                       sol: dict,
                       param_vec_: np.ndarray,
                       vis_options: dict) -> tuple:
-        """
-        Python version: 3.5
-        Created by: Thomas Herrmann
-        Created on: 01.01.2020
-        Modified by: Tobias Klotz
+        """Function to solve the constructed QP.
 
-        Documentation: Transforms IPOPT-solution back to state variables.
+        :param sol: solution of the QP
+        :param param_vec: paramter vector
+        :param vis_options: user specified visualization options of the debugging tool
 
-        Inputs:
-        sol: IPOPT solution output
-        param_vec: multi-parametric input into velocity optimization problem
+        :return: v: optimized velocity [m/s] \n
+            eps_tre: optimized tire slacks [-] \n
+            F_p: optimize powertrain force [kN] \n
+            P_p: optimized power force [kW] \n
+            a_x: acceleration in x-direction of CoG [m/s²] \n
+            a_y: acceleration in y-direction of CoG [m/s²]
 
-        Outputs:
-        v: optimized velocity [m/s]
-        eps_tre: optimized tire slacks [-]
-        F_p: optimize powertrain force [kN]
-        P_p: optimized power force [kW]
-        a_x: acceleration in x-direction of CoG [m/s²]
-        a_y: acceleration in y-direction of CoG [m/s²]
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            01.01.2020
         """
 
         m = self.m
@@ -2053,7 +2057,6 @@ class VOptIPOPT:
             return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr)
 
         elif self.sol_dict[self.key]['Model'] == "FW":
-            # elif self.model == 'fourwheel_model':
             # --- Extract variables
             v = np.array(sol['x'][0:m])
             beta = np.array(sol['x'][m:2 * m])
