@@ -1367,7 +1367,7 @@ class VOpt_qpOASES2:
         return v, F, P, ax, ay, t_total, sol_status['success']
 
     def transform_results(self, sol, ds, kappa, N):
-        """Function to recalculat the optimization variables of the QP.
+        """Function to re-calculate the optimization variables of the QP.
 
         :param sol: solution of the QP
         :param ds: discretization step length of given path [m]

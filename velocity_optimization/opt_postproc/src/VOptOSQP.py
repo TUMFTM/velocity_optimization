@@ -29,27 +29,26 @@ class VOptOSQP:
     def __init__(self,
                  m: int,
                  sid: str,
-                 model: str,
                  params_path: str,
-                 fric_model: str,
                  sol_options: dict,
                  key: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Class to optimize a velocity profile for a given path using the solver OSQP.
 
-        Documentation: Class to optimize a velocity profile for a given path using the solver OSQP. This class supports
-        variable power limitations and variable friction.
+        .. math::
+            \mathrm{min} \frac{ 1 } { 2 } x^{T}Px + qx \n
+            \mathrm{s.t.} \quad lb \leq Ax \leq ub
 
-        Inputs:
-        m: number of optimization velocity points
-        sid: ID of optimizer object 'EmergSQP' or 'PerfSQP'
-        model: name of vehicle dynamic model
-        params_path:
-        fric_model: name of friction model
-        sol_options: user specified solver options of the debugging tool
-        key: determines which specified solver in sol_options is used
+        :param m: number of velocity points
+        :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
+        :param params_path: absolute path to folder containing config file .ini
+        :param sol_options: user specified solver options of the debugging tool
+        :param key: key of the used solver
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         self.m = m
@@ -57,7 +56,6 @@ class VOptOSQP:
         self.F_ini_osqp = []
 
         self.Car = Car(params_path=params_path)
-        self.fric_model = fric_model
         self.sol_options = sol_options
         self.key = key
 
@@ -72,13 +70,17 @@ class VOptOSQP:
     # Point mass model
     def sol_init_pm(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the OSQP solver with the point-mass model \n
+        by defining the objective function and constraints.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the point-mass model to describe the
-        vehicle dynamics.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         # Length of planning horizion
@@ -278,13 +280,17 @@ class VOptOSQP:
     # Kinematic bicycle model
     def sol_init_km(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the OSQP solver with the kinematic bicycle model \n
+        by defining the objective function and constraints.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the kinematic bicycle model to
-        describe the vehicle dynamics.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         # Length of planning horizion
@@ -484,13 +490,17 @@ class VOptOSQP:
     # Dynamic bicycle model
     def sol_init_dm(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the OSQP solver with the dynamic-bicycle model \n
+        by defining the objective function and constraints.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the dynamic bicycle model to
-        describe the vehicle dynamics.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         # Length of planning horizion
@@ -879,30 +889,33 @@ class VOptOSQP:
                     v_end: float = None,
                     F_ini: float = None
                     ):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to update the matrix and functions for the optimization problem. \n
+        Solve the optimization problem with the solver OSQP.
 
-        Documentation: Builds parameter and initialization vectors for OSQP solver
+        :param N: number of velocity points
+        :param ds: discretization step length of given path [m]
+        :param kappa: curvature profile of given path [rad/m]
+        :param P_max: max. allowed power [kW]
+        :param ax_max: max. allowed longitudinal acceleration [m/s^2]
+        :param ay_max: max. allowed lateral accelereation [m/s]
+        :param x0_v: initial guess velocity [m/s]
+        :param v_max: max. allowed velocity (in objective function) [m/s]
+        :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
+        :param F_ini: hard constrained initial force [kN]
 
-        Inputs:
-        N: length of planning horizon []
-        v_ini: initial velocity [m/s]
-        kappa: curvature profile [rad/m]
-        ds: discretization steplength [m]
-        v_max: max. velocity [m/s]
-        P_max: max. power limit [kW]
-        v_end: end velocity within optimization horizon [m/s]
-        x0_v: initial velocity guess [m/s]
-        ax_max: max. longitudinal acceleration limit [m/s^2]
-        ay_max: max. lateral acceleration limit [m/s^2]
-        F_ini: initial force constraint [kN]
+        :return: v: v: optimized velocity [m/s] \n
+            F: optimize powertrain force [kN] \n
+            P: optimized power force [kW] \n
+            ax: acceleration in x-direction of CoG [m/s²] \n
+            ay: acceleration in y-direction of CoG [m/s²]
+            t_total: runtime of the solver OSQP [ms] \n
+            res.info.status: status of the solution (solved, infeasible, etc.)
 
-        Outputs:
-        sol: optimized OSQP output
-        param_vec: variable parameter vector
-        dt_ipopt: OSQP runtimed [ms]
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         # Initialisation of Optimization with the Point mass model
@@ -1204,6 +1217,26 @@ class VOptOSQP:
         return v, F, P, ax, ay, t_total, res.info.status
 
     def transform_results(self, sol, ds, kappa, N):
+        """Function to re-calculate the optimization variables of the QP.
+
+        :param sol: solution of the QP
+        :param ds: discretization step length of given path [m]
+        :param kappa: curvature profile of given path [rad/m]
+        :param N: number of velocity points
+
+        :return: v: optimized velocity [m/s] \n
+            F: optimize powertrain force [kN] \n
+            P: optimized power force [kW] \n
+            ax: acceleration in x-direction of CoG [m/s²] \n
+            ay: acceleration in y-direction of CoG [m/s²]
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
+        """
+
         if self.sol_options[self.key]['Model'] == "PM":
             v = sol
 
@@ -1353,51 +1386,21 @@ class VOptOSQP:
 
         return v, F, P, ax, ay
 
-    def plot_result(self,
-                     v: np.ndarray,
-                     F: np.ndarray,
-                     ds: np.ndarray,
-                     kappa: np.ndarray,
-                     N: int,
-                     model: str):
-
-        # Calculate Acceleration
-        a = []
-        for k in range(N):
-            a.append(1 / self.Car.m * (F[k] - 0.5 * self.Car.rho * self.Car.c_w * self.Car.A * v[k] ** 2))
-
-        # Plot Velocity
-        fig = plt.figure(figsize=(6, 6))
-        ax10 = fig.add_subplot(2, 1, 1)
-        ax11 = ax10.twinx()
-        velo, = ax10.plot(v, 'k', label='velocity')
-        velo_max, = ax10.plot(self.Car.v_max*np.ones(N), 'k--', label='max velocity')
-        Force, = ax11.plot(F, 'b', label='Force')
-        Force_max, = ax11.plot(self.Car.F_dr_max * np.ones(N), 'k--', label='max Force')
-        P_max, = ax11.plot(self.Car.P_max * np.ones(N)/v, 'b--', label='max Power')
-        Force_min, = ax11.plot(self.Car.F_br_max * np.ones(N), 'b--', label='min Force')
-        ax10.set_xlabel('Planing Horizon')
-        ax10.set_ylabel('Velocity')
-        ax11.set_ylabel('Force')
-        ax10.legend(handles=[velo, velo_max, Force, Force_max, Force_min, P_max])
-
-        ax20 = fig.add_subplot(2, 1, 2)
-        circle = plt.Circle((0, 0), self.Car.a_lat_max, facecolor='none',
-                            edgecolor=(0, 0.8, 0.8), linewidth=3, alpha=0.5)
-        plt.plot(v ** 2 * kappa[0:N], a, 'k.')
-        ax20.add_patch(circle)
-        plt.xlim(-13.2, 13.2)
-        plt.ylim(-13.2, 13.2)
-        ax20.set_xlabel('Lateral Acceleration m/s²')
-        ax20.set_ylabel('Longitudinal Acceleration m/s²')
-
-        plt.show()
-
 
 class Car:
 
     def __init__(self,
                  params_path: str):
+        """Class to initialize the car parameter.
+
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+            :Created on:
+            16.06.2020
+        """
         opt_config = configparser.ConfigParser()
         if not opt_config.read(params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')

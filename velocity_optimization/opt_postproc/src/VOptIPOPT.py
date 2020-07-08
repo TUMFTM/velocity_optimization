@@ -60,7 +60,7 @@ class VOptIPOPT:
         :param b_warm: allow or disallow the use of a warm start
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
@@ -103,7 +103,7 @@ class VOptIPOPT:
             \mathrm{s.t.} \quad g(x) \leq 0
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
@@ -1607,7 +1607,7 @@ class VOptIPOPT:
             sol_status: status of the solution (solved, infeasible, etc.)
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
@@ -1776,7 +1776,7 @@ class VOptIPOPT:
             sol_status: status of the solution (solved, infeasible, etc.)
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
@@ -1832,7 +1832,7 @@ class VOptIPOPT:
             a_y: acceleration in y-direction of CoG [m/s²]
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
+            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
