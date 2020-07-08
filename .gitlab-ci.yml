@@ -38,7 +38,7 @@ Documentation:
   # only:
   #     - master
   script:
-    - ${CI_JOB_ID}-env/bin/sphinx-apidoc -o .docs/source velocity_optimization
+    - ${CI_JOB_ID}-env/bin/sphinx-apidoc -f -o .docs/source velocity_optimization
     - ${CI_JOB_ID}-env/bin/sphinx-build -b html docs/source docs/build
   artifacts:
     when: always
