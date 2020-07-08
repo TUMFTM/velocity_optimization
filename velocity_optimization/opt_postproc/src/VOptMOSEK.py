@@ -26,20 +26,25 @@ class VOptMOSEK:
                  vis_options: dict,
                  sol_options: dict,
                  key: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Class to optimize a velocity profile for a given path using the solver MOSEK.
 
-        Documentation: Class to optimize a velocity profile for a given path using the solver IPOPT interfaced by
-        CasADi. This class supports variable power limitations and variable friction.
+        .. math::
+            \mathrm{min} \frac{ 1 } { 2 } x^{T}Px + qx \n
+            \mathrm{s.t.} \quad blc \leq Ax \leq buc \n
+            blx < x < bux
 
-        Inputs:
-        m: number of optimization velocity points
-        sid: ID of optimizer object 'EmergSQP' or 'PerfSQP'
-        vis_options: user specified visualization options of the debugging tool
-        sol_options: user specified solver options of the debugging tool
-        key: determines which specified solver in sol_options is used
+        :param m: number of velocity points
+        :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
+        :param params_path: absolute path to folder containing config file .ini
+        :param vis_options: user specified visualization options of the debugging tool
+        :param sol_options: user specified solver options of the debugging tool
+        :param key: key of the used solver
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         self.m = m
@@ -62,13 +67,17 @@ class VOptMOSEK:
     # Point-mass model
     def sol_init_pm(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the MOSEK solver with the point-mass model \n
+        by defining the objective function and constraints.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the point-mass model to describe the
-        vehicle dynamics for the MOSEK optimizer.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         # Planing horizon
@@ -327,14 +336,19 @@ class VOptMOSEK:
     # Kinematic bicycle model
     def sol_init_km(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the MOSEK solver with the kinematic-bicycle model \n
+        by defining the objective function and constraints.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the point-mass model to describe the
-        vehicle dynamics for the MOSEK optimizer.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
+
         # Planing horizon
         N = self.m
 
@@ -606,13 +620,17 @@ class VOptMOSEK:
     # Dynamic bicycle model
     def sol_init_dm(self,
                     params_path: str):
-        """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
+        """Function to initialize the MOSEK solver with the dynamci-bicycle model \n
+        by defining the objective function and constraints.\n
+        Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
-        Documentation: Builds matrix and vectors for the optimization problem with the point-mass model to describe the
-        vehicle dynamics for the MOSEK optimizer.
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
 
         # Planing horizon
@@ -1024,30 +1042,35 @@ class VOptMOSEK:
                      v_end: float = None,
                      v_max: np.array = None,
                      ):
+        """Function to update the matrix and functions for the optimization problem. \n
+        Solve the optimization problem with the solver OSQP.
+
+        :param N: number of velocity points
+        :param x0_v: initial guess velocity [m/s]
+        :param F_ini: hard constrained initial force [kN]
+        :param ds: discretization step length of given path [m]
+        :param kappa: curvature profile of given path [rad/m]
+        :param P_max: max. allowed power [kW]
+        :param ax_max: max. allowed longitudinal acceleration [m/s^2]
+        :param ay_max: max. allowed lateral accelereation [m/s]
+        :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
+        :param v_max: max. allowed velocity (in objective function) [m/s]
+
+        :return: v: v: optimized velocity [m/s] \n
+            F: optimize powertrain force [kN] \n
+            P: optimized power force [kW] \n
+            ax: acceleration in x-direction of CoG [m/s²] \n
+            ay: acceleration in y-direction of CoG [m/s²]
+            t_total: runtime of the solver OSQP [ms] \n
+            sol_status: status of the solution (solved, infeasible, etc.)
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
         """
-        Python version: 3.5
-        Created by: Tobias Klotz
-        Created on: 16.06.2020
 
-        Documentation: Builds parameter and initialization vectors for MOSEK solver
-
-        Inputs:
-        N: length of planning horizon []
-        kappa: curvature profile [rad/m]
-        ds: discretization steplength [m]
-        v_max: max. velocity [m/s]
-        P_max: max. power limit [kW]
-        v_end: end velocity within optimization horizon [m/s]
-        x0_v: initial velocity guess [m/s]
-        ax_max: max. longitudinal acceleration limit [m/s^2]
-        ay_max: max. lateral acceleration limit [m/s^2]
-        F_ini: initial force constraint [kN]
-
-        Outputs:
-        sol: optimized IPOPT output
-        dt_ipopt: IPOPT runtimed [ms]
-        sol_status: solution status of the MOSEK solver
-        """
         # Point-mass model
         if self.sol_options[self.key]['Model'] == "PM":
             # Initialization of optimization variables
@@ -1331,6 +1354,26 @@ class VOptMOSEK:
         return v, F, P, ax, ay, t_total, sol_status
 
     def transform_results(self, sol, ds, kappa, N):
+        """Function to re-calculate the optimization variables of the QP.
+
+        :param sol: solution of the QP
+        :param ds: discretization step length of given path [m]
+        :param kappa: curvature profile of given path [rad/m]
+        :param N: number of velocity points
+
+        :return: v: optimized velocity [m/s] \n
+            F: optimize powertrain force [kN] \n
+            P: optimized power force [kW] \n
+            ax: acceleration in x-direction of CoG [m/s²] \n
+            ay: acceleration in y-direction of CoG [m/s²]
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+        :Created on:
+            16.06.2020
+        """
+
         if self.sol_options[self.key]['Model'] == "PM":
             v = sol
 
@@ -1438,10 +1481,20 @@ class VOptMOSEK:
 class Car:
 
     def __init__(self,
-                 param_path: str):
+                 params_path: str):
+        """Class to initialize the car parameter.
+
+        :param params_path: absolute path to folder containing config file .ini
+
+        :Authors:
+            Tobias Klotz <tobias.klotz@tum.de>
+
+            :Created on:
+            16.06.2020
+        """
 
         opt_config = configparser.ConfigParser()
-        if not opt_config.read(param_path + 'sqp_config.ini'):
+        if not opt_config.read(params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
 
         # Load Car Paramter
