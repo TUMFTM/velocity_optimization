@@ -1,8 +1,4 @@
 try:
-    import mosek
-except ImportError:
-    print('Warning: No module mosek found. Not necessary on car but for development.')
-try:
     import sympy as sym
 except ImportError:
     print('Warning: No module sympy found. Not necessary on car but for development.')
@@ -10,10 +6,6 @@ try:
     import dill
 except ImportError:
     print('Warning: No module dill found. Not necessary on car but for development.')
-try:
-    import casadi as cs
-except ImportError:
-    print('Warning: No module casadi found. Not necessary on car but for development.')
 import os
 import sys
 import numpy as np
@@ -93,7 +85,8 @@ class VOptOSQP:
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Osqp" + "_" + "point_mass" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
-            file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
+            file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                   + ".pkl"
         filename = params_path + '/Lambdify_Function/' + file
         try:
             f = open(filename)
@@ -141,7 +134,7 @@ class VOptOSQP:
             # initial force [kN]
             F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = sym.symbols('P_max0:%d' % (N-1))
+            P_max = sym.symbols('P_max0:%d' % (N - 1))
             # max. acceleration in x-direction of the vehicle [m/s²]
             ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
@@ -171,7 +164,7 @@ class VOptOSQP:
             a = []
             F_dr = []
             # Calculate force and acceleration
-            for k in range(N-1):
+            for k in range(N - 1):
                 # Calculate acceleration from velocity and step length
                 a.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * ds[k]))
                 # Driving Force [kN]
@@ -194,11 +187,11 @@ class VOptOSQP:
                     h.append(v[k])
 
             # Driving Force Boundary Constraint
-            for k in range(N-1):
+            for k in range(N - 1):
                 if k == 0:
                     ub.append(0.0)
                     lb.append(0.0)
-                    h.append(F_dr[k]-F_ini)
+                    h.append(F_dr[k] - F_ini)
                 else:
                     lb.append(self.Car.F_br_max - F_dr[k])
                     ub.append(self.Car.F_dr_max - F_dr[k])
@@ -211,8 +204,8 @@ class VOptOSQP:
                     ub.append(self.Car.a_lat_max ** 2 - a[k] ** 2 - (kappa[k] * v[k] ** 2) ** 2)
                     h.append(a[k] ** 2 + (kappa[k] * v[k] ** 2) ** 2)'''
                     lb.append(-np.inf)
-                    ub.append(1 - a[k]**2/ax_max[k]**2 - (kappa[k] * v[k] ** 2)**2/ay_max[k]**2)
-                    h.append(a[k]**2/ax_max[k]**2 + (kappa[k] * v[k] ** 2)**2/ay_max[k]**2)
+                    ub.append(1 - a[k] ** 2 / ax_max[k] **2 - (kappa[k] * v[k] ** 2) ** 2 / ay_max[k] ** 2)
+                    h.append(a[k] ** 2 / ax_max[k] **2 + (kappa[k] * v[k] ** 2) ** 2 / ay_max[k] ** 2)
 
                 '''acc ** 2 / ax_max ** 2 + (kappa_param[: - 1] * (v[: - 1] ** 2)) ** 2 / ay_max ** 2 - \
                 oneone_vec_short'''
@@ -239,11 +232,10 @@ class VOptOSQP:
                     h.append(- a[k] / ax_max[k] - (kappa[k] * v[k] ** 2) / ay_max[k])
 
             # Power Constraint
-            for k in range(N-1):
+            for k in range(N - 1):
                 lb.append(- np.inf)
                 ub.append(P_max[k] - F_dr[k] * v[k])
                 h.append(F_dr[k] * v[k])
-
 
             # Calculate Jacobian Matrix
             print('Calculate Matrix A')
@@ -268,7 +260,8 @@ class VOptOSQP:
             if self.sol_options[self.key]['Friction'] == "Circle":
                 file = "Osqp" + "_" + "point_mass" + "_" + str(N) + ".pkl"
             elif self.sol_options[self.key]['Friction'] == "Diamond":
-                file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
+                file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                       + ".pkl"
 
             filepath = params_path + '/Lambdify_Function/'
             filename = filepath + file
@@ -300,8 +293,9 @@ class VOptOSQP:
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
-            file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = params_path+ 'Lambdify_Function/' + file
+            file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                   + ".pkl"
+        filename = params_path + 'Lambdify_Function/' + file
 
         try:
             f = open(filename)
@@ -339,16 +333,10 @@ class VOptOSQP:
             kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
             ds = sym.symbols('ds:0%d' % (N - 1))
-            # initial velocity [m/s]
-            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
             v_end = sym.symbols('v_end')
-            # max. velocity [m/s]
-            v_max = sym.symbols('v_max0:%d' % (N))
-            # initial force [kN]
-            F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = sym.symbols('P_max0:%d' % (N-1))
+            P_max = sym.symbols('P_max0:%d' % (N - 1))
             # max. acceleration in x-direction of the vehicle [m/s²]
             ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
@@ -514,7 +502,8 @@ class VOptOSQP:
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
-            file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
+            file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                   + ".pkl"
         filename = params_path + '/Lambdify_Function/' + file
 
         try:
@@ -569,8 +558,6 @@ class VOptOSQP:
             v_end = sym.symbols('v_end')
             # max. velocity [m/s]
             v_max = sym.symbols('v_max0:%d' % (N))
-            # initial force [kN]
-            F_ini = sym.symbols('F_ini')
             # max. power [kW]
             P_max = sym.symbols('P_max0:%d' % (N))
             # max. acceleration in x-direction of the vehicle [m/s²]
@@ -659,14 +646,15 @@ class VOptOSQP:
             F_roll_f = self.Car.f_r * self.Car.m * self.Car.g * self.Car.l_r / (self.Car.l_r + self.Car.l_f)
             F_roll_r = self.Car.f_r * self.Car.m * self.Car.g * self.Car.l_f / (self.Car.l_r + self.Car.l_f)
 
-
             for k in range(N - 1):
                 # tire slip angle (front & rear)
                 alpha_f = np.append(alpha_f,
-                                    delta[k] - sym.atan2((self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sym.sin(beta[k])),
-                                                     (v[k] * sym.cos(beta[k]))))
-                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sym.sin(beta[k])),
-                                                   (v[k] * sym.cos(beta[k]))))
+                                    delta[k] - sym.atan2((self.Car.l_f * kappa[k] * v[k]
+                                                          / (2 * np.pi) + v[k] * sym.sin(beta[k])),
+                                                         (v[k] * sym.cos(beta[k]))))
+                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k]
+                                                        / (2 * np.pi) - v[k] * sym.sin(beta[k])),
+                                                       (v[k] * sym.cos(beta[k]))))
 
                 # aerodynamic resistance [kN]
                 F_d = np.append(F_d, 0.5 * self.Car.c_w * self.Car.rho * self.Car.A * v[k] ** 2)
@@ -679,120 +667,120 @@ class VOptOSQP:
                 ma_x = np.append(ma_x, F_xf[k] + F_xr[k] - F_d[k])
 
                 # force at axle in z-direction (front & rear)
-                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r / (self.Car.l_r + self.Car.l_f) - self.Car.h_cg / (
-                        self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
-                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f / (self.Car.l_r + self.Car.l_f) + self.Car.h_cg / (
-                        self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r / (self.Car.l_r + self.Car.l_f)
+                                 - self.Car.h_cg / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f / (self.Car.l_r + self.Car.l_f)
+                                 + self.Car.h_cg / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
 
                 # force at axle in y-direction (front & rear)
-                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[k] / self.Car.F_z0 * sym.sin(
-                    self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
-                            self.Car.B_f * alpha_f[k] - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
-                F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[k] / self.Car.F_z0 * sym.sin(
-                    self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
-                            self.Car.B_r * alpha_r[k] - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[k]
+                                 / self.Car.F_z0
+                                 * sym.sin(self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k]
+                                                                    - self.Car.E_f
+                                                                    * (self.Car.B_f * alpha_f[k]
+                                                                       - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
+                F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[k]
+                                 / self.Car.F_z0 * sym.sin(self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k]
+                                                                                    - self.Car.E_r
+                                                                                    * (self.Car.B_r * alpha_r[k]
+                                                                                    - sym.atan2(self.Car.B_r
+                                                                                                * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
                 ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sym.sin(delta[k]) + F_yf[k] * sym.cos(delta[k]))
 
             # --- EQUALITY CONSTRAINTS (Velocity, Slip Angle)
             for k in range(N - 1):
-                h = np.append(h, [# Derivation of Velocity (Christ Eq. 5.2)
-                                  v[k + 1] - v[k] - ds[k] / v[k] *
-                                  (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                     + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                     + F_yr[k] * sym.sin(beta[k])
-                                                     - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                     - F_d[k] * sym.cos(beta[k]))),
+                h = np.append(h, [  # Derivation of Velocity (Christ Eq. 5.2)
+                                  v[k + 1] - v[k] - ds[k] / v[k]
+                                  * (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                       + F_yr[k] * sym.sin(beta[k])
+                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                       - F_d[k] * sym.cos(beta[k]))),
                                   # Derivation of Slip Angle (Christ Eq. 5.3)
                                   (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
                                   (-kappa[k] * v[k]
-                                   + 1 / (self.Car.m * v[k]) *
-                                   (- F_xr[k] * sym.sin(beta[k])
-                                    + F_xf[k] * sym.sin(delta[k] - beta[k])
-                                    + F_yr[k] * sym.cos(beta[k])
-                                    + F_yf[k] * sym.cos(delta[k] - beta[k])
-                                    + F_d[k] * sym.sin(beta[k]))),])
+                                   + 1 / (self.Car.m * v[k])
+                                   * (- F_xr[k] * sym.sin(beta[k])
+                                      + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                      + F_yr[k] * sym.cos(beta[k])
+                                      + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                      + F_d[k] * sym.sin(beta[k])))])
                 # Lower Bound
-                lb = np.append(lb, [# Derivation of Velocity (Christ Eq. 5.2)
-                                    v[k + 1] - v[k] - ds[k] / v[k] *
-                                    (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                       + F_yr[k] * sym.sin(beta[k])
-                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                       - F_d[k] * sym.cos(beta[k]))),
+                lb = np.append(lb, [  # Derivation of Velocity (Christ Eq. 5.2)
+                                    v[k + 1] - v[k] - ds[k] / v[k]
+                                    * (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                         + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                         + F_yr[k] * sym.sin(beta[k])
+                                                         - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                         - F_d[k] * sym.cos(beta[k]))),
                                     # Derivation of Slip Angle (Christ Eq. 5.3)
-                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
-                                    (-kappa[k] * v[k]
-                                     + 1 / (self.Car.m * v[k]) *
-                                     (- F_xr[k] * sym.sin(beta[k])
-                                      + F_xf[k] * sym.sin(delta[k] - beta[k])
-                                      + F_yr[k] * sym.cos(beta[k])
-                                      + F_yf[k] * sym.cos(delta[k] - beta[k])
-                                      + F_d[k] * sym.sin(beta[k]))),])
+                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                                    * (- kappa[k] * v[k]
+                                       + 1 / (self.Car.m * v[k])
+                                       * (- F_xr[k] * sym.sin(beta[k])
+                                          + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                          + F_yr[k] * sym.cos(beta[k])
+                                          + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                          + F_d[k] * sym.sin(beta[k])))])
                 # Upper Bound
-                ub = np.append(ub, [# Derivation of Velocity (Christ Eq. 5.2)
-                                    v[k + 1] - v[k] - ds[k] / v[k] *
-                                    (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                       + F_yr[k] * sym.sin(beta[k])
-                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                       - F_d[k] * sym.cos(beta[k]))),
+                ub = np.append(ub, [  # Derivation of Velocity (Christ Eq. 5.2)
+                                    v[k + 1] - v[k] - ds[k] / v[k]
+                                    * (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                         + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                         + F_yr[k] * sym.sin(beta[k])
+                                                         - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                         - F_d[k] * sym.cos(beta[k]))),
                                     # Derivation of Slip Angle (Christ Eq. 5.3)
-                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
-                                    (-kappa[k] * v[k]
-                                     + 1 / (self.Car.m * v[k]) *
-                                     (- F_xr[k] * sym.sin(beta[k])
-                                      + F_xf[k] * sym.sin(delta[k] - beta[k])
-                                      + F_yr[k] * sym.cos(beta[k])
-                                      + F_yf[k] * sym.cos(delta[k] - beta[k])
-                                      + F_d[k] * sym.sin(beta[k]))),])
+                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                    * (- kappa[k] * v[k] + 1 / (self.Car.m * v[k]) * (
+                            - F_xr[k] * sym.sin(beta[k]) + F_xf[k] * sym.sin(delta[k] - beta[k]) + F_yr[k]
+                            * sym.cos(beta[k]) + F_yf[k] * sym.cos(delta[k] - beta[k]) + F_d[k]
+                            * sym.sin(beta[k])))])
 
             # INEQUALITY CONSTRAINTS
             # Friction Coefficient
             mu_x = []
             mu_y = []
-            for k in range(N-1):
+            for k in range(N - 1):
                 mu_x.append(ax_max[k] / self.Car.a_max)
                 mu_y.append(ay_max[k] / self.Car.a_lat_max)
 
             for k in range(N - 1):
                 if k == N - 2:
-                    h = np.append(h, [# Power Constraint
+                    h = np.append(h, [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
                                       # Kamm Circle Front Axle
                                       - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                       # Kamm Circle Rear Axle
-                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                      ])
+                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Lower Bound
-                    lb = np.append(lb, [# Power Constraint
+                    lb = np.append(lb, [  # Power Constraint
                                         - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - 0.02 - F_dr[k] * F_br[k],
                                         # Kamm Circle Front Axle
                                         - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                         # Kamm Circle Rear Axle
-                                        - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                        ])
+                                        - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Upper Bound
-                    ub = np.append(ub, [# Power Constraint
+                    ub = np.append(ub, [  # Power Constraint
                                         P_max[k] - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - F_dr[k] * F_br[k],
                                         # Kamm Circle Front Axle
-                                        1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (
-                                                F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                        1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 -
+                                        (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                         # Kamm Circle Rear Axle
-                                        1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (
-                                                F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                        ])
+                                        1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 -
+                                        (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                 else:
-                    h = np.append(h, [# Power Constraint
+                    h = np.append(h, [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -805,10 +793,9 @@ class VOptOSQP:
                                       # Kamm Circle Front Axle
                                       - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                       # Kamm Circle Rear Axle
-                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                      ])
+                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Lower Bound
-                    lb = np.append(lb, [# Power Constraint
+                    lb = np.append(lb, [  # Power Constraint
                                         - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - 0.02 - F_dr[k] * F_br[k],
@@ -821,10 +808,9 @@ class VOptOSQP:
                                         # Kamm Circle Front Axle
                                         - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                         # Kamm Circle Rear Axle
-                                        - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                        ])
+                                        - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Upper Bound
-                    ub = np.append(ub, [# Power Constraint
+                    ub = np.append(ub, [  # Power Constraint
                                         P_max[k] - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - F_dr[k] * F_br[k],
@@ -835,23 +821,25 @@ class VOptOSQP:
                                         # Constraint Derivative of Steer Angle
                                         self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
                                         # Kamm Circle Front Axle
-                                        1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (
-                                                F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                        1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 -
+                                        (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                         # Kamm Circle Rear Axle
-                                        1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (
-                                                F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                        ])
+                                        1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 -
+                                        (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
 
             # Calculate Jacobian Matrix
             print('Caluclate Matrix A')
             A = sym.Matrix([-h]).jacobian(var)
             print('Matrix A solved.')
             print('Lambdify Matrix')
-            A_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], A, 'numpy')
+            A_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], A,
+                                 'numpy')
             print('a_lam lambdified.')
-            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], lb, modules=['numpy', 'math'])
+            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max],
+                                  lb, modules=['numpy', 'math'])
             print('lbo_lam lambdified.')
-            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], ub, modules=['numpy', 'math'])
+            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max],
+                                  ub, modules=['numpy', 'math'])
             print('lbo lambdified.')
 
             self.P_lam = P_lam
@@ -875,7 +863,6 @@ class VOptOSQP:
 
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
-
 
     def calc_v_osqp(self,
                     N: int,
@@ -943,14 +930,14 @@ class VOptOSQP:
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N-1)
+                P_max = self.Car.P_max * np.ones(N - 1)
             # Initialize max. velocity
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
             # Initialize max. acceleration
-            if ax_max == None:
+            if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
-            if ay_max == None:
+            if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
 
             '''# Choose step length
@@ -988,12 +975,12 @@ class VOptOSQP:
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
             # Initialize max. acceleartion
-            if ax_max == None:
+            if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
-            if ay_max == None:
+            if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
             # Initialize end velocity
-            if v_end == None:
+            if v_end is None:
                 v_end = self.Car.v_end
 
             # Choose step length
@@ -1026,26 +1013,26 @@ class VOptOSQP:
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
             # Initialize max. acceleartion
-            if ax_max == None:
+            if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
-            if ay_max == None:
+            if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
 
             # Initialize Optimization variables
             beta = np.zeros(N)  # slip angle
-            omega = np.zeros(N) # gear rate
+            omega = np.zeros(N)  # gear rate
             F_dr = np.zeros(N - 1)  # driving force
             F_br = np.zeros(N - 1)  # braking force
             if F_ini > 0:
                 F_dr[0] = F_ini
             else:
                 F_br[0] = F_ini
-            delta = np.zeros(N - 1) # steer angle
+            delta = np.zeros(N - 1)  # steer angle
 
             kappa = kappa[0:N]  # curvature
 
             # Choose step length
-            alpha = self.sol_options[self.key]['Alpha'] # alpha = 0.1
+            alpha = self.sol_options[self.key]['Alpha']  # alpha = 0.1
 
         # While-Loop to Solve the QPs
         count = True    # maximum number iterations reached
@@ -1053,6 +1040,7 @@ class VOptOSQP:
         t = []  # save calculation time
         save_obj = []   # save objective
         counter = 0     # count the iterations
+        v_start = 0.1
         while count:
             # Fill Matrix P, q, A, b, G, h
             if self.sol_options[self.key]['Model'] == "PM":
@@ -1082,11 +1070,14 @@ class VOptOSQP:
                 # pprint(P)
                 q = np.array(self.q_lam(v, ds).T)
                 # pprint(q)
-                A = sparse.csc_matrix(self.A_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                A = sparse.csc_matrix(self.A_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max,
+                                                 ax_max, ay_max))
                 # pprint(A)
-                lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
+                                           ay_max))
                 # pprint(lbo)
-                ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
+                                           ay_max))
 
             # Start timer
             t0 = time.perf_counter()
@@ -1107,7 +1098,7 @@ class VOptOSQP:
             t.append(t1 - t0)
             print(res.info.status)
 
-            if counter == 30: # stop while-loop due to max. iteartions reached
+            if counter == 30:  # stop while-loop due to max. iteartions reached
                 t_total = sum(t)
                 count = False
             else:
@@ -1121,7 +1112,6 @@ class VOptOSQP:
 
             # Adapt Velocity, Acceleration, Delta and Time with new values
             if res.info.status == 'primal infeasible':
-            #if res.info.status == 'primal infeasible' or res.info.status == 'maximum iterations reached':
                 # Try restart if no solution could be found
                 if self.sol_options[self.key]['Model'] == "PM" or self.sol_options[self.key]['Model'] == "KM":
                     if abs(res.info.obj_val) < 0.1:
@@ -1193,10 +1183,10 @@ class VOptOSQP:
         # Return solution, velocity and result
         if res.info.status == 'primal infeasible':
             v = np.zeros(N)
-            F = np.zeros(N-1)
-            P = np.zeros(N-1)
-            ax = np.zeros(N-1)
-            ay = np.zeros(N-1)
+            F = np.zeros(N - 1)
+            P = np.zeros(N - 1)
+            ax = np.zeros(N - 1)
+            ay = np.zeros(N - 1)
         else:
             if self.sol_options[self.key]['Model'] == "PM":
                 sol = v
@@ -1268,7 +1258,7 @@ class VOptOSQP:
         elif self.sol_options[self.key]['Model'] == "DM":
             v = sol[0:N]
             beta = sol[N:2 * N]
-            F_dr = sol[2 * N:3 * N -1]
+            F_dr = sol[2 * N:3 * N - 1]
             F_br = sol[3 * N - 1:4 * N - 2]
             delta = sol[4 * N - 2:5 * N - 3]
 
@@ -1296,8 +1286,9 @@ class VOptOSQP:
                                     delta[k] - sym.atan2(
                                         (self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sym.sin(beta[k])),
                                         (v[k] * sym.cos(beta[k]))))
-                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sym.sin(beta[k])),
-                                                   (v[k] * sym.cos(beta[k]))))
+                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k] /
+                                                        (2 * np.pi) - v[k] * sym.sin(beta[k])),
+                                                       (v[k] * sym.cos(beta[k]))))
 
                 # aerodynamic resistance [kN]
                 F_d = np.append(F_d, 0.5 * self.Car.c_w * self.Car.rho * self.Car.A * v[k] ** 2)
@@ -1311,54 +1302,44 @@ class VOptOSQP:
                 ax = ma_x / self.Car.m
 
                 # force at axle in z-direction (front & rear)
-                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r / (
-                            self.Car.l_r + self.Car.l_f) - self.Car.h_cg / (
-                                         self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
-                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f / (
-                            self.Car.l_r + self.Car.l_f) + self.Car.h_cg / (
-                                         self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r /
+                                 (self.Car.l_r + self.Car.l_f) - self.Car.h_cg /
+                                 (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f /
+                                 (self.Car.l_r + self.Car.l_f) + self.Car.h_cg /
+                                 (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
 
                 # force at axle in y-direction (front & rear)
                 F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[
                     k] / self.Car.F_z0 * sym.sin(
-                    self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
-                            self.Car.B_f * alpha_f[k] - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
+                    self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f *
+                                             (self.Car.B_f * alpha_f[k] - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
                 F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[
                     k] / self.Car.F_z0 * sym.sin(
-                    self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
-                            self.Car.B_r * alpha_r[k] - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                    self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r *
+                                             (self.Car.B_r * alpha_r[k] - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
                 ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sym.sin(delta[k]) + F_yf[k] * sym.cos(delta[k]))
-                ay = ma_y/self.Car.m
+                ay = ma_y / self.Car.m
 
                 F = F_dr + F_br
                 P = F * v[0:N - 1]
 
             do_plot = False
-            if do_plot == True:
+            if do_plot is True:
                 # TUM Color
                 TUMBlue = [0 / 255, 101 / 255, 189 / 255]
-                TUMWhite = [255 / 255, 255 / 255, 255 / 255]
-                TUMBlack = [0 / 255, 0 / 255, 0 / 255]
-                TUMBlue1 = [0 / 255, 51 / 255, 89 / 255]
-                TUMBlue2 = [0 / 255, 82 / 255, 147 / 255]
                 TUMGray1 = [51 / 255, 51 / 255, 51 / 255]
-                TUMGray2 = [127 / 255, 127 / 255, 127 / 255]
-                TUMGray3 = [204 / 255, 204 / 255, 204 / 255]
-                TUMBlue3 = [100 / 255, 160 / 255, 200 / 255]
-                TUMBlue4 = [152 / 255, 198 / 255, 234 / 255]
-                TUMIvory = [218 / 255, 215 / 255, 203 / 255]
                 TUMOrange = [227 / 255, 114 / 255, 34 / 255]
-                TUMGreen = [162 / 255, 173 / 255, 0 / 255]
 
                 # Line Width
                 LW = 1.5
                 # Plot Constraints
                 # FRONT TIRE
-                fig = plt.figure()
+                plt.figure()
                 ax1 = plt.gca()
                 # Boundary
                 circle = plt.Circle((0, 0), 1, facecolor='none',
@@ -1382,7 +1363,6 @@ class VOptOSQP:
                 plt.ylabel(r'$F_\mathrm{x,f/r}/F_\mathrm{z,f/r}$')
 
                 plt.show()
-
 
         return v, F, P, ax, ay
 
@@ -1408,7 +1388,7 @@ class Car:
         # Load Car Paramter
         self.A = opt_config.getfloat('CAR_PARAMETER', 'A')  # [m²] Front Surface
         self.c_lf = opt_config.getfloat('CAR_PARAMETER', 'c_lf')  # [] Drift Coefficient at Front Trie
-        self.c_lr = opt_config.getfloat('CAR_PARAMETER', 'c_lr') # [] Drift Coefficient at Rear Tire
+        self.c_lr = opt_config.getfloat('CAR_PARAMETER', 'c_lr')  # [] Drift Coefficient at Rear Tire
         self.c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')  # [] Air Resistance Coefficient
         self.f_r = opt_config.getfloat('CAR_PARAMETER', 'f_r')  # [] Rolling Friction Coefficient
         self.h_cg = opt_config.getfloat('CAR_PARAMETER', 'h_cg')  # [m] Height of CoG
@@ -1419,7 +1399,7 @@ class Car:
         self.l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')  # [m] Length from CoG to Front Axle
         self.l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')  # [m] Length from CoG to Rear Axle
         self.m = opt_config.getfloat('CAR_PARAMETER', 'm')  # [t] vehicle mass
-        self.q = opt_config.getfloat('CAR_PARAMETER', 'q') # [] Air Resistance Coefficient: 0.5*rho*A*c_w
+        self.q = opt_config.getfloat('CAR_PARAMETER', 'q')  # [] Air Resistance Coefficient: 0.5*rho*A*c_w
         self.turn_r = opt_config.getfloat('CAR_PARAMETER', 'turn_r')  # [m] Minimum Turn Radius
 
         self.delta_max = opt_config.getfloat('CAR_PARAMETER', 'delta_max')  # [rad] Maximum Steer Angle
@@ -1454,4 +1434,3 @@ class Car:
 
         self.g = 9.91  # [m/s²] Gravitational Constant on Earth
         self.rho = 1.25  # [kg/m³] Air Density
-
