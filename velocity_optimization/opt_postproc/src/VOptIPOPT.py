@@ -2,11 +2,6 @@ try:
     import casadi as cs
 except ImportError:
     print('Warning: No module CasADi found. Not necessary on car but for development.')
-try:
-    import tikzplotlib
-except ImportError:
-    print('Warning: No module tikzplotlib found. Not necessary on car but for development.')
-import os
 import numpy as np
 import time
 import configparser
@@ -143,9 +138,8 @@ class VOptIPOPT:
         # Hard coded params --------------------------------------------------------------------------------------------
         # Vehicle parameters
         # max. power [kw] if constant max. power
-        if self.sol_dict[self.key]['VarPower'] == False:
+        if self.sol_dict[self.key]['VarPower'] is False:
             # max. power of both e-machines [kW]
-            #P_max = opt_config.getfloat('VEHICLE', 'P_max_kW')
             P_max = opt_config.getfloat('CAR_PARAMETER', 'P_max')
         # max. tractional force [kN]
         F_max = opt_config.getfloat('VEHICLE', 'F_max_kN')
@@ -200,18 +194,16 @@ class VOptIPOPT:
         tw_f = opt_config.getfloat('CAR_PARAMETER', 'tw_f')
         # Spurbreite hinten
         tw_r = opt_config.getfloat('CAR_PARAMETER', 'tw_r')
-        # [] Air Resistance Coefficient: 0.5*rho*A*c_w
-        q = opt_config.getfloat('CAR_PARAMETER', 'q')
         # Tire Model (Extended Magic Formula of Fabian Christ)
-        F_z0 = opt_config.getfloat('CAR_PARAMETER', 'F_z0') #* self.sol_dict[self.key]['F_Z']    # [kN] 3
+        F_z0 = opt_config.getfloat('CAR_PARAMETER', 'F_z0')
         B_f = opt_config.getfloat('CAR_PARAMETER', 'B_f')
         C_f = opt_config.getfloat('CAR_PARAMETER', 'C_f')
-        D_f = opt_config.getfloat('CAR_PARAMETER', 'D_f') #* self.sol_dict[self.key]['F_Z']
+        D_f = opt_config.getfloat('CAR_PARAMETER', 'D_f')
         E_f = opt_config.getfloat('CAR_PARAMETER', 'E_f')
         eps_f = opt_config.getfloat('CAR_PARAMETER', 'eps_f')
         B_r = opt_config.getfloat('CAR_PARAMETER', 'B_r')
         C_r = opt_config.getfloat('CAR_PARAMETER', 'C_r')
-        D_r = opt_config.getfloat('CAR_PARAMETER', 'D_r') #* self.sol_dict[self.key]['F_Z']
+        D_r = opt_config.getfloat('CAR_PARAMETER', 'D_r')
         E_r = opt_config.getfloat('CAR_PARAMETER', 'E_r')
         eps_r = opt_config.getfloat('CAR_PARAMETER', 'eps_r')
 
@@ -258,9 +250,9 @@ class VOptIPOPT:
         # Point mass model to describe the vehicle dynamics
         if self.sol_dict[self.key]['Model'] == "PM":
 
-            ################################################################################################################
+            ############################################################################################################
             # Optimization Variables
-            ################################################################################################################
+            ############################################################################################################
             # Velocity [m/s]
             v = cs.SX.sym('v', m)
 
@@ -268,9 +260,9 @@ class VOptIPOPT:
             if self.sol_dict[self.key]['Slack']:
                 eps_tre = cs.SX.sym('eps_tre', int(np.ceil(m / self.slack_every_v)))
 
-            ################################################################################################################
+            ############################################################################################################
             # Online Parameters
-            ################################################################################################################
+            ############################################################################################################
             # Initial velocity [m/s]
             v_ini_param = cs.SX.sym('v_ini_param', 1)
 
@@ -299,9 +291,9 @@ class VOptIPOPT:
                 ax_max = cs.SX.sym('ax_max', m - 1)
                 ay_max = cs.SX.sym('ay_max', m - 1)
 
-            ################################################################################################################
+            ############################################################################################################
             # Constraints
-            ################################################################################################################
+            ############################################################################################################
             # acceleration [m/s^2]
             acc = (v[1:] ** 2 - v[: - 1] ** 2) / (2 * delta_s_param)
 
@@ -325,7 +317,7 @@ class VOptIPOPT:
             # --- Power
             # P_max * [v_mps__1, ... v_mps__n] >= [F_p__1, ..., F_p__n]
             # 0 >= F_p__i - P_max * 1/v_mps__i >= - inf
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pwr_cst = F_p * v[:-1]
                 g.append(pwr_cst)
                 ubg.append([P_max] * n)
@@ -343,14 +335,10 @@ class VOptIPOPT:
                 # (| a_x_mps2 | __i / ax_max + a | a_y_mps2 | __i / ay_max - 1__i - eps <= 0__i)
                 # tire_cst = 1.0 * \
                 #    (1 / ax_max * 1 / m_t * F_p) ** 2 + 1.0 * (1 / ay_max * mtimes(d, (v ** 2))) ** 2
-                tire_cst1 = (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
-                tire_cst2 = (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
-                tire_cst3 = - (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
-                tire_cst4 = - (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
+                tire_cst1 = (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
+                tire_cst2 = (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
+                tire_cst3 = - (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
+                tire_cst4 = - (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
 
                 # Slack variables used
                 if self.sol_dict[self.key]['Slack']:
@@ -390,8 +378,8 @@ class VOptIPOPT:
                     lbg.append([- np.inf] * n)
                 else:
                     # variable acceleration limit
-                    tire_cst1 = acc ** 2 / ax_max**2 + (kappa_param[: - 1] * (v[: - 1] ** 2))**2 / ay_max**2 - \
-                            oneone_vec_short
+                    tire_cst1 = acc ** 2 / ax_max**2 + (kappa_param[: - 1]
+                                                        * (v[: - 1] ** 2))**2 / ay_max**2 - oneone_vec_short
                     g.append(tire_cst1)
                     ubg.append([0] * n)
                     lbg.append([- np.inf] * n)
@@ -435,9 +423,9 @@ class VOptIPOPT:
                 lbg.append([0] * int(np.ceil(m / self.slack_every_v)))
                 ubg.append([unit_eps_tre * eps_tre_max] * int(np.ceil(m / self.slack_every_v)))
 
-            ################################################################################################################
+            ############################################################################################################
             # Objective function
-            ################################################################################################################
+            ############################################################################################################
             # sum__i (d_s_m__i * 1/v__i + s_eps_vel * eps_vel_mps__i + s_eps_dF * (dF__i)**2 + s_eps_tre * eps_tre__i)
             if self.sol_dict[self.key]['Slack']:
                 J = cs.sum1((v - v_max_param) ** 2) + \
@@ -448,9 +436,9 @@ class VOptIPOPT:
                 J = cs.sum1((v - v_max_param) ** 2) + \
                     penalty_jerk * cs.sum1((cs.diff(cs.diff(v))) ** 2)
 
-            ################################################################################################################
+            ############################################################################################################
             # Solver stuff
-            ################################################################################################################
+            ############################################################################################################
             # Initialization of optimization variables, OVERRIDDEN during usage
             x0.append([20] * m)  # initial guess for velocity
             x0.append([0] * int(np.ceil(m / self.slack_every_v)))  # initial guess for slack variable tire-constraints
@@ -472,7 +460,7 @@ class VOptIPOPT:
             # --- Formatting parameter vector for optimization
             # Constant friction
             if isinstance(ax_max, float):
-                if self.sol_dict[self.key]['VarPower'] == False:
+                if self.sol_dict[self.key]['VarPower'] is False:
                     param_vec = cs.vertcat(v_ini_param,
                                            kappa_param,
                                            delta_s_param,
@@ -489,7 +477,7 @@ class VOptIPOPT:
                                            P_max_param)
             # Variable friction
             else:
-                if self.sol_dict[self.key]['VarPower'] == False:
+                if self.sol_dict[self.key]['VarPower'] is False:
                     param_vec = cs.vertcat(v_ini_param,
                                            kappa_param,
                                            delta_s_param,
@@ -561,9 +549,9 @@ class VOptIPOPT:
             self.J = 0
 
         elif self.sol_dict[self.key]['Model'] == "KM":
-            ################################################################################################################
+            ############################################################################################################
             # Optimization Variables
-            ################################################################################################################
+            ############################################################################################################
             # Velocity [m/s]
             v = cs.SX.sym('v', m)
 
@@ -571,9 +559,9 @@ class VOptIPOPT:
             if self.sol_dict[self.key]['Slack']:
                 eps_tre = cs.SX.sym('eps_tre', int(np.ceil(m / self.slack_every_v)))
 
-            ################################################################################################################
+            ############################################################################################################
             # Online Parameters
-            ################################################################################################################
+            ############################################################################################################
             # Initial velocity [m/s]
             v_ini_param = cs.SX.sym('v_ini_param', 1)
 
@@ -602,9 +590,9 @@ class VOptIPOPT:
                 ax_max = cs.SX.sym('ax_max', m - 1)
                 ay_max = cs.SX.sym('ay_max', m - 1)
 
-            ################################################################################################################
+            ############################################################################################################
             # Constraints
-            ################################################################################################################
+            ############################################################################################################
             # acceleration [m/s^2]
             acc = (v[1:] ** 2 - v[: - 1] ** 2) / (2 * delta_s_param)
 
@@ -637,7 +625,7 @@ class VOptIPOPT:
             # --- Power
             # P_max * [v_mps__1, ... v_mps__n] >= [F_p__1, ..., F_p__n]
             # 0 >= F_p__i - P_max * 1/v_mps__i >= - inf
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pwr_cst = F_p * v[:-1]
                 g.append(pwr_cst)
                 ubg.append([P_max] * n)
@@ -654,14 +642,10 @@ class VOptIPOPT:
                 # (| a_x_mps2 | __i / ax_max + a | a_y_mps2 | __i / ay_max - 1__i - eps <= 0__i)
                 # tire_cst = 1.0 * \
                 #    (1 / ax_max * 1 / m_t * F_p) ** 2 + 1.0 * (1 / ay_max * mtimes(d, (v ** 2))) ** 2
-                tire_cst1 = (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
-                tire_cst2 = (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
-                tire_cst3 = - (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
-                tire_cst4 = - (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - \
-                            oneone_vec_short
+                tire_cst1 = (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
+                tire_cst2 = (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
+                tire_cst3 = - (F_p / m_t) / ax_max - (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
+                tire_cst4 = - (F_p / m_t) / ax_max + (kappa_param * (v ** 2))[: - 1] / ay_max - oneone_vec_short
 
                 if self.sol_dict[self.key]['Slack']:
                     i = 0
@@ -694,15 +678,16 @@ class VOptIPOPT:
 
                 if self.sol_dict[self.key]['VarFriction']:
                     # variable acceleration limit
-                    tire_cst1 = acc ** 2 / ax_max ** 2 + (kappa_param[: - 1] * (v[: - 1] ** 2)) ** 2 / ay_max ** 2 - \
-                                oneone_vec_short
+                    tire_cst1 = acc ** 2 / ax_max ** 2 + (kappa_param[: - 1]
+                                                          * (v[: - 1] ** 2)) ** 2 / ay_max ** 2 - oneone_vec_short
                     # Slack variables used
                     if self.sol_dict[self.key]['Slack']:
                         i = 0
                         # counter variable for slacks
                         j = 0
                         for tre in range(tire_cst1.shape[0]):
-                            # if i reaches switching point, go to next slack variable and apply to following tire entries
+                            # if i reaches switching point, go to next slack variable and apply to following tire
+                            # entries
                             if np.mod(i, self.slack_every_v) == 0 and i >= self.slack_every_v:
                                 j += 1
                             tire_cst1[i] -= unit_eps_tre * eps_tre[j]
@@ -721,7 +706,8 @@ class VOptIPOPT:
                         # counter variable for slacks
                         j = 0
                         for tre in range(tire_cst1.shape[0]):
-                            # if i reaches switching point, go to next slack variable and apply to following tire entries
+                            # if i reaches switching point, go to next slack variable and apply to following tire
+                            # entries
                             if np.mod(i, self.slack_every_v) == 0 and i >= self.slack_every_v:
                                 j += 1
                             tire_cst1[i] -= unit_eps_tre * eps_tre[j]
@@ -730,7 +716,6 @@ class VOptIPOPT:
                     g.append(tire_cst1)
                     ubg.append([a_lat_max ** 2] * n)
                     lbg.append([- np.inf] * n)
-
 
             # --- Initial values
             # v_mps__0 == v_ini_param
@@ -751,10 +736,9 @@ class VOptIPOPT:
             ubg.append([np.inf] * m)
             lbg.append([0] * m)
 
-
-            ################################################################################################################
+            ############################################################################################################
             # Objective function
-            ################################################################################################################
+            ############################################################################################################
             # sum__i (d_s_m__i * 1/v__i + s_eps_vel * eps_vel_mps__i + s_eps_dF * (dF__i)**2 + s_eps_tre * eps_tre__i)
             if self.sol_dict[self.key]['Slack']:
                 J = cs.sum1((v - v_max_param) ** 2) + \
@@ -764,9 +748,9 @@ class VOptIPOPT:
             else:
                 J = cs.sum1((v - v_max_param) ** 2)
 
-            ################################################################################################################
+            ############################################################################################################
             # Solver stuff
-            ################################################################################################################
+            ############################################################################################################
             # Initialization of optimization variables, OVERRIDDEN during usage
             x0.append([20] * m)  # initial guess for velocity
 
@@ -787,7 +771,7 @@ class VOptIPOPT:
             # --- Formatting parameter vector for optimization
             # Constant friction
             if self.sol_dict[self.key]['VarFriction']:
-                if self.sol_dict[self.key]['VarPower'] == False:
+                if self.sol_dict[self.key]['VarPower'] is False:
                     param_vec = cs.vertcat(v_ini_param,
                                            kappa_param,
                                            delta_s_param,
@@ -808,7 +792,7 @@ class VOptIPOPT:
                                            ay_max)
             # Variable friction
             else:
-                if self.sol_dict[self.key]['VarPower'] == False:
+                if self.sol_dict[self.key]['VarPower'] is False:
                     param_vec = cs.vertcat(v_ini_param,
                                            kappa_param,
                                            delta_s_param,
@@ -823,7 +807,6 @@ class VOptIPOPT:
                                            F_cst_ini_param,
                                            v_end_param,
                                            P_max_param)
-
 
             # Formatting optimization vector for optimization
             if self.sol_dict[self.key]['Slack']:
@@ -875,9 +858,9 @@ class VOptIPOPT:
             self.J = 0
 
         elif self.sol_dict[self.key]['Model'] == "DM":
-            ################################################################################################################
+            ############################################################################################################
             # Optimization Variables
-            ################################################################################################################
+            ############################################################################################################
             # velocity [m/s]
             v = cs.SX.sym('v', m)
 
@@ -896,9 +879,9 @@ class VOptIPOPT:
             # steer angle [rad]
             delta = cs.SX.sym('delta', n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Online Parameters
-            ################################################################################################################
+            ############################################################################################################
             # step length [m]
             ds = cs.SX.sym('ds', n)
 
@@ -925,15 +908,15 @@ class VOptIPOPT:
             # max accelearation in y-direction [m/s²]
             ay_max = cs.SX.sym('ay_max', n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Objective function
-            ################################################################################################################
+            ############################################################################################################
             # sum__i (d_s_m__i * 1/v__i)
             J = cs.sum1(ds / v[1::])
 
-            ################################################################################################################
+            ############################################################################################################
             # Boundary conditions
-            ################################################################################################################
+            ############################################################################################################
             # --- BOUNDARY CONDITIONS
             # --- Velocity
 
@@ -991,18 +974,18 @@ class VOptIPOPT:
             ubg.append([delta_max] * n)
             lbg.append([- delta_max] * n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Forces
-            ################################################################################################################
+            ############################################################################################################
             # roll friction (front & rear)
             F_roll_f = f_r * m_t * grav * l_r / (l_r + l_f)
             F_roll_r = f_r * m_t * grav * l_f / (l_r + l_f)
 
             # tire slip angle (front & rear)
             alpha_f = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                    v[: - 1] * cs.cos(beta[: - 1]))
+                                       v[: - 1] * cs.cos(beta[: - 1]))
             alpha_r = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
-                            v[: - 1] * cs.cos(beta[: - 1]))
+                               v[: - 1] * cs.cos(beta[: - 1]))
 
             # air resistance
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
@@ -1015,12 +998,10 @@ class VOptIPOPT:
             ma_x = F_xf + F_xr - F_d
 
             # normal force at axle (front & rear)
-            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (
-                        l_r + l_f) * ma_x + 0.5 * c_lf * \
-                   rho * A * v[: - 1] ** 2
-            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (
-                        l_r + l_f) * ma_x + 0.5 * c_lr * \
-                   rho * A * v[: - 1] ** 2
+            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) * ma_x + 0.5 * c_lf \
+                   * rho * A * v[: - 1] ** 2
+            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) * ma_x + 0.5 * c_lr \
+                   * rho * A * v[: - 1] ** 2
 
             # force in y-direction at axle (front & rear)
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
@@ -1035,35 +1016,40 @@ class VOptIPOPT:
             # Equality Constraints
             ################################################################################################################
             # --- dot_v = ....
-            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] * (1 / m_t * (
-                    + F_xr * cs.cos(beta[: - 1]) + F_xf * cs.cos(delta - beta[: - 1]) + F_yr * cs.sin(beta[: - 1]) - F_yf * cs.sin(
-                delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
+            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] \
+                        * (1 / m_t
+                           * (+ F_xr * cs.cos(beta[: - 1])
+                              + F_xf * cs.cos(delta - beta[: - 1])
+                              + F_yr * cs.sin(beta[: - 1]) - F_yf
+                              * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
-            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) * (
-                        -kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1]) * (
-                        - F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1]) + F_yr * cs.cos(beta[:-1]) + F_yf *
-                        cs.cos(delta - beta[:-1]) + F_d * cs.sin(beta[:-1])))
+            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) \
+                           * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
+                              * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
+                                 + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
+                                 + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] * (
-                    1 / I_zz * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
+            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] \
+                            * (1 / I_zz
+                               * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Inequality Constraints
-            ################################################################################################################
+            ############################################################################################################
 
             # --- 0 <= v * F_dr <= P_max
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pwr_cst = F_dr * v[:-1]
                 g.append(pwr_cst)
                 ubg.append([P_max] * n)
@@ -1114,9 +1100,9 @@ class VOptIPOPT:
             ubg.append([delta_max] * (m - 2))
             lbg.append([- delta_max] * (m - 2))
 
-            ################################################################################################################
+            ############################################################################################################
             # Solver stuff
-            ################################################################################################################
+            ############################################################################################################
             # Initialization of optimization variables, OVERRIDDEN during usage
             x0.append([10] * m)  # initial guess for velocity
             x0.append([0] * m)  # initial guess for slip angle
@@ -1136,7 +1122,7 @@ class VOptIPOPT:
 
             # --- Formatting parameter vector for optimization
             # Constant friction
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 param_vec = cs.vertcat(kappa,
                                        ds,
                                        v_ini_param,
@@ -1196,9 +1182,9 @@ class VOptIPOPT:
             pass
 
         elif self.sol_dict[self.key]['Model'] == "FW":
-            ################################################################################################################
+            ############################################################################################################
             # Optimization Variables
-            ################################################################################################################
+            ############################################################################################################
             # velocity [m/s]
             v = cs.SX.sym('v', m)
 
@@ -1217,9 +1203,9 @@ class VOptIPOPT:
             # steer angle [rad]
             gamma_y = cs.SX.sym('gamma', n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Online Parameters
-            ################################################################################################################
+            ############################################################################################################
             # step length [m]
             ds = cs.SX.sym('ds', n)
 
@@ -1241,22 +1227,22 @@ class VOptIPOPT:
                 P_max_param = cs.SX.sym('P_max_param', m - 1)
 
             # max. acceleration in x- and y-direction of the vehicle if variable power
-             # max acceleration in x-direction [m/s²]
+            # max acceleration in x-direction [m/s²]
             ax_max = cs.SX.sym('ax_max', n)
 
             # max accelearation in y-direction [m/s²]
             ay_max = cs.SX.sym('ay_max', n)
 
 
-            ################################################################################################################
+            ############################################################################################################
             # Objective function
-            ################################################################################################################
+            ############################################################################################################
             # sum__i (d_s_m__i * 1/v__i)
             J = cs.sum1(ds / v[1::])
 
-            ################################################################################################################
+            ############################################################################################################
             # Boundary conditions
-            ################################################################################################################
+            ############################################################################################################
             # --- BOUNDARY CONDITIONS
             # --- Velocity
 
@@ -1314,9 +1300,9 @@ class VOptIPOPT:
             ubg.append([np.inf] * n)
             lbg.append([- np.inf] * n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Forces
-            ################################################################################################################
+            ############################################################################################################
             # roll friction (front & rear/ left & right) [kN]
             F_roll_fl = 0.5 * f_r * m_t * grav * l_r / (l_r + l_f)
             F_roll_fr = 0.5 * f_r * m_t * grav * l_r / (l_r + l_f)
@@ -1325,14 +1311,16 @@ class VOptIPOPT:
 
             # tire slip angle (front & rear/ left & right) [rad]
             alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                     v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
             alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                     v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
 
             alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
-                             v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
             alpha_rr = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
-                             v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
             # air resistance [kN]
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
@@ -1348,19 +1336,15 @@ class VOptIPOPT:
             ma_x = F_xrl + F_xrr + (F_xfl + F_xfr) - F_d
 
             # tire normal force (front & rear / left & right) [kN]
-            F_zfl = + 0.5 * m_t * grav * l_r / (l_r + l_f) \
-                    - 0.5 * h_cg / (l_r + l_f) * ma_x \
-                    - k_roll * gamma_y \
+            F_zfl = + 0.5 * m_t * grav * l_r / (l_r + l_f) - 0.5 * h_cg / (l_r + l_f) * ma_x - k_roll * gamma_y \
                     + 0.25 * c_lf * rho * A * v[: - 1] ** 2
 
-            F_zfr = + 0.5 * m_t * grav * l_r / (l_r + l_f) \
-                    - 0.5 * h_cg / (l_r + l_f) * ma_x \
+            F_zfr = + 0.5 * m_t * grav * l_r / (l_r + l_f) - 0.5 * h_cg / (l_r + l_f) * ma_x \
                     + k_roll * gamma_y \
                     + 0.25 * c_lf * rho * A * v[: - 1] ** 2
 
             F_zrl = + 0.5 * m_t * grav * l_f / (l_r + l_f) \
-                    + 0.5 * h_cg / (l_r + l_f) * ma_x \
-                    - (1 - k_roll) * gamma_y \
+                    + 0.5 * h_cg / (l_r + l_f) * ma_x - (1 - k_roll) * gamma_y \
                     + 0.25 * c_lr * rho * A * v[: - 1] ** 2
 
             F_zrr = + 0.5 * m_t * grav * l_f / (l_r + l_f) \
@@ -1369,54 +1353,53 @@ class VOptIPOPT:
                     + 0.25 * c_lr * rho * A * v[: - 1] ** 2
 
             # tire force in y-direction (front & rear/ left & right) [kN]
-            F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 * \
-                    cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
-            F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 * \
-                    cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
+            F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 \
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
+            F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 \
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
-            F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 * \
-                    cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
-            F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 * \
-                    cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
+            F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 \
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
+            F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 \
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
             ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
 
-            ################################################################################################################
+            ############################################################################################################
             # Equality Constraints
-            ################################################################################################################
+            ############################################################################################################
             # --- dot_v = ....
-            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] * \
-                        (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
-                                    + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
-                                    + (F_yrl + F_yrr) * cs.sin(beta[:-1])
-                                    - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
-                                    - F_d * cs.cos(beta[:-1])))
+            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] \
+                        * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
+                                      + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
+                                      + (F_yrl + F_yrr) * cs.sin(beta[:-1])
+                                      - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
+                                      - F_d * cs.cos(beta[:-1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
-            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) * \
-                           (-kappa[: - 1] * v[: - 1]
-                            + 1 / (m_t * v[:-1])
-                            * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
-                               + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
-                               + (F_yrl + F_yrr) * cs.cos(beta[:-1])
-                               + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
-                               + F_d * cs.sin(beta[:-1])))
+            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) \
+                           * (-kappa[: - 1] * v[: - 1]
+                              + 1 / (m_t * v[:-1])
+                              * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
+                                 + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
+                                 + (F_yrl + F_yrr) * cs.cos(beta[:-1])
+                                 + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
+                                 + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] * \
-                            (1 / I_zz *
-                             (+ (F_xrr - F_xrl) * tw_r / 2
-                              - (F_yrl + F_yrr) * l_r
-                              + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(delta)) * tw_f/2
-                              + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(delta)) * l_f
-                              ))
+            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] \
+                            * (1 / I_zz *
+                               (+ (F_xrr - F_xrl) * tw_r / 2
+                                - (F_yrl + F_yrr) * l_r
+                                + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(delta)) * tw_f / 2
+                                + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(delta)) * l_f))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1427,12 +1410,12 @@ class VOptIPOPT:
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
-            ################################################################################################################
+            ############################################################################################################
             # Inequality Constraints
-            ################################################################################################################
+            ############################################################################################################
 
             # --- 0 <= v * F_dr <= P_max
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pwr_cst = F_dr * v[:-1]
                 g.append(pwr_cst)
                 ubg.append([P_max] * n)
@@ -1495,9 +1478,9 @@ class VOptIPOPT:
             ubg.append([delta_max] * (m - 2))
             lbg.append([- delta_max] * (m - 2))
 
-            ################################################################################################################
+            ############################################################################################################
             # Solver stuff
-            ################################################################################################################
+            ############################################################################################################
             # Initialization of optimization variables, OVERRIDDEN during usage
             x0.append([10] * m)  # initial guess for velocity
             x0.append([0] * m)  # initial guess for slip angle
@@ -1516,7 +1499,7 @@ class VOptIPOPT:
 
             # --- Formatting parameter vector for optimization
             # Constant friction
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 param_vec = cs.vertcat(kappa,
                                        ds,
                                        v_ini_param,
@@ -1625,7 +1608,7 @@ class VOptIPOPT:
             param_vec.append(v_max)
             param_vec.append([F_ini])
             param_vec.append([v_end])
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pass
             else:
                 param_vec.append(P_max)
@@ -1653,7 +1636,7 @@ class VOptIPOPT:
             param_vec.append(v_max)
             param_vec.append([F_ini])
             param_vec.append([v_end])
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pass
             else:
                 param_vec.append(P_max)
@@ -1683,7 +1666,7 @@ class VOptIPOPT:
                 v_ini = 1
             param_vec.append([v_ini])
             param_vec.append([v_end])
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pass
             else:
                 param_vec.append(P_max)
@@ -1702,9 +1685,9 @@ class VOptIPOPT:
                 v0[0] = 1
             beta0 = np.zeros(self.m)
             omega0 = np.zeros(self.m)
-            F_dr0 = np.zeros(self.m-1)
-            F_br0 = np.zeros(self.m-1)
-            delta0 = np.zeros(self.m-1)
+            F_dr0 = np.zeros(self.m - 1)
+            F_br0 = np.zeros(self.m - 1)
+            delta0 = np.zeros(self.m - 1)
             x0_nlp.append(v0)
             x0_nlp.append(beta0)
             x0_nlp.append(omega0)
@@ -1723,7 +1706,7 @@ class VOptIPOPT:
                 v_ini = 1
             param_vec.append([v_ini])
             param_vec.append([v_end])
-            if self.sol_dict[self.key]['VarPower'] == False:
+            if self.sol_dict[self.key]['VarPower'] is False:
                 pass
             else:
                 param_vec.append(P_max)
@@ -1741,10 +1724,10 @@ class VOptIPOPT:
             if v0[0] == 0:
                 v0[0] = 1
             beta0 = np.zeros(self.m)
-            F_dr0 = np.zeros(self.m-1)
-            F_br0 = np.zeros(self.m-1)
-            delta0 = np.zeros(self.m-1)
-            gamma0 = np.zeros(self.m-1)
+            F_dr0 = np.zeros(self.m - 1)
+            F_br0 = np.zeros(self.m - 1)
+            delta0 = np.zeros(self.m - 1)
+            gamma0 = np.zeros(self.m - 1)
             x0_nlp.append(v0)
             x0_nlp.append(beta0)
             x0_nlp.append(F_dr0)
@@ -1759,7 +1742,7 @@ class VOptIPOPT:
         # Solve NLP
         ################################################################################################################
         sol, dt_ipopt, sol_status = self.solve(x0=x0_nlp,
-                                   param_vec=param_vec)
+                                               param_vec=param_vec)
 
         return sol, param_vec, dt_ipopt, sol_status
 
@@ -1863,11 +1846,11 @@ class VOptIPOPT:
             # Calculate engine force
             F_p, tire_cst, a, pwr_cst = trj(sol['x'], param_vec_)
             # Calculate engine power
-            P_p = F_p*v[0:-1]
+            P_p = F_p * v[0:-1]
 
             # Calculate Acceleration ax
-            kappa = param_vec_[1:self.m+1]
-            delta_s = param_vec_[self.m+1:2*self.m]
+            kappa = param_vec_[1:self.m + 1]
+            delta_s = param_vec_[self.m + 1:2 * self.m]
             ax = []
             ay = []
             for k in range(self.m - 1):
@@ -1879,11 +1862,12 @@ class VOptIPOPT:
 
         # Kinematic bicycle model
         elif self.sol_dict[self.key]['Model'] == "KM":
-            # Extreact velocity
+            # Extract velocity
             v = np.array(sol['x'][0:m])
             # Extract slack variable
             if self.sol_dict[self.key]['Slack']:
-                eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
+                # eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
+                pass
 
             # Calculate engine force and acceleartion
             kappa = param_vec_[1:self.m + 1]
@@ -1892,8 +1876,7 @@ class VOptIPOPT:
             ay = []
             F_p = []
             for k in range(self.m - 1):
-                ax.append((v[k + 1] ** 2 - v[k] ** 2) / (
-                        2 * delta_s[k]))
+                ax.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * delta_s[k]))
                 ay.append(kappa[k] * v[k] ** 2)
                 F_p.append(1.16 * ax[k] - 0.854 * 0.001 * v[k] ** 2)
             # Calculate engine power
@@ -1922,13 +1905,13 @@ class VOptIPOPT:
             # Calculate engine force from driving and braking force [kN]
             F_p = F_dr + F_br
             # Calculate engine power [kW]
-            P_p = F_p*v[0:-1]
+            P_p = F_p * v[0: - 1]
 
             kappa = param_vec_[0:self.m]
             # Calculate Forces fto calculate accleration at CoG
-            ################################################################################################################
+            ############################################################################################################
             # Forces
-            ################################################################################################################
+            ############################################################################################################
             # gravittational constatns [m/s²]
             grav = 9.81
             # rolling friction coefficient[-]
@@ -1978,9 +1961,9 @@ class VOptIPOPT:
             F_roll_r = f_r * m_t * grav * l_f / (l_r + l_f)
 
             alpha_f = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                    v[: - 1] * cs.cos(beta[: - 1]))
+                                       v[: - 1] * cs.cos(beta[: - 1]))
             alpha_r = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
-                            v[: - 1] * cs.cos(beta[: - 1]))
+                               v[: - 1] * cs.cos(beta[: - 1]))
 
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
 
@@ -1989,12 +1972,10 @@ class VOptIPOPT:
 
             ma_x = F_xf + F_xr - F_d
 
-            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (
-                    l_r + l_f) * ma_x + 0.5 * c_lf * \
-                   rho * A * v[: - 1] ** 2
-            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (
-                    l_r + l_f) * ma_x + 0.5 * c_lr * \
-                   rho * A * v[: - 1] ** 2
+            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg \
+                   / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
+            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg \
+                   / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
 
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
                 C_f * cs.atan2(B_f * alpha_f - E_f * (B_f * alpha_f - cs.atan2(B_f * alpha_f, 1)), 1))
@@ -2006,8 +1987,8 @@ class VOptIPOPT:
             ax = []
             ay = []
             for k in range(self.m - 1):
-                ax.append(ma_x[k]/m_t)
-                ay.append(ma_y[k]/m_t)
+                ax.append(ma_x[k] / m_t)
+                ay.append(ma_y[k] / m_t)
 
             ax = np.array(ax)
             ay = np.array(ay)
@@ -2057,9 +2038,9 @@ class VOptIPOPT:
             # Calculate engine power [kW]
             P_p = F_p * v[0:-1]
 
-            ################################################################################################################
+            ############################################################################################################
             # Forces
-            ################################################################################################################
+            ############################################################################################################
             # gravittational constatns [m/s²]
             grav = 9.81
             # rolling friction coefficient[-]
@@ -2086,8 +2067,6 @@ class VOptIPOPT:
             c_lr = 3e-03
             # Height of CoG [m]
             h_cg = 0.35
-            # Yaw Inertia Coefficient [t m²]
-            I_zz = 1.260
             # Spurbreite vorne [m]
             tw_f = 1.581
             # Spurbreite hinten [m]
@@ -2095,9 +2074,6 @@ class VOptIPOPT:
 
             # Vehicle Mass [t]
             m_t = 1.16
-
-
-            q = 0.854  # [] Air Resistance Coefficient: 0.5*rho*A*c_w
 
             # Tire Model (Magic Formula)
             F_z0 = 3  # [kN]
@@ -2120,14 +2096,16 @@ class VOptIPOPT:
 
             # tire slip angle (front & rear/ left & right) [rad]
             alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                     v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
             alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                     v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
 
             alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
-                             v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
             alpha_rr = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
-                             v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
+                                v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
             # air resistance [kN]
             F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
@@ -2143,19 +2121,15 @@ class VOptIPOPT:
             ma_x = F_xrl + F_xrr + (F_xfl + F_xfr) - F_d
 
             # tire normal force (front & rear / left & right) [kN]
-            F_zfl = + 0.5 * m_t * grav * l_r / (l_r + l_f) \
-                    - 0.5 * h_cg / (l_r + l_f) * ma_x \
-                    - k_roll * gamma_y \
+            F_zfl = + 0.5 * m_t * grav * l_r / (l_r + l_f) - 0.5 * h_cg / (l_r + l_f) * ma_x - k_roll * gamma_y \
                     + 0.25 * c_lf * rho * A * v[: - 1] ** 2
 
-            F_zfr = + 0.5 * m_t * grav * l_r / (l_r + l_f) \
-                    - 0.5 * h_cg / (l_r + l_f) * ma_x \
+            F_zfr = + 0.5 * m_t * grav * l_r / (l_r + l_f) - 0.5 * h_cg / (l_r + l_f) * ma_x \
                     + k_roll * gamma_y \
                     + 0.25 * c_lf * rho * A * v[: - 1] ** 2
 
             F_zrl = + 0.5 * m_t * grav * l_f / (l_r + l_f) \
-                    + 0.5 * h_cg / (l_r + l_f) * ma_x \
-                    - (1 - k_roll) * gamma_y \
+                    + 0.5 * h_cg / (l_r + l_f) * ma_x - (1 - k_roll) * gamma_y \
                     + 0.25 * c_lr * rho * A * v[: - 1] ** 2
 
             F_zrr = + 0.5 * m_t * grav * l_f / (l_r + l_f) \
@@ -2164,15 +2138,15 @@ class VOptIPOPT:
                     + 0.25 * c_lr * rho * A * v[: - 1] ** 2
 
             # tire force in y-direction (front & rear/ left & right) [kN]
-            F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 * \
-                    cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
-            F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 * \
-                    cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
+            F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 \
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
+            F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 \
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
-            F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 * \
-                    cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
-            F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 * \
-                    cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
+            F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 \
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
+            F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 \
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
             ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
@@ -2189,6 +2163,7 @@ class VOptIPOPT:
             ay = np.array(ay)
 
             return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
+
 
 if __name__ == '__main__':
     pass
