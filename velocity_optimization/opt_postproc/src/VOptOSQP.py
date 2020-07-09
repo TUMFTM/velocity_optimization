@@ -34,10 +34,6 @@ class VOptOSQP:
                  key: str):
         """Class to optimize a velocity profile for a given path using the solver OSQP.
 
-        .. math::
-            \mathrm{min} \frac{ 1 } { 2 } x^{T}Px + qx \n
-            \mathrm{s.t.} \quad lb \leq Ax \leq ub
-
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
         :param params_path: absolute path to folder containing config file .ini

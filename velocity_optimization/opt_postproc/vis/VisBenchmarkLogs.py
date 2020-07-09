@@ -618,13 +618,15 @@ class VisVP_Logs:
 
                 # --- Front Axle Tire usage update
                 for key, value in self.sol_options.items():
-                    self.vis_gui.F_f_dict[key].set_xdata(self.sol_options[key]['F_yzf'])
-                    self.vis_gui.F_f_dict[key].set_ydata(self.sol_options[key]['F_xzf'])
+                    if self.sol_options[key]['Model'] == "DM":
+                        self.vis_gui.F_f_dict[key].set_xdata(self.sol_options[key]['F_yzf'])
+                        self.vis_gui.F_f_dict[key].set_ydata(self.sol_options[key]['F_xzf'])
 
-                # --- Front Axle Tire usage update
+                # --- Rear Axle Tire usage update
                 for key, value in self.sol_options.items():
-                    self.vis_gui.F_r_dict[key].set_xdata(self.sol_options[key]['F_yzr'])
-                    self.vis_gui.F_r_dict[key].set_ydata(self.sol_options[key]['F_xzr'])
+                    if self.sol_options[key]['Model'] == "DM":
+                        self.vis_gui.F_r_dict[key].set_xdata(self.sol_options[key]['F_yzr'])
+                        self.vis_gui.F_r_dict[key].set_ydata(self.sol_options[key]['F_xzr'])
 
                 # --- Slack update
                 self.vis_gui.p7_1.set_ydata(s_t_op_osqp)

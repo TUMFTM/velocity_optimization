@@ -28,11 +28,6 @@ class VOpt_qpOASES:
                  Am: np.ndarray):
         """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
-        :math:`\underline{x}=[  x_{1}, ...,  x_{n}]^{T}`
-        .. math::
-            \mathrm{min} \quad 1/2 x Hm x + gv x \n
-            \mathrm{s.t.} \quad lba \leq Am x \leq uba
-
         :param Hm: Hessian problem matrix
         :param Am: Linearized constraints matrix (Jacobian)
 
@@ -140,10 +135,6 @@ class VOpt_qpOASES2:
                  sol_options: dict,
                  key: str):
         """Class to optimize a velocity profile for a given path using the solver qpOASES.
-
-        .. math::
-            \mathrm{min} \frac{ 1 } { 2 } x^{T}Px + qx \n
-            \mathrm{s.t.} \quad lb \leq Ax \leq ub
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'

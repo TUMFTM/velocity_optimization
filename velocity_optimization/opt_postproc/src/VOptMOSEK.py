@@ -28,11 +28,6 @@ class VOptMOSEK:
                  key: str):
         """Class to optimize a velocity profile for a given path using the solver MOSEK.
 
-        .. math::
-            \mathrm{min} \frac{ 1 } { 2 } x^{T}Px + qx \n
-            \mathrm{s.t.} \quad blc \leq Ax \leq buc \n
-            blx < x < bux
-
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
         :param params_path: absolute path to folder containing config file .ini
