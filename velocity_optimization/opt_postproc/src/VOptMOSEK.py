@@ -3,7 +3,7 @@ try:
 except ImportError:
     print('Warning: No module mosek found. Not necessary on car but for development.')
 try:
-    from sympy import symbols, Matrix, lambdify, hessian, pprint, cos, sin, tan, atan2, SparseMatrix
+    from sympy import symbols, Matrix, lambdify, hessian, cos, sin, atan2, SparseMatrix
 except ImportError:
     print('Warning: No module sympy found. Not necessary on car but for development.')
 try:
@@ -19,8 +19,8 @@ import time
 
 class VOptMOSEK:
 
-    def __init__(self, 
-                 m: int, 
+    def __init__(self,
+                 m: int,
                  sid: str,
                  params_path: str,
                  vis_options: dict,
@@ -88,7 +88,8 @@ class VOptMOSEK:
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Mosek" + "_" + "point_mass" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
-            file = "Mosek" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
+            file = "Mosek" + "_" + "point_mass" + "_" + str(N) + "_" \
+                   + str(self.sol_options[self.key]['Friction']) + ".pkl"
         else:
             print("No valid friction model specified!")
             file = None
@@ -108,7 +109,9 @@ class VOptMOSEK:
 
         if available:
             dill.settings['recurse'] = True
-            self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(open(filename, "rb"))
+            self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, \
+                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx \
+                = dill.load(open(filename, "rb"))
 
         else:
             inf = 0.0
@@ -131,8 +134,6 @@ class VOptMOSEK:
             v_ini = symbols('v_ini')
             # end velocity [m/s]
             v_end = symbols('v_end')
-            # max. velocity [m/s]
-            v_max = symbols('v_max0:%d' % (N))
             # initial force [kN]
             F_ini_param = symbols('F_ini')
             # max. power [kW]
@@ -187,8 +188,8 @@ class VOptMOSEK:
             # Calculate Acceleration and Driving Force
             a = []
             F_dr = []
-            for k in range(N-1):
-                a.append((v[k+1]**2-v[k]**2)/( 2 * ds[k]))
+            for k in range(N - 1):
+                a.append((v[k+1] ** 2 - v[k] ** 2) / (2 * ds[k]))
                 F_dr.append(self.Car.m * a[k] + 0.5 * self.Car.rho * self.Car.c_w * self.Car.A * v[k] ** 2)
 
             # BOUNDARY CONDITIONS blx <= x <= buc
@@ -280,7 +281,6 @@ class VOptMOSEK:
                 blc.append(- 4 - (F_dr[k + 1] - F_dr[k]))
                 buc.append(4 - (F_dr[k + 1] - F_dr[k]))
 
-
             self.bkc = bkc
 
             print('Calculation of the Matrix A...')
@@ -299,7 +299,8 @@ class VOptMOSEK:
             print('A Matrix calculated.')
             print('Lambdify')
 
-            aval_lam = lambdify([v, F_ini_param, ds, kappa, P_max, ax_max, ay_max, v_ini, v_end], aval, modules=['numpy'])
+            aval_lam = lambdify([v, F_ini_param, ds, kappa, P_max, ax_max, ay_max, v_ini, v_end], aval,
+                                modules=['numpy'])
 
             blc_lam = lambdify([v, F_ini_param, ds, kappa, P_max, ax_max, ay_max, v_ini, v_end], blc, modules=['numpy'])
 
@@ -357,7 +358,8 @@ class VOptMOSEK:
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Mosek" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
-            file = "Mosek" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) + ".pkl"
+            file = "Mosek" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
+                   + str(self.sol_options[self.key]['Friction']) + ".pkl"
 
         filepath = params_path + '/Lambdify_Function/'
         filename = filepath + file
@@ -374,9 +376,9 @@ class VOptMOSEK:
 
         if available:
             dill.settings['recurse'] = True
-            self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(
+            self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, \
+                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(
                 open(filename, "rb"))
-
 
         # Ceck if there is a Lambdification File
         else:
@@ -401,8 +403,6 @@ class VOptMOSEK:
             v_ini = symbols('v_ini')
             # end velocity [m/s]
             v_end = symbols('v_end')
-            # max. velocity [m/s]
-            v_max = symbols('v_max0:%d' % (N))
             # initial force [kN]
             F_ini = symbols('F_ini')
             # max. power [kW]
@@ -586,11 +586,14 @@ class VOptMOSEK:
 
             # Lambdify Matrix and Vectors
             print('Lambdify')
-            aval_lam = lambdify([v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max], aval, modules=['numpy', 'math'])
+            aval_lam = lambdify([v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max], aval,
+                                modules=['numpy', 'math'])
 
-            blc_lam = lambdify([v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max], blc, modules=['numpy', 'math'])
+            blc_lam = lambdify([v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max], blc,
+                               modules=['numpy', 'math'])
 
-            buc_lam = lambdify([v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max], buc, modules=['numpy', 'math'])
+            buc_lam = lambdify([v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max], buc,
+                               modules=['numpy', 'math'])
 
             blx_lam = lambdify([v, F_ini, v_ini, v_end, P_max, ax_max, ay_max], blx, modules=['numpy', 'math'])
 
@@ -655,9 +658,9 @@ class VOptMOSEK:
 
         if available:
             dill.settings['recurse'] = True
-            self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(
+            self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, \
+                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(
                 open(filename, "rb"))
-
 
         # Ceck if there is a Lambdification File
         else:
@@ -690,10 +693,6 @@ class VOptMOSEK:
             v_ini = symbols('v_ini')
             # end velocity [m/s]
             v_end = symbols('v_end')
-            # max. velocity [m/s]
-            v_max = symbols('v_max0:%d' % (N))
-            # initial force [kN]
-            F_ini = symbols('F_ini')
             # max. power [kW]
             P_max = symbols('P_max0:%d' % (N))
             # max. acceleration in x-direction of the vehicle [m/s²]
@@ -808,7 +807,8 @@ class VOptMOSEK:
             for k in range(N - 1):
                 # Tire Slip Angle (front/rear)
                 alpha_f = np.append(alpha_f,
-                                    delta[k] - atan2((self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sin(beta[k])),
+                                    delta[k] - atan2((self.Car.l_f * kappa[k] * v[k]
+                                                      / (2 * np.pi) + v[k] * sin(beta[k])),
                                                      (v[k] * cos(beta[k]))))
                 alpha_r = np.append(alpha_r, atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi) - v[k] * sin(beta[k])),
                                                    (v[k] * cos(beta[k]))))
@@ -823,20 +823,24 @@ class VOptMOSEK:
                 ma_x = np.append(ma_x, F_xf[k] + F_xr[k] - F_d[k])
 
                 # force at axle in z-direction (front & rear)
-                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r / (self.Car.l_r + self.Car.l_f) - self.Car.h_cg / (
-                        self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
-                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f / (self.Car.l_r + self.Car.l_f) + self.Car.h_cg / (
-                        self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r
+                                 / (self.Car.l_r + self.Car.l_f) - self.Car.h_cg
+                                 / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f
+                                 / (self.Car.l_r + self.Car.l_f) + self.Car.h_cg
+                                 / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
 
                 # force at axle in y-direction (front & rear)
-                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[k] / self.Car.F_z0 * sin(
-                    self.Car.C_f * atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
-                            self.Car.B_f * alpha_f[k] - atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
-                F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[k] / self.Car.F_z0 * sin(
-                    self.Car.C_r * atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
-                            self.Car.B_r * alpha_r[k] - atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[k]
+                                 / self.Car.F_z0 * sin(
+                    self.Car.C_f * atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f
+                                         * (self.Car.B_f * alpha_f[k] - atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
+                F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[k]
+                                 / self.Car.F_z0 * sin(
+                    self.Car.C_r * atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r
+                                         * (self.Car.B_r * alpha_r[k] - atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
                 ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sin(delta[k]) + F_yf[k] * cos(delta[k]))
@@ -847,54 +851,51 @@ class VOptMOSEK:
             h = []
             # EQUALITY CONSTRAINTS
             for k in range(N - 1):
-                h = np.append(h, [# Derivation of Velocity (Christ Eq. 5.2)
-                                  v[k + 1] - v[k] - ds[k] / v[k] *
-                                  (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
-                                                     + F_xf[k] * cos(delta[k] - beta[k])
-                                                     + F_yr[k] * sin(beta[k])
-                                                     - F_yf[k] * sin(delta[k] - beta[k])
-                                                     - F_d[k] * cos(beta[k]))),
+                h = np.append(h, [  # Derivation of Velocity (Christ Eq. 5.2)
+                                  v[k + 1] - v[k] - ds[k] / v[k]
+                                  * (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
+                                                       + F_xf[k] * cos(delta[k] - beta[k])
+                                                       + F_yr[k] * sin(beta[k])
+                                                       - F_yf[k] * sin(delta[k] - beta[k])
+                                                       - F_d[k] * cos(beta[k]))),
                                   # Derivation of Slip Angle (Christ Eq. 5.3)
-                                  (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
-                                  (- kappa[k] * v[k]
-                                   + 1 / (self.Car.m * v[k]) *
-                                   (- F_xr[k] * sin(beta[k])
-                                    + F_xf[k] * sin(delta[k] - beta[k])
-                                    + F_yr[k] * cos(beta[k])
-                                    + F_yf[k] * cos(delta[k] - beta[k])
-                                    + F_d[k] * sin(beta[k]))),])
+                                  (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                                  * (- kappa[k] * v[k] + 1 / (self.Car.m * v[k])
+                                     * (- F_xr[k] * sin(beta[k])
+                                        + F_xf[k] * sin(delta[k] - beta[k])
+                                        + F_yr[k] * cos(beta[k])
+                                        + F_yf[k] * cos(delta[k] - beta[k])
+                                        + F_d[k] * sin(beta[k])))])
                 # Derivation of Velocity (Christ Eq. 5.2)
                 bkc.append(mosek.boundkey.fx)
-                blc.append(v[k + 1] - v[k] - ds[k] / v[k] *
-                           (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
-                                              + F_xf[k] * cos(delta[k] - beta[k])
-                                              + F_yr[k] * sin(beta[k])
-                                              - F_yf[k] * sin(delta[k] - beta[k])
-                                              - F_d[k] * cos(beta[k]))))
-                buc.append(v[k + 1] - v[k] - ds[k] / v[k] *
-                           (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
-                                              + F_xf[k] * cos(delta[k] - beta[k])
-                                              + F_yr[k] * sin(beta[k])
-                                              - F_yf[k] * sin(delta[k] - beta[k])
-                                              - F_d[k] * cos(beta[k]))))
+                blc.append(v[k + 1] - v[k] - ds[k] / v[k]
+                           * (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
+                                                + F_xf[k] * cos(delta[k] - beta[k])
+                                                + F_yr[k] * sin(beta[k])
+                                                - F_yf[k] * sin(delta[k] - beta[k])
+                                                - F_d[k] * cos(beta[k]))))
+                buc.append(v[k + 1] - v[k] - ds[k] / v[k]
+                           * (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
+                                                + F_xf[k] * cos(delta[k] - beta[k])
+                                                + F_yr[k] * sin(beta[k])
+                                                - F_yf[k] * sin(delta[k] - beta[k])
+                                                - F_d[k] * cos(beta[k]))))
                 # Derivation of Slip Angle (Christ Eq. 5.3)
                 bkc.append(mosek.boundkey.fx)
-                blc.append((beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
-                           (- kappa[k] * v[k]
-                            + 1 / (self.Car.m * v[k]) *
-                            (- F_xr[k] * sin(beta[k])
-                             + F_xf[k] * sin(delta[k] - beta[k])
-                             + F_yr[k] * cos(beta[k])
-                             + F_yf[k] * cos(delta[k] - beta[k])
-                             + F_d[k] * sin(beta[k]))))
-                buc.append((beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
-                           (- kappa[k] * v[k]
-                            + 1 / (self.Car.m * v[k]) *
-                            (- F_xr[k] * sin(beta[k])
-                             + F_xf[k] * sin(delta[k] - beta[k])
-                             + F_yr[k] * cos(beta[k])
-                             + F_yf[k] * cos(delta[k] - beta[k])
-                             + F_d[k] * sin(beta[k]))))
+                blc.append((beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                           * (- kappa[k] * v[k] + 1 / (self.Car.m * v[k])
+                              * (- F_xr[k] * sin(beta[k])
+                                 + F_xf[k] * sin(delta[k] - beta[k])
+                                 + F_yr[k] * cos(beta[k])
+                                 + F_yf[k] * cos(delta[k] - beta[k])
+                                 + F_d[k] * sin(beta[k]))))
+                buc.append((beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                           * (- kappa[k] * v[k] + 1 / (self.Car.m * v[k])
+                              * (- F_xr[k] * sin(beta[k])
+                                 + F_xf[k] * sin(delta[k] - beta[k])
+                                 + F_yr[k] * cos(beta[k])
+                                 + F_yf[k] * cos(delta[k] - beta[k])
+                                 + F_d[k] * sin(beta[k]))))
 
             # INEQUALITY CONSTRAINTS
             mu_x = []
@@ -906,15 +907,14 @@ class VOptMOSEK:
 
             for k in range(N - 1):
                 if k == N - 2:
-                    h = np.append(h, [# Power Constraint
+                    h = np.append(h, [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
                                       # Kamm Circle Front Axle
                                       - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                       # Kamm Circle Rear Axle
-                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2
-                                      ])
+                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Power Constraint
                     bkc.append(mosek.boundkey.ra)
                     blc.append(- v[k] * F_dr[k])
@@ -933,7 +933,7 @@ class VOptMOSEK:
                     buc.append(1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2)
 
                 else:
-                    h = np.append(h, [# Power Constraint
+                    h = np.append(h, [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -946,9 +946,7 @@ class VOptMOSEK:
                                       # Kamm Circle Front Axle
                                       - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                       # Kamm Circle Rear Axle
-                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2,
-                                      #1 / self.Car.m * ma_y[k]
-                                      ])
+                                      - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Power Constraint
                     bkc.append(mosek.boundkey.ra)
                     blc.append(- v[k] * F_dr[k])
@@ -1000,15 +998,20 @@ class VOptMOSEK:
             print('A Matrix calculated.')
             print('Lambdify')
             # Lambdify Matrix and Vector
-            aval_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], aval, modules=['numpy', 'math'])
+            aval_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], aval,
+                                modules=['numpy', 'math'])
 
-            blc_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], blc, modules=['numpy', 'math'])
+            blc_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], blc,
+                               modules=['numpy', 'math'])
 
-            buc_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], buc, modules=['numpy', 'math'])
+            buc_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], buc,
+                               modules=['numpy', 'math'])
 
-            blx_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], blx, modules=['numpy', 'math'])
+            blx_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max], blx,
+                               modules=['numpy', 'math'])
 
-            bux_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_end, v_ini, P_max], bux, modules=['numpy', 'math'])
+            bux_lam = lambdify([v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_end, v_ini, P_max],
+                               bux, modules=['numpy', 'math'])
 
             self.aval_lam = aval_lam
             self.blc_lam = blc_lam
@@ -1139,7 +1142,7 @@ class VOptMOSEK:
                 v = x0_v
                 if x0_v[0] == 0:
                     v[0] = 0.1
-            v = 10*np.ones(N)
+            v = 10 * np.ones(N)
             v_ini = x0_v[0]
             # initial guess of slip angle
             beta = np.zeros(N)
@@ -1160,9 +1163,9 @@ class VOptMOSEK:
             else:
                 P_max = self.Car.P_max * np.ones(N)
             # Initialize max. acceleartion
-            if ax_max == None:
+            if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
-            if ay_max == None:
+            if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
 
             # alpha = 0.4
@@ -1219,7 +1222,8 @@ class VOptMOSEK:
                         aval = self.aval_lam(v, ds, kappa, psi, F_ini, v_ini, v_end, P_max, ax_max, ay_max)
                     elif self.sol_options[self.key]['Model'] == "DM":
                         blx = self.blx_lam(v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max)
-                        bux = self.bux_lam(v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_end, v_ini, P_max)
+                        bux = self.bux_lam(v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_end, v_ini,
+                                           P_max)
                         blc = self.blc_lam(v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max)
                         buc = self.buc_lam(v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max)
                         aval = self.aval_lam(v, beta, omega, F_dr, F_br, delta, ds, kappa, ax_max, ay_max, v_ini, P_max)
@@ -1239,7 +1243,7 @@ class VOptMOSEK:
                     t1 = time.perf_counter()
 
                     # save Calculation Time
-                    t.append(t1-t0)
+                    t.append(t1 - t0)
 
                     # Output a solution
                     xx = [0.] * numvar
@@ -1269,19 +1273,19 @@ class VOptMOSEK:
                             no_solution = False
                             pass
                         else:
-                            if optimal == True:
+                            if optimal is True:
                                 alpha_save = 0.5 * alpha
                                 v += - alpha_save * x_save[0:N]  # v(N): Velocity
 
-                                if no_solution == True:
+                                if no_solution is True:
                                     alpha = alpha * 0.5
                                 no_solution = True
-                            elif optimal == False:
+                            elif optimal is False:
                                 # Reset:
-                                if infeasible == False and reset == False:
+                                if infeasible is False and reset == False:
                                     v = x0_v[0] * np.ones(N)
                                     reset = True
-                                elif infeasible == False and reset == True:
+                                elif infeasible is False and reset == True:
                                     v = v_end * np.ones(N)
                                     v[0] = x0_v[0]
 
@@ -1330,7 +1334,6 @@ class VOptMOSEK:
                                     count = False
                             elif np.abs(obj) < 0.4:
                                 alpha = 0.6
-
 
                         save_obj.append(obj)
                         if sol_status == mosek.solsta.optimal or sol_status == mosek.solsta.unknown:
@@ -1406,7 +1409,7 @@ class VOptMOSEK:
         elif self.sol_options[self.key]['Model'] == "DM":
             v = sol[0:N]
             beta = sol[N:2 * N]
-            F_dr = sol[2 * N:3 * N -1]
+            F_dr = sol[2 * N:3 * N - 1]
             F_br = sol[3 * N - 1:4 * N - 2]
             delta = sol[4 * N - 2:5 * N - 3]
 
@@ -1449,34 +1452,36 @@ class VOptMOSEK:
                 ax = ma_x / self.Car.m
 
                 # force at axle in z-direction (front & rear)
-                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r / (
-                            self.Car.l_r + self.Car.l_f) - self.Car.h_cg / (
-                                         self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
-                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f / (
-                            self.Car.l_r + self.Car.l_f) + self.Car.h_cg / (
-                                         self.Car.l_r + self.Car.l_f) * ma_x[
-                                     k] + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r
+                                 / (self.Car.l_r + self.Car.l_f) - self.Car.h_cg
+                                 / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
+                F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f
+                                 / (self.Car.l_r + self.Car.l_f) + self.Car.h_cg
+                                 / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
 
                 # force at axle in y-direction (front & rear)
-                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[
-                    k] / self.Car.F_z0 * sin(
-                    self.Car.C_f * atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f * (
-                            self.Car.B_f * alpha_f[k] - atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
-                F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[
-                    k] / self.Car.F_z0 * sin(
-                    self.Car.C_r * atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r * (
-                            self.Car.B_r * alpha_r[k] - atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k]
+                                                       / self.Car.F_z0) * F_zf[k] / self.Car.F_z0
+                                 * sin(self.Car.C_f * atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f
+                                                            * (self.Car.B_f * alpha_f[k]
+                                                               - atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
+                F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k]
+                                                       / self.Car.F_z0) * F_zr[k]
+                                 / self.Car.F_z0
+                                 * sin(self.Car.C_r * atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r
+                                                            * (self.Car.B_r * alpha_r[k]
+                                                               - atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
                 ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sin(delta[k]) + F_yf[k] * cos(delta[k]))
-                ay = ma_y/self.Car.m
+                ay = ma_y / self.Car.m
 
                 F = F_dr + F_br
                 P = F * v[0:N - 1]
 
         return v, F, P, ax, ay
-
 
 
 class Car:
@@ -1547,4 +1552,3 @@ class Car:
 
         self.g = 9.91  # [m/s²] Gravitational Constant on Earth
         self.rho = 1.25  # [kg/m³] Air Density
-
