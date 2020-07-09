@@ -28,8 +28,9 @@ class VOpt_qpOASES:
                  Am: np.ndarray):
         """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
+        :math:`\underline{x}=[  x_{1}, ...,  x_{n}]^{T}`
         .. math::
-            \mathrm{min} 1/2 x Hm x + gv x \n
+            \mathrm{min} \quad 1/2 x Hm x + gv x \n
             \mathrm{s.t.} \quad lba \leq Am x \leq uba
 
         :param Hm: Hessian problem matrix
