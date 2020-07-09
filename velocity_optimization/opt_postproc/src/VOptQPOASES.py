@@ -29,8 +29,8 @@ class VOpt_qpOASES:
         """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
         .. math::
-            \mathrm{min} \qquad 1/2~x^T H_m x + q^T_v x \n
-            a = b
+            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
+            \mathrm{s.t} \qquad lba \leq A_m x \leq uba
 
         :param Hm: Hessian problem matrix
         :param Am: Linearized constraints matrix (Jacobian)
