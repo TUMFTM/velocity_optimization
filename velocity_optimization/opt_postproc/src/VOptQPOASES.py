@@ -28,6 +28,9 @@ class VOpt_qpOASES:
                  Am: np.ndarray):
         """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
+        .. math::
+            a + b = 0
+
         :param Hm: Hessian problem matrix
         :param Am: Linearized constraints matrix (Jacobian)
 
