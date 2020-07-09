@@ -15,19 +15,19 @@ BIGGER_SIZE = 18
 LW = 1.5
 
 # TUM Color
-TUMBlue = [0/255, 101/255, 189/255]
-TUMWhite = [255/255, 255/255, 255/255]
-TUMBlack = [0/255, 0/255, 0/255]
-TUMBlue1 = [0/255, 51/255, 89/255]
-TUMBlue2 = [0/255, 82/255, 147/255]
-TUMGray1 = [51/255, 51/255, 51/255]
-TUMGray2 = [127/255, 127/255, 127/255]
-TUMGray3 = [204/255, 204/255, 204/255]
-TUMBlue3 = [100/255, 160/255, 200/255]
-TUMBlue4 = [152/255, 198/255, 234/255]
-TUMIvory = [218/255, 215/255, 203/255]
-TUMOrange = [227/255, 114/255, 34/255]
-TUMGreen = [162/255, 173/255, 0/255]
+TUMBlue = [0 / 255, 101 / 255, 189 / 255]
+TUMWhite = [255 / 255, 255 / 255, 255 / 255]
+TUMBlack = [0 / 255, 0 / 255, 0 / 255]
+TUMBlue1 = [0 / 255, 51 / 255, 89 / 255]
+TUMBlue2 = [0 / 255, 82 / 255, 147 / 255]
+TUMGray1 = [51 / 255, 51 / 255, 51 / 255]
+TUMGray2 = [127 / 255, 127 / 255, 127 / 255]
+TUMGray3 = [204 / 255, 204 / 255, 204 / 255]
+TUMBlue3 = [100 / 255, 160 / 255, 200 / 255]
+TUMBlue4 = [152 / 255, 198 / 255, 234 / 255]
+TUMIvory = [218 / 255, 215 / 255, 203 / 255]
+TUMOrange = [227 / 255, 114 / 255, 34 / 255]
+TUMGreen = [162 / 255, 173 / 255, 0 / 255]
 
 # controls default text sizes
 plt.rc('font', size=SMALL_SIZE)
@@ -151,17 +151,17 @@ class VisVP_Logs_GUI:
 
         # Lines within debug plots
         self.p1_1, self.p1_2, self.p1_3, self.p1_4, self.p1_5, self.p1_6, self.p1_7, self.p1_8, self.p1_9, self.p1_10, \
-        self.p1_11, self.p1_12, self.p1_13, self.p1_14, self.p1_15, self.p1_16, self.p1_17, self.p1_18 = \
+            self.p1_11, self.p1_12, self.p1_13, self.p1_14, self.p1_15, self.p1_16, self.p1_17, self.p1_18 = \
             None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         self.p3_1, self.p3_2, self.p3_3, self.p3_4, self.p3_5, self.p3_6, self.p3_7, self.p3_8, self.p3_9, \
-        self.p3_10, self.p3_11, self.p3_12, self.p3_13, self.p3_14, self.p3_15 = \
+            self.p3_10, self.p3_11, self.p3_12, self.p3_13, self.p3_14, self.p3_15 = \
             None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         self.p4_1 = None
         self.p5_1, self.p5_2, self.p5_3, self.p5_4, self.p5_5, self.p5_6, self.p5_7, self.p5_8, self.p5_9, self.p5_10, \
-        self.p5_11, self.p5_12, self.p5_13, self.p5_14, self.p5_15 = \
+            self.p5_11, self.p5_12, self.p5_13, self.p5_14, self.p5_15 = \
             None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         self.p6_1, self.p6_2, self.p6_3, self.p6_4, self.p6_5, self.p6_6, self.p6_7, self.p6_8, self.p6_9, self.p6_10, \
-        self.p6_11, self.p6_12, self.p6_13, self.p6_14, self.p6_15, self.p6_16 = \
+            self.p6_11, self.p6_12, self.p6_13, self.p6_14, self.p6_15, self.p6_16 = \
             None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
         self.p7_1, self.p7_2, self.p7_3, self.p7_4, self.p7_5, self.p7_6 = None, None, None, None, None, None
 
@@ -322,8 +322,8 @@ class VisVP_Logs_GUI:
 
         if self.vis_options['b_calc_qpOASES']:
             p5, = ax.plot(np.zeros((self.m, 1)),
-                           color='gray', linewidth=LW, linestyle=':',
-                           marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
+                          color='gray', linewidth=LW, linestyle=':',
+                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
             legend.append(r'$v_\mathrm{o,qpOASES}$')
         else:
             p5 = None
@@ -360,7 +360,7 @@ class VisVP_Logs_GUI:
         ax.set_xticklabels([])
 
         legend = [r'$F_\mathrm{o,OSQP}$',
-                    r'tol']
+                  r'tol']
         p1, = ax.plot(x_dots,
                       np.zeros((self.m - 1, 1)),
                       color='black', linewidth=LW, linestyle='-')
@@ -510,8 +510,8 @@ class VisVP_Logs_GUI:
         ax.set_ylim([- Y_AXMAX_MPS2, Y_AXMAX_MPS2])
 
         legend = [r'$\bar{\mu}$',
-                    r'$\bar{\mu} + \epsilon_\mathrm{max}$',
-                    r'$\mu_\mathrm{o}$']
+                  r'$\bar{\mu} + \epsilon_\mathrm{max}$',
+                  r'$\mu_\mathrm{o}$']
 
         # --- Case of constant friction limits
         p1, = ax.plot([self.constants_opt.params['aymax_mps2_'],
@@ -547,7 +547,7 @@ class VisVP_Logs_GUI:
                      marker='x', linestyle='', markersize=LW * 3, color='black')
         if self.vis_options['b_calc_qpOASES']:
             p5, = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                           marker='x', linestyle='', markersize=LW * 3, color='orange')
+                          marker='x', linestyle='', markersize=LW * 3, color='orange')
 
         for key, value in self.sol_options.items():
             self.a_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
@@ -607,9 +607,9 @@ class VisVP_Logs_GUI:
 
         for key, value in self.sol_options.items():
             self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                         color=self.sol_options[key]["Color"], linewidth=LW,
-                                         linestyle=self.sol_options[key]["Linestyle"],
-                                         marker=self.sol_options[key]["Marker"], markevery=2)
+                                          color=self.sol_options[key]["Color"], linewidth=LW,
+                                          linestyle=self.sol_options[key]["Linestyle"],
+                                          marker=self.sol_options[key]["Marker"], markevery=2)
             if self.vis_options['b_vis_model_name']:
                 legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
             elif self.vis_options['b_vis_solver_name']:
