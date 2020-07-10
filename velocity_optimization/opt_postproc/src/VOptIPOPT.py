@@ -997,10 +997,8 @@ class VOptIPOPT:
             ma_x = F_xf + F_xr - F_d
 
             # normal force at axle (front & rear)
-            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) \
-                   * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
-            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) \
-                   * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
+            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
+            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
 
             # force in y-direction at axle (front & rear)
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
@@ -1016,29 +1014,28 @@ class VOptIPOPT:
             ############################################################################################################
             # --- dot_v = ....
             v_dot_cst = v[1:] - v[: - 1] - ds \
-                        / v[: - 1] * (1 / m_t
-                                      * (+ F_xr * cs.cos(beta[: - 1])
-                                         + F_xf * cs.cos(delta - beta[: - 1])
-                                         + F_yr * cs.sin(beta[: - 1]) - F_yf
-                                         * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
+                / v[: - 1] * (1 / m_t
+                              * (+ F_xr * cs.cos(beta[: - 1])
+                                 + F_xf * cs.cos(delta - beta[: - 1])
+                                 + F_yr * cs.sin(beta[: - 1]) - F_yf
+                                 * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
             beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) \
-                           - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
-                                                * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
-                                                   + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
-                                                   + F_d * cs.sin(beta[:-1])))
+                - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
+                                     * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
+                                        + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
+                                        + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
             omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] \
-                            - ds / v[: - 1] \
-                            * (1 / I_zz * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
+                - ds / v[: - 1] * (1 / I_zz * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1369,37 +1366,36 @@ class VOptIPOPT:
             ############################################################################################################
             # --- dot_v = ....
             v_dot_cst = v[1:] - v[: - 1] - ds \
-                        / v[: - 1] * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
-                                      + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
-                                      + (F_yrl + F_yrr) * cs.sin(beta[:-1])
-                                      - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
-                                      - F_d * cs.cos(beta[:-1])))
+                / v[: - 1] * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
+                                         + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
+                                         + (F_yrl + F_yrr) * cs.sin(beta[:-1])
+                                         - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
+                                         - F_d * cs.cos(beta[:-1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
             beta_dot_cst = (beta[1:] - beta[:-1]) \
-                           / (ds / v[:-1]) - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1]
-                                                                + 1 / (m_t * v[:-1])
-                                                                * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
-                                                                   + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
-                                                                   + (F_yrl + F_yrr) * cs.cos(beta[:-1])
-                                                                   + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
-                                                                   + F_d * cs.sin(beta[:-1])))
+                / (ds / v[:-1]) - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1]
+                                                     + 1 / (m_t * v[:-1])
+                                                     * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
+                                                        + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
+                                                        + (F_yrl + F_yrr) * cs.cos(beta[:-1])
+                                                        + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
+                                                        + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] \
-                            - ds / v[: - 1] * (1 / I_zz *
-                                               (+ (F_xrr - F_xrl) * tw_r / 2
-                                                - (F_yrl + F_yrr) * l_r
-                                                + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(
-                                                           delta)) * tw_f / 2
-                                                + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(
-                                                           delta)) * l_f))
+            omega_dot_cst = kappa[1:] * v[1:] \
+                            - kappa[1:] * v[:-1] - ds / v[: - 1] \
+                            * (1 / I_zz * (+ (F_xrr - F_xrl) * tw_r / 2 - (F_yrl + F_yrr)
+                                           * l_r + ((F_xfr - F_xfl) * cs.cos(delta)
+                                                    + (F_yfl - F_yfr) * cs.sin(delta))
+                                           * tw_f / 2 + ((F_yfl + F_yfr) * cs.cos(delta)
+                                                         + (F_xfl + F_xfr) * cs.sin(delta)) * l_f))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -2189,6 +2185,7 @@ class VOptIPOPT:
             return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, np.array(F_xzfl), np.array(F_xzfr), \
                 np.array(F_yzfl), np.array(F_yzfr), np.array(F_xzrl), np.array(F_xzrr), np.array(F_yzrl), \
                 np.array(F_yzrr)
+
 
 if __name__ == '__main__':
     pass
