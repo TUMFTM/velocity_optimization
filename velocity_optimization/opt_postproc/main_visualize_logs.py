@@ -17,12 +17,13 @@ if __name__ == "__main__":
 
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
-
-    csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
-    csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
+    csv_name = vel_opt_path + '/logs/vp_sqp/sqp_perf_2020_05_23_09_55.log'
+    #csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
+    csv_name_ltpl = vel_opt_path + '/logs/vp_sqp/sqp_perf_2020_05_23_09_55.log'
+                                   #'/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
     # Number of velocity points
-    m = 115
+    m = 60 # 115
 
     # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
     sid = 'PerfSQP'
@@ -36,16 +37,16 @@ if __name__ == "__main__":
     # visualize all logs consecutively?
     b_movie = False
     # re-calculate QP from log-input?
-    b_run_OSQP = True
+    b_run_OSQP = False
 
     # run qpOASES solver?
-    b_calc_qpOASES = True
+    b_calc_qpOASES = False
 
     # Constant(True)/Variable(False) Power
     b_con_power = True
 
     # Choose Starting Idx of Log-File
-    b_idx = 0
+    b_idx = 552
     # Save the plots?
     b_save_tikz_MA = False
     # Plot Race Course with planning horizon
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     b_vis_dynamic_model = False
 
     # do global plot of states for entire log?
-    b_global_plot = True
+    b_global_plot = False
     glob_lim = np.inf
 
     # plot immediately or only solver data replay?
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     b_calc_time_plot = True
 
     # save plots as tikz files?
-    b_save_tikz = True
+    b_save_tikz = False
 
     # visulaization options
     vis_options = {'b_movie': b_movie,
