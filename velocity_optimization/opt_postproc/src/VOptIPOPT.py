@@ -1390,7 +1390,7 @@ class VOptIPOPT:
 
             # --- dot_omega = ...
             omega_dot_cst = kappa[1:] * v[1:] \
-                            - kappa[1:] * v[:-1] - ds / v[: - 1] \
+                - kappa[1:] * v[:-1] - ds / v[: - 1] \
                             * (1 / I_zz * (+ (F_xrr - F_xrl) * tw_r / 2 - (F_yrl + F_yrr)
                                            * l_r + ((F_xfr - F_xfl) * cs.cos(delta)
                                                     + (F_yfl - F_yfr) * cs.sin(delta))

@@ -17,13 +17,13 @@ if __name__ == "__main__":
 
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
-    csv_name = vel_opt_path + '/logs/vp_sqp/sqp_perf_2020_05_23_09_55.log'
-    #csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
-    csv_name_ltpl = vel_opt_path + '/logs/vp_sqp/sqp_perf_2020_05_23_09_55.log'
-                                   #'/logs/ltpl/2020_04_09/14_13_12_data.csv'
+    csv_name = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_05_23_09_55.log'
+    # csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
+    csv_name_ltpl = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_05_23_09_55.log'
+    # '/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
     # Number of velocity points
-    m = 60 # 115
+    m = 60  # 115
 
     # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
     sid = 'PerfSQP'
@@ -97,13 +97,14 @@ if __name__ == "__main__":
                    'b_save_tikz_MA': b_save_tikz_MA}
 
     # Define solver options
-    sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell), DM (dynamisches Einspurmodell), FW (Zweispurmodell)
+    sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
+                                                            # DM (dynamisches Einspurmodell), FW (Zweispurmodell)
                                'Solver': "IPOPT",           # IPOPT, OSQP, MOSEK, qpOASES
-                               'Friction': "Circle",       # Circle, Diamond (only for PM and KM)
+                               'Friction': "Circle",        # Circle, Diamond (only for PM and KM)
                                'VarFriction': False,        # True, False
                                'VarPower': False,           # True, False
                                'Slack': False,              # True, False
-                               'Alpha': 1,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
+                               'Alpha': 1,                  # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
                                'F_Z': 0.5,                  # (only for DM to check influence of parameter)
                                'DM': "F_z"                  # (only for DM to check influence of parameter)
                                }

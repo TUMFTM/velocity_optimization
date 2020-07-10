@@ -446,9 +446,9 @@ class VisVP_Logs:
                     self.sol_options[key].update({'Power': P_op_osqp})
                     self.sol_options[key].update({'Acc_x': ax_op_osqp})
                     self.sol_options[key].update({'Acc_y': ay_op_osqp})
-                    self.sol_options[key]['Time'].append(t_op_osqp*1000)
+                    self.sol_options[key]['Time'].append(t_op_osqp * 1000)
                     self.sol_options[key]['SolStatus'].append(sol_status_osqp)
-                    print('Overall OSQP runtime:', t_op_osqp*1000)
+                    print('Overall OSQP runtime:', t_op_osqp * 1000)
 
                 ########################################################################################################
                 # --- Calculate MOSEK-solution

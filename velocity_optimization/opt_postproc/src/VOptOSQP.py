@@ -702,14 +702,14 @@ class VOptOSQP:
                                                        - F_yf[k] * sym.sin(delta[k] - beta[k])
                                                        - F_d[k] * sym.cos(beta[k]))),
                                   # Derivation of Slip Angle (Christ Eq. 5.3)
-                                  (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi) *
-                                  (-kappa[k] * v[k]
-                                   + 1 / (self.Car.m * v[k])
-                                   * (- F_xr[k] * sym.sin(beta[k])
-                                      + F_xf[k] * sym.sin(delta[k] - beta[k])
-                                      + F_yr[k] * sym.cos(beta[k])
-                                      + F_yf[k] * sym.cos(delta[k] - beta[k])
-                                      + F_d[k] * sym.sin(beta[k])))])
+                                  (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                                  * (-kappa[k] * v[k]
+                                     + 1 / (self.Car.m * v[k])
+                                     * (- F_xr[k] * sym.sin(beta[k])
+                                        + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                        + F_yr[k] * sym.cos(beta[k])
+                                        + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                        + F_d[k] * sym.sin(beta[k])))])
                 # Lower Bound
                 lb = np.append(lb,
                                [  # Derivation of Velocity (Christ Eq. 5.2)
@@ -780,11 +780,11 @@ class VOptOSQP:
                                        # Braking and Driving Force Constraint
                                        - F_dr[k] * F_br[k],
                                        # Kamm Circle Front Axle
-                                       1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 -
-                                       (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                       1.0 - (F_xf[k]
+                                              / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
                                        # Kamm Circle Rear Axle
-                                       1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 -
-                                       (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
+                                       1.0 - (F_xr[k]
+                                              / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                 else:
                     h = np.append(h,
                                   [  # Power Constraint
