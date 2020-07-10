@@ -1398,8 +1398,8 @@ class Car:
         self.L = opt_config.getfloat('CAR_PARAMETER', 'L')  # [m] Total Car Length
         self.l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')  # [m] Length from CoG to Front Axle
         self.l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')  # [m] Length from CoG to Rear Axle
-        self.m = opt_config.getfloat('CAR_PARAMETER', 'm')  # [t] vehicle mass
-        self.q = opt_config.getfloat('CAR_PARAMETER', 'q')  # [] Air Resistance Coefficient: 0.5*rho*A*c_w
+        self.m = opt_config.getfloat('VEHICLE', 'mass_t')  # [t] vehicle mass
+        self.q = opt_config.getfloat('VEHICLE', 'c_res')  # [] Air Resistance Coefficient: 0.5*rho*A*c_w
         self.turn_r = opt_config.getfloat('CAR_PARAMETER', 'turn_r')  # [m] Minimum Turn Radius
 
         self.delta_max = opt_config.getfloat('CAR_PARAMETER', 'delta_max')  # [rad] Maximum Steer Angle
@@ -1409,12 +1409,12 @@ class Car:
         self.v_min = opt_config.getfloat('CAR_PARAMETER', 'v_min')  # [m/s] Minimum Velocity
         self.v_max = opt_config.getfloat('CAR_PARAMETER', 'v_max')  # [m/s] Maximum Velocity
 
-        self.F_dr_max = opt_config.getfloat('CAR_PARAMETER', 'F_dr_max')  # [kN] Maximum Driving Force
-        self.F_br_max = opt_config.getfloat('CAR_PARAMETER', 'F_br_max')  # [kN] Maximum Brake Force
-        self.P_max = opt_config.getfloat('CAR_PARAMETER', 'P_max')  # [kW] Power of Engine
+        self.F_dr_max = opt_config.getfloat('VEHICLE', 'F_max_kN')  # [kN] Maximum Driving Force
+        self.F_br_max = opt_config.getfloat('VEHICLE', 'F_min_kN')  # [kN] Maximum Brake Force
+        self.P_max = opt_config.getfloat('VEHICLE', 'P_max_kW')  # [kW] Power of Engine
 
-        self.a_lat_max = opt_config.getfloat('CAR_PARAMETER', 'a_lat_max')  # [m/s²] Maximum Lateral Acceleration
-        self.a_max = opt_config.getfloat('CAR_PARAMETER', 'a_max')  # [m/s²] Maximum Laongitudianl Acceleration
+        self.a_lat_max = opt_config.getfloat('VEHICLE', 'ax_max_mps2')  # [m/s²] Maximum Lateral Acceleration
+        self.a_max = opt_config.getfloat('VEHICLE', 'ay_max_mps2')  # [m/s²] Maximum Laongitudianl Acceleration
         self.a_long_max = opt_config.getfloat('CAR_PARAMETER', 'a_long_max')
         self.a_long_min = opt_config.getfloat('CAR_PARAMETER', 'a_long_min')
         self.v_end = opt_config.getfloat('CAR_PARAMETER', 'v_end')  # Maximum Velocity at End of Interval
@@ -1432,5 +1432,5 @@ class Car:
         self.E_r = opt_config.getfloat('CAR_PARAMETER', 'E_r')
         self.eps_r = opt_config.getfloat('CAR_PARAMETER', 'eps_r')
 
-        self.g = 9.91  # [m/s²] Gravitational Constant on Earth
-        self.rho = 1.25  # [kg/m³] Air Density
+        self.g = opt_config.getfloat('CAR_PARAMETER', 'g')  # [m/s²] Gravitational Constant on Earth
+        self.rho = opt_config.getfloat('CAR_PARAMETER', 'rho')  # [kg/m³] Air Density
