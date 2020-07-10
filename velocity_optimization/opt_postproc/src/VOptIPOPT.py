@@ -1820,7 +1820,9 @@ class VOptIPOPT:
         :Created on:
             01.01.2020
         """
-
+        opt_config = configparser.ConfigParser()
+        if not opt_config.read(self.params_path + 'sqp_config.ini'):
+            raise ValueError('Specified cost config file does not exist or is empty!')
         m = self.m
         trj = self.trj
 
@@ -1912,48 +1914,44 @@ class VOptIPOPT:
             # Forces
             ############################################################################################################
             # gravittational constatns [m/s²]
-            grav = 9.81
+            grav = opt_config.getfloat('CAR_PARAMETER', 'g')
             # rolling friction coefficient[-]
-            f_r = 0.01
+            f_r = opt_config.getfloat('CAR_PARAMETER', 'f_r')
             # length from CoG to Front Axle [m]
-            l_f = 1.51
+            l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
             # length from CoG to Rear Axle [m]
-            l_r = 1.388
+            l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
             # Air Resistance Coefficient [-]
-            c_w = 1.4e-03
+            c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
             # Front Surface [m²]
-            A = 1
+            A = opt_config.getfloat('CAR_PARAMETER', 'A')
             # Air Density [kg/m³]
-            rho = 1.2041
+            rho = opt_config.getfloat('CAR_PARAMETER', 'rho')
             # Distribution of Engine Force (Front/Rear) [-]
-            k_dr = 0
+            k_dr = opt_config.getfloat('CAR_PARAMETER', 'k_dr')
             # Distribution of Braking Force (Front/Rear) [-]
-            k_br = 0.7
+            k_br = opt_config.getfloat('CAR_PARAMETER', 'k_br')
             # Drift Coefficient at Front Tire [-]
-            c_lf = 2.35e-03
+            c_lf = opt_config.getfloat('CAR_PARAMETER', 'c_lf')
             # Drift Coefficient at Rear Tire [-]
-            c_lr = 3e-03
+            c_lr = opt_config.getfloat('CAR_PARAMETER', 'c_lr')
             # Height of CoG [m]
-            h_cg = 0.35
-            # Yaw Inertia Coefficient [t m²]
-            I_zz = 1.260
+            h_cg = opt_config.getfloat('CAR_PARAMETER', 'h_cg')
 
-            m_t = 1.16
-
-            q = 0.854  # [] Air Resistance Coefficient: 0.5*rho*A*c_w
+            m_t = opt_config.getfloat('VEHICLE', 'mass_t')
 
             # Tire Model (Magic Formula)
-            F_z0 = 3  # [kN]
-            B_f = 9.62
-            C_f = 2.59
-            D_f = 4.120
-            E_f = 1
-            eps_f = -0.0813
-            B_r = 8.62
-            C_r = 2.65
-            D_r = 4.617
-            E_r = 1
-            eps_r = -0.1263
+            F_z0 = opt_config.getfloat('CAR_PARAMETER', 'F_z0')  # [kN]
+            B_f = opt_config.getfloat('CAR_PARAMETER', 'B_f')
+            C_f = opt_config.getfloat('CAR_PARAMETER', 'C_f')
+            D_f = opt_config.getfloat('CAR_PARAMETER', 'D_f')
+            E_f = opt_config.getfloat('CAR_PARAMETER', 'E_f')
+            eps_f = opt_config.getfloat('CAR_PARAMETER', 'eps_f')
+            B_r = opt_config.getfloat('CAR_PARAMETER', 'B_r')
+            C_r = opt_config.getfloat('CAR_PARAMETER', 'C_r')
+            D_r = opt_config.getfloat('CAR_PARAMETER', 'D_r')
+            E_r = opt_config.getfloat('CAR_PARAMETER', 'E_r')
+            eps_r = opt_config.getfloat('CAR_PARAMETER', 'eps_r')
 
             # front and rear roll friction
             F_roll_f = f_r * m_t * grav * l_r / (l_r + l_f)
@@ -2041,51 +2039,49 @@ class VOptIPOPT:
             # Forces
             ############################################################################################################
             # gravittational constatns [m/s²]
-            grav = 9.81
+            grav = opt_config.getfloat('CAR_PARAMETER', 'g')
             # rolling friction coefficient[-]
-            f_r = 0.01
+            f_r = opt_config.getfloat('CAR_PARAMETER', 'f_r')
             # length from CoG to Front Axle [m]
-            l_f = 1.51
+            l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
             # length from CoG to Rear Axle [m]
-            l_r = 1.388
+            l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
             # Air Resistance Coefficient [-]
-            c_w = 1.4e-03
+            c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
             # Front Surface [m²]
-            A = 1
+            A = opt_config.getfloat('CAR_PARAMETER', 'A')
             # Air Density [kg/m³]
-            rho = 1.2041
+            rho = opt_config.getfloat('CAR_PARAMETER', 'rho')
             # Distribution of Engine Force (Front/Rear) [-]
-            k_dr = 0
+            k_dr = opt_config.getfloat('CAR_PARAMETER', 'k_dr')
             # Distribution of Braking Force (Front/Rear) [-]
-            k_br = 0.7
+            k_br = opt_config.getfloat('CAR_PARAMETER', 'k_br')
 
-            k_roll = 0.5
+            k_roll = opt_config.getfloat('CAR_PARAMETER', 'k_roll')
             # Drift Coefficient at Front Tire [-]
-            c_lf = 2.35e-03
+            c_lf = opt_config.getfloat('CAR_PARAMETER', 'c_lf')
             # Drift Coefficient at Rear Tire [-]
-            c_lr = 3e-03
+            c_lr = opt_config.getfloat('CAR_PARAMETER', 'c_lr')
             # Height of CoG [m]
-            h_cg = 0.35
-            # Spurbreite vorne [m]
-            tw_f = 1.581
-            # Spurbreite hinten [m]
-            tw_r = 1.541
+            h_cg = opt_config.getfloat('CAR_PARAMETER', 'h_cg')
 
-            # Vehicle Mass [t]
-            m_t = 1.16
+            tw_f = opt_config.getfloat('CAR_PARAMETER', 'tw_f')
+            tw_r = opt_config.getfloat('CAR_PARAMETER', 'tw_r')
+
+            m_t = opt_config.getfloat('VEHICLE', 'mass_t')
 
             # Tire Model (Magic Formula)
-            F_z0 = 3  # [kN]
-            B_f = 9.62
-            C_f = 2.59
-            D_f = 4.120
-            E_f = 1
-            eps_f = -0.0813
-            B_r = 8.62
-            C_r = 2.65
-            D_r = 4.617
-            E_r = 1
-            eps_r = -0.1263
+            F_z0 = opt_config.getfloat('CAR_PARAMETER', 'F_z0')  # [kN]
+            B_f = opt_config.getfloat('CAR_PARAMETER', 'B_f')
+            C_f = opt_config.getfloat('CAR_PARAMETER', 'C_f')
+            D_f = opt_config.getfloat('CAR_PARAMETER', 'D_f')
+            E_f = opt_config.getfloat('CAR_PARAMETER', 'E_f')
+            eps_f = opt_config.getfloat('CAR_PARAMETER', 'eps_f')
+            B_r = opt_config.getfloat('CAR_PARAMETER', 'B_r')
+            C_r = opt_config.getfloat('CAR_PARAMETER', 'C_r')
+            D_r = opt_config.getfloat('CAR_PARAMETER', 'D_r')
+            E_r = opt_config.getfloat('CAR_PARAMETER', 'E_r')
+            eps_r = opt_config.getfloat('CAR_PARAMETER', 'eps_r')
 
             # roll friction (front & rear/ left & right) [kN]
             F_roll_fl = 0.5 * f_r * m_t * grav * l_r / (l_r + l_f)
