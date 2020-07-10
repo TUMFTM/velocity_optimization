@@ -808,12 +808,12 @@ class VOpt_qpOASES2:
                 # Lower Bound
                 lb = np.append(lb,
                                [  # Derivation of Velocity (Christ Eq. 5.2)
-                                   v[k + 1] - v[k] - ds[k] / v[k] *
-                                   (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                      + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                      + F_yr[k] * sym.sin(beta[k])
-                                                      - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                      - F_d[k] * sym.cos(beta[k]))),
+                                   v[k + 1] - v[k] - ds[k] / v[k]
+                                   * (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                        + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                        + F_yr[k] * sym.sin(beta[k])
+                                                        - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                        - F_d[k] * sym.cos(beta[k]))),
                                    # Derivation of Slip Angle (Christ Eq. 5.3)
                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
                                    * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
@@ -825,12 +825,12 @@ class VOpt_qpOASES2:
                 # Upper Bound
                 ub = np.append(ub,
                                [  # Derivation of Velocity (Christ Eq. 5.2)
-                                   v[k + 1] - v[k] - ds[k] / v[k] *
-                                   (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                      + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                      + F_yr[k] * sym.sin(beta[k])
-                                                      - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                      - F_d[k] * sym.cos(beta[k]))),
+                                   v[k + 1] - v[k] - ds[k] / v[k]
+                                   * (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                        + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                        + F_yr[k] * sym.sin(beta[k])
+                                                        - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                        - F_d[k] * sym.cos(beta[k]))),
                                    # Derivation of Slip Angle (Christ Eq. 5.3)
                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
                                    * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
@@ -851,7 +851,8 @@ class VOpt_qpOASES2:
 
             for k in range(N - 1):
                 if k == N - 2:
-                    h = np.append(h, [
+                    h = np.append(h,
+                                  [
                                       # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
@@ -861,30 +862,31 @@ class VOpt_qpOASES2:
                                       # Kamm Circle Rear Axle
                                       - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Lower Bound
-                    lb = np.append(lb, [
-                                        # Power Constraint
-                                        - v[k] * F_dr[k],
-                                        # Braking and Driving Force Constraint
-                                        - 0.02 - F_dr[k] * F_br[k],
-                                        # Kamm Circle Front Axle
-                                        - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
-                                        # Kamm Circle Rear Axle
-                                        - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
+                    lb = np.append(lb,
+                                   [
+                                       # Power Constraint
+                                       - v[k] * F_dr[k],
+                                       # Braking and Driving Force Constraint
+                                       - 0.02 - F_dr[k] * F_br[k],
+                                       # Kamm Circle Front Axle
+                                       - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                       # Kamm Circle Rear Axle
+                                       - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Upper Bound
-                    ub = np.append(ub, [
-                                        # Power Constraint
-                                        P_max[k] - v[k] * F_dr[k],
-                                        # Braking and Driving Force Constraint
-                                        - F_dr[k] * F_br[k],
-                                        # Kamm Circle Front Axle
-                                        1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2
-                                        - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
-                                        # Kamm Circle Rear Axle
-                                        1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2
-                                        - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
+                    ub = np.append(ub,
+                                   [  # Power Constraint
+                                       P_max[k] - v[k] * F_dr[k],
+                                       # Braking and Driving Force Constraint
+                                       - F_dr[k] * F_br[k],
+                                       # Kamm Circle Front Axle
+                                       1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2
+                                       - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                       # Kamm Circle Rear Axle
+                                       1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2
+                                       - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                 else:
-                    h = np.append(h, [
-                                      # Power Constraint
+                    h = np.append(h,
+                                  [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -899,38 +901,39 @@ class VOpt_qpOASES2:
                                       # Kamm Circle Rear Axle
                                       - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Lower Bound
-                    lb = np.append(lb, [  # Power Constraint
-                                        - v[k] * F_dr[k],
-                                        # Braking and Driving Force Constraint
-                                        - 0.02 - F_dr[k] * F_br[k],
-                                        # Constraint Derivative of Driving Force
-                                        - np.inf,
-                                        # Constraint Derivative of Braking Force
-                                        self.Car.F_br_max - ((F_br[k + 1] - F_br[k]) / (ds[k] / v[k])),
-                                        # Constraint Derivative of Steer Angle
-                                        - self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
-                                        # Kamm Circle Front Axle
-                                        - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
-                                        # Kamm Circle Rear Axle
-                                        - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
+                    lb = np.append(lb,
+                                   [  # Power Constraint
+                                       - v[k] * F_dr[k],
+                                       # Braking and Driving Force Constraint
+                                       - 0.02 - F_dr[k] * F_br[k],
+                                       # Constraint Derivative of Driving Force
+                                       - np.inf,
+                                       # Constraint Derivative of Braking Force
+                                       self.Car.F_br_max - ((F_br[k + 1] - F_br[k]) / (ds[k] / v[k])),
+                                       # Constraint Derivative of Steer Angle
+                                       - self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
+                                       # Kamm Circle Front Axle
+                                       - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2 - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                       # Kamm Circle Rear Axle
+                                       - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Upper Bound
-                    ub = np.append(ub, [
-                                        # Power Constraint
-                                        P_max[k] - v[k] * F_dr[k],
-                                        # Braking and Driving Force Constraint
-                                        - F_dr[k] * F_br[k],
-                                        # Constraint Derivative of Driving Force
-                                        self.Car.F_dr_max - ((F_dr[k + 1] - F_dr[k]) / (ds[k] / v[k])),
-                                        # Constraint Derivative of Braking Force
-                                        np.inf,
-                                        # Constraint Derivative of Steer Angle
-                                        self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
-                                        # Kamm Circle Front Axle
-                                        1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2
-                                        - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
-                                        # Kamm Circle Rear Axle
-                                        1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2
-                                        - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
+                    ub = np.append(ub,
+                                   [  # Power Constraint
+                                       P_max[k] - v[k] * F_dr[k],
+                                       # Braking and Driving Force Constraint
+                                       - F_dr[k] * F_br[k],
+                                       # Constraint Derivative of Driving Force
+                                       self.Car.F_dr_max - ((F_dr[k + 1] - F_dr[k]) / (ds[k] / v[k])),
+                                       # Constraint Derivative of Braking Force
+                                       np.inf,
+                                       # Constraint Derivative of Steer Angle
+                                       self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
+                                       # Kamm Circle Front Axle
+                                       1.0 - (F_xf[k] / (mu_x[k] * F_zf[k])) ** 2
+                                       - (F_yf[k] / (mu_y[k] * F_zf[k])) ** 2,
+                                       # Kamm Circle Rear Axle
+                                       1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2
+                                       - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
 
             # Calculate Jacobian Matrix
             print('Caluclate Matrix A')
