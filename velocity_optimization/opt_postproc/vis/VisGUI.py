@@ -598,9 +598,9 @@ class VisVP_Logs_GUI:
                  self.constants_opt.params['Fmax_kN_'] / self.constants_opt.params['m_t_']],
                 linestyle='--', color='red', linewidth=LW)
 
-        ########################################################################################################
+        ################################################################################################################
         # --- Front Axle Tire usage
-        ########################################################################################################
+        ################################################################################################################
         ax = self.main_fig.add_subplot(4, 4, 7)
         ax.set_xlim([- 1, 1])
         ax.set_ylim([- 1, 1])
@@ -623,9 +623,9 @@ class VisVP_Logs_GUI:
 
             elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
                 self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                              color=self.sol_options[key]["Color"], linewidth=LW,
-                                              linestyle=self.sol_options[key]["Linestyle"],
-                                              marker=self.sol_options[key]["Marker"], markevery=2)
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker=self.sol_options[key]["Marker"], markevery=2)
                 self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
                                                color=self.sol_options[key]["Color"], linewidth=LW,
                                                linestyle=self.sol_options[key]["Linestyle"],
@@ -641,9 +641,9 @@ class VisVP_Logs_GUI:
 
         ax.axis('equal')
 
-        ########################################################################################################
+        ################################################################################################################
         # --- Rear Axle Tire usage
-        ########################################################################################################
+        ################################################################################################################
         ax = self.main_fig.add_subplot(4, 4, 8)
         ax.set_xlim([- 1, 1])
         ax.set_ylim([- 1, 1])
@@ -661,9 +661,9 @@ class VisVP_Logs_GUI:
                                               marker=self.sol_options[key]["Marker"], markevery=2)
             elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
                 self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                              color=self.sol_options[key]["Color"], linewidth=LW,
-                                              linestyle=self.sol_options[key]["Linestyle"],
-                                              marker=self.sol_options[key]["Marker"], markevery=2)
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker=self.sol_options[key]["Marker"], markevery=2)
                 self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
                                                color=self.sol_options[key]["Color"], linewidth=LW,
                                                linestyle=self.sol_options[key]["Linestyle"],
