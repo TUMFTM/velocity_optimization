@@ -997,10 +997,10 @@ class VOptIPOPT:
             ma_x = F_xf + F_xr - F_d
 
             # normal force at axle (front & rear)
-            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) * ma_x + 0.5 * c_lf \
-                   * rho * A * v[: - 1] ** 2
-            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) * ma_x + 0.5 * c_lr \
-                   * rho * A * v[: - 1] ** 2
+            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) \
+                   * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
+            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) \
+                   * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
 
             # force in y-direction at axle (front & rear)
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
@@ -1011,34 +1011,34 @@ class VOptIPOPT:
             # total lateral accelaration at CoG
             ma_y = F_yr + F_xf * cs.sin(delta) + F_yf * cs.cos(delta)
 
-            ################################################################################################################
+            ############################################################################################################
             # Equality Constraints
-            ################################################################################################################
+            ############################################################################################################
             # --- dot_v = ....
-            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] \
-                        * (1 / m_t
-                           * (+ F_xr * cs.cos(beta[: - 1])
-                              + F_xf * cs.cos(delta - beta[: - 1])
-                              + F_yr * cs.sin(beta[: - 1]) - F_yf
-                              * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
+            v_dot_cst = v[1:] - v[: - 1] - ds \
+                        / v[: - 1] * (1 / m_t
+                                      * (+ F_xr * cs.cos(beta[: - 1])
+                                         + F_xf * cs.cos(delta - beta[: - 1])
+                                         + F_yr * cs.sin(beta[: - 1]) - F_yf
+                                         * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
-            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) \
-                           * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
-                              * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
-                                 + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
-                                 + F_d * cs.sin(beta[:-1])))
+            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) \
+                           - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
+                                                * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
+                                                   + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
+                                                   + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] \
-                            * (1 / I_zz
-                               * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
+            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] \
+                            - ds / v[: - 1] \
+                            * (1 / I_zz * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1232,7 +1232,6 @@ class VOptIPOPT:
             # max accelearation in y-direction [m/s²]
             ay_max = cs.SX.sym('ay_max', n)
 
-
             ############################################################################################################
             # Objective function
             ############################################################################################################
@@ -1310,11 +1309,11 @@ class VOptIPOPT:
 
             # tire slip angle (front & rear/ left & right) [rad]
             alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
-                                                    2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1]
+                                        / (2 * np.pi))
             alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
-                                                    2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1]
+                                        / (2 * np.pi))
 
             alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
                                 v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
@@ -1353,14 +1352,14 @@ class VOptIPOPT:
 
             # tire force in y-direction (front & rear/ left & right) [kN]
             F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 \
-                    * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
+                * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
             F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 \
-                    * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
+                * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
             F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 \
-                    * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
+                * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
             F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 \
-                    * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
+                * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
             ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
@@ -1369,8 +1368,8 @@ class VOptIPOPT:
             # Equality Constraints
             ############################################################################################################
             # --- dot_v = ....
-            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] \
-                        * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
+            v_dot_cst = v[1:] - v[: - 1] - ds \
+                        / v[: - 1] * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
                                       + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
                                       + (F_yrl + F_yrr) * cs.sin(beta[:-1])
                                       - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
@@ -1380,25 +1379,27 @@ class VOptIPOPT:
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
-            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) \
-                           * (-kappa[: - 1] * v[: - 1]
-                              + 1 / (m_t * v[:-1])
-                              * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
-                                 + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
-                                 + (F_yrl + F_yrr) * cs.cos(beta[:-1])
-                                 + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
-                                 + F_d * cs.sin(beta[:-1])))
+            beta_dot_cst = (beta[1:] - beta[:-1]) \
+                           / (ds / v[:-1]) - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1]
+                                                                + 1 / (m_t * v[:-1])
+                                                                * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
+                                                                   + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
+                                                                   + (F_yrl + F_yrr) * cs.cos(beta[:-1])
+                                                                   + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
+                                                                   + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] \
-                            * (1 / I_zz *
-                               (+ (F_xrr - F_xrl) * tw_r / 2
-                                - (F_yrl + F_yrr) * l_r
-                                + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(delta)) * tw_f / 2
-                                + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(delta)) * l_f))
+            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] \
+                            - ds / v[: - 1] * (1 / I_zz *
+                                               (+ (F_xrr - F_xrl) * tw_r / 2
+                                                - (F_yrl + F_yrr) * l_r
+                                                + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(
+                                                           delta)) * tw_f / 2
+                                                + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(
+                                                           delta)) * l_f))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1851,7 +1852,8 @@ class VOptIPOPT:
             v = np.array(sol['x'][0:m])
             # Extract slack variable
             if self.sol_dict[self.key]['Slack']:
-                eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
+                # eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
+                pass
 
             # Calculate engine force
             F_p, tire_cst, a, pwr_cst = trj(sol['x'], param_vec_)
@@ -1869,7 +1871,7 @@ class VOptIPOPT:
                 ay.append(kappa[k] * v[k] ** 2)
 
             return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
-                   F_yrl, F_yrr
+                F_yrl, F_yrr
 
         # Kinematic bicycle model
         elif self.sol_dict[self.key]['Model'] == "KM":
@@ -1894,7 +1896,7 @@ class VOptIPOPT:
             P_p = F_p * v[0:-1]
 
             return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
-                   F_yrl, F_yrr
+                F_yrl, F_yrr
 
         # Dynamic bicycle model
         elif self.sol_dict[self.key]['Model'] == "DM":
@@ -1981,9 +1983,9 @@ class VOptIPOPT:
             ma_x = F_xf + F_xr - F_d
 
             F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg \
-                   / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
+                / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
             F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg \
-                   / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
+                / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
 
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
                 C_f * cs.atan2(B_f * alpha_f - E_f * (B_f * alpha_f - cs.atan2(B_f * alpha_f, 1)), 1))
@@ -2024,7 +2026,7 @@ class VOptIPOPT:
             lbg.append([0.0] * n)'''
 
             return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr), \
-                   F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
+                F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
 
         elif self.sol_dict[self.key]['Model'] == "FW":
             # --- Extract variables
@@ -2104,11 +2106,11 @@ class VOptIPOPT:
 
             # tire slip angle (front & rear/ left & right) [rad]
             alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
-                                                    2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1]
+                                        / (2 * np.pi))
             alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
-                                                    2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1]
+                                        / (2 * np.pi))
 
             alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
                                 v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
@@ -2147,14 +2149,14 @@ class VOptIPOPT:
 
             # tire force in y-direction (front & rear/ left & right) [kN]
             F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 \
-                    * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
+                * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
             F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 \
-                    * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
+                * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
             F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 \
-                    * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
+                * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
             F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 \
-                    * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
+                * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
             ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
@@ -2185,8 +2187,8 @@ class VOptIPOPT:
             F_yzrr = (F_yrr / F_zrr)
 
             return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, np.array(F_xzfl), np.array(F_xzfr), \
-                   np.array(F_yzfl), np.array(F_yzfr), np.array(F_xzrl), np.array(F_xzrr), np.array(F_yzrl), \
-                   np.array(F_yzrr)
+                np.array(F_yzfl), np.array(F_yzfr), np.array(F_xzrl), np.array(F_xzrr), np.array(F_yzrl), \
+                np.array(F_yzrr)
 
 if __name__ == '__main__':
     pass
