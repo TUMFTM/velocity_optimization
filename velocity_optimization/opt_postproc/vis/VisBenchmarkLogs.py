@@ -77,7 +77,7 @@ class VisVP_Logs:
                  csv_name: str,
                  csv_name_ltpl: str,
                  params_path: str,
-                 input_path:str,
+                 input_path: str,
                  vis_options: dict,
                  sol_options: dict,
                  m: int,
@@ -153,33 +153,31 @@ class VisVP_Logs:
             # --- Create IPOPT solver object
             if self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Create_Solver': VOptIPOPT(m=m,
-                                                                          sid=sid,
-                                                                          slack_every_v=self.velqp.slack_every_v,
-                                                                          params_path=params_path,
-                                                                          b_warm=False,
-                                                                          model='point_mass',
-                                                                          vis_options=vis_options,
-                                                                          sol_dict=sol_options,
-                                                                          key=key)})
+                                                                         sid=sid,
+                                                                         slack_every_v=self.velqp.slack_every_v,
+                                                                         params_path=params_path,
+                                                                         b_warm=False,
+                                                                         model='point_mass',
+                                                                         vis_options=vis_options,
+                                                                         sol_dict=sol_options,
+                                                                         key=key)})
             # --- Create OSQP solver object
             if self.sol_options[key]['Solver'] == "OSQP":
                 self.sol_options[key].update({'Create_Solver': VOptOSQP(m=m,
-                                                                         sid=sid,
-                                                                         model="point_mass",
-                                                                         params_path=params_path,
-                                                                         fric_model="circle",
-                                                                         sol_options=sol_options,
-                                                                         key=key
-                                                                         )})
+                                                                        sid=sid,
+                                                                        model="point_mass",
+                                                                        params_path=params_path,
+                                                                        fric_model="circle",
+                                                                        sol_options=sol_options,
+                                                                        key=key)})
             # --- Create MOSEK solver object
             if self.sol_options[key]['Solver'] == "MOSEK":
                 self.sol_options[key].update({'Create_Solver': VOptMOSEK(m=m,
-                                                                          sid=sid,
-                                                                          params_path=params_path,
-                                                                          vis_options=vis_options,
-                                                                          sol_options=sol_options,
-                                                                          key=key
-                                                                          )})
+                                                                         sid=sid,
+                                                                         params_path=params_path,
+                                                                         vis_options=vis_options,
+                                                                         sol_options=sol_options,
+                                                                         key=key)})
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
                 self.sol_options[key].update({'Create_Solver': VOpt_qpOASES2(m=m,
@@ -254,7 +252,7 @@ class VisVP_Logs:
 
         # Choose your own starting Index for a single plot
         if self.vis_options['b_idx'] > 0:
-            number = self.vis_options['b_idx'] #552 #180, 245 552 (used for single plots in MA) #3000, 3200
+            number = self.vis_options['b_idx']  # 552 #180, 245 552 (used for single plots in MA) #3000, 3200
             idx = 4 * number
 
         # --- Read specific lines in logs
@@ -365,37 +363,37 @@ class VisVP_Logs:
 
                 if self.sol_options[key]['Solver'] == "IPOPT":
                     sol_ipopt, \
-                    param_vec, \
-                    t_op_ipopt, \
-                    sol_status_ipopt = self.sol_options[key]['Create_Solver'].calc_v_ipopt(v_ini=v_ini,
-                                                                                           kappa=kappa,
-                                                                                           delta_s=delta_s,
-                                                                                           v_max=v_max,
-                                                                                           F_ini=F_ini,
-                                                                                           v_end=v_end,
-                                                                                           P_max=P_max,
-                                                                                           x0_v=x0_v,
-                                                                                           x0_s_t=x0_s_t,
-                                                                                           ax_max=ax_max_new_ipopt,
-                                                                                           ay_max=ay_max_new_ipopt)
+                        param_vec, \
+                        t_op_ipopt, \
+                        sol_status_ipopt = self.sol_options[key]['Create_Solver'].calc_v_ipopt(v_ini=v_ini,
+                                                                                               kappa=kappa,
+                                                                                               delta_s=delta_s,
+                                                                                               v_max=v_max,
+                                                                                               F_ini=F_ini,
+                                                                                               v_end=v_end,
+                                                                                               P_max=P_max,
+                                                                                               x0_v=x0_v,
+                                                                                               x0_s_t=x0_s_t,
+                                                                                               ax_max=ax_max_new_ipopt,
+                                                                                               ay_max=ay_max_new_ipopt)
 
                     v_op_ipopt, \
-                    F_op_ipopt, \
-                    P_op_ipopt, \
-                    ax_op_ipopt, \
-                    ay_op_ipopt, \
-                    F_xzf_op_ipopt, \
-                    F_yzf_op_ipopt, \
-                    F_xzr_op_ipopt, \
-                    F_yzr_op_ipopt, \
-                    F_xzfl_op_ipopt, \
-                    F_xzfr_op_ipopt, \
-                    F_yzfl_op_ipopt, \
-                    F_yzfr_op_ipopt, \
-                    F_xzrl_op_ipopt, \
-                    F_xzrr_op_ipopt, \
-                    F_yzrl_op_ipopt, \
-                    F_yzrr_op_ipopt, \
+                        F_op_ipopt, \
+                        P_op_ipopt, \
+                        ax_op_ipopt, \
+                        ay_op_ipopt, \
+                        F_xzf_op_ipopt, \
+                        F_yzf_op_ipopt, \
+                        F_xzr_op_ipopt, \
+                        F_yzr_op_ipopt, \
+                        F_xzfl_op_ipopt, \
+                        F_xzfr_op_ipopt, \
+                        F_yzfl_op_ipopt, \
+                        F_yzfr_op_ipopt, \
+                        F_xzrl_op_ipopt, \
+                        F_xzrr_op_ipopt, \
+                        F_yzrl_op_ipopt, \
+                        F_yzrr_op_ipopt, \
                         = self.sol_options[key]['Create_Solver'].transform_sol(sol=sol_ipopt,
                                                                                param_vec_=param_vec,
                                                                                vis_options=self.vis_options)
@@ -426,12 +424,12 @@ class VisVP_Logs:
 
                 if self.sol_options[key]['Solver'] == "OSQP":
                     v_op_osqp, \
-                    F_op_osqp, \
-                    P_op_osqp, \
-                    ax_op_osqp, \
-                    ay_op_osqp, \
-                    t_op_osqp, \
-                    sol_status_osqp = \
+                        F_op_osqp, \
+                        P_op_osqp, \
+                        ax_op_osqp, \
+                        ay_op_osqp, \
+                        t_op_osqp, \
+                        sol_status_osqp = \
                         self.sol_options[key]['Create_Solver'].calc_v_osqp(N=self.m,
                                                                            kappa=kappa,
                                                                            ds=delta_s,
@@ -458,12 +456,12 @@ class VisVP_Logs:
 
                 if self.sol_options[key]['Solver'] == "MOSEK":
                     v_op_mosek, \
-                    F_op_mosek, \
-                    P_op_mosek, \
-                    ax_op_mosek, \
-                    ay_op_mosek, \
-                    t_op_mosek, \
-                    sol_status_mosek = \
+                        F_op_mosek, \
+                        P_op_mosek, \
+                        ax_op_mosek, \
+                        ay_op_mosek, \
+                        t_op_mosek, \
+                        sol_status_mosek = \
                         self.sol_options[key]['Create_Solver'].calc_v_mosek(N=self.m,
                                                                             kappa=kappa,
                                                                             ds=delta_s,
@@ -491,12 +489,12 @@ class VisVP_Logs:
                     # qpOASES velocity [m/s]
 
                     v_op_qpoases, \
-                    F_op_qpoases, \
-                    P_op_qpoases, \
-                    ax_op_qpoases, \
-                    ay_op_qpoases, \
-                    t_op_qpoases, \
-                    sol_status_qpoases \
+                        F_op_qpoases, \
+                        P_op_qpoases, \
+                        ax_op_qpoases, \
+                        ay_op_qpoases, \
+                        t_op_qpoases, \
+                        sol_status_qpoases \
                         = self.sol_options[key]['Create_Solver'].calc_v_qpOASES(N=self.m,
                                                                                 kappa=kappa,
                                                                                 ds=delta_s,
@@ -690,19 +688,14 @@ class VisVP_Logs:
                 sys.path.append(mod_local_trajectory_path)
                 course = 'zalazone'
                 for key, value in self.sol_options.items():
-                    # Calculate Mean, Median and Max Value of Succesful Solved QPs
-                    mean_val = np.mean(self.sol_options[key]['Time'])
-                    median_val = np.median(self.sol_options[key]['Time'])
-                    max_val = np.max(self.sol_options[key]['Time'])
-                    std_val = np.std(self.sol_options[key]['Time'])
 
                     file = str(self.sol_options[key]['Solver']) + "_" + str(self.sol_options[key]['Model']) \
-                           + "_" + str(self.sol_options[key]['Friction']) \
-                           + "_" + str(course) + "_" + str(self.m) + "_Model" \
+                        + "_" + str(self.sol_options[key]['Friction']) \
+                        + "_" + str(course) + "_" + str(self.m) + "_Model" \
 
                     if self.sol_options[key]['VarFriction']:
                         file += "_VarFriction"
-                    file += ".pkl" #+ "_Alpha_" + str(self.sol_dict[key]['Alpha'])
+                    file += ".pkl"  # + "_Alpha_" + str(self.sol_dict[key]['Alpha'])
                     filename = mod_local_trajectory_path + '/vp_MA/src/RuntimeSolStatus/' + file
 
                     dill.settings['recurse'] = True
@@ -711,9 +704,6 @@ class VisVP_Logs:
                     self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
                                             dt_solver=np.array(self.sol_options[key]['Time']),
                                             vis_options=self.vis_options)
-
-
-
 
                 # --- Plot qpOASES runtimes
                 if self.vis_options['b_calc_qpOASES'] and self.vis_options['b_calc_time_plot']:
