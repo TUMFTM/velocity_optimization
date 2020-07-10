@@ -189,7 +189,7 @@ class VOptMOSEK:
             a = []
             F_dr = []
             for k in range(N - 1):
-                a.append((v[k+1] ** 2 - v[k] ** 2) / (2 * ds[k]))
+                a.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * ds[k]))
                 F_dr.append(self.Car.m * a[k] + 0.5 * self.Car.rho * self.Car.c_w * self.Car.A * v[k] ** 2)
 
             # BOUNDARY CONDITIONS blx <= x <= buc
@@ -377,8 +377,8 @@ class VOptMOSEK:
         if available:
             dill.settings['recurse'] = True
             self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, \
-                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(
-                open(filename, "rb"))
+                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx \
+                = dill.load(open(filename, "rb"))
 
         # Ceck if there is a Lambdification File
         else:
@@ -659,8 +659,8 @@ class VOptMOSEK:
         if available:
             dill.settings['recurse'] = True
             self.cval_lam, self.csubj, self.qval_lam, self.qsubi, self.qsubj, self.aval_lam, self.asubi, self.asubj, \
-                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx = dill.load(
-                open(filename, "rb"))
+                self.blc_lam, self.buc_lam, self.bkc, self.blx_lam, self.bux_lam, self.bkx \
+                = dill.load(open(filename, "rb"))
 
         # Ceck if there is a Lambdification File
         else:
@@ -851,7 +851,8 @@ class VOptMOSEK:
             h = []
             # EQUALITY CONSTRAINTS
             for k in range(N - 1):
-                h = np.append(h, [  # Derivation of Velocity (Christ Eq. 5.2)
+                h = np.append(h,
+                              [  # Derivation of Velocity (Christ Eq. 5.2)
                                   v[k + 1] - v[k] - ds[k] / v[k]
                                   * (1 / self.Car.m * (+ F_xr[k] * cos(beta[k])
                                                        + F_xf[k] * cos(delta[k] - beta[k])
@@ -907,7 +908,8 @@ class VOptMOSEK:
 
             for k in range(N - 1):
                 if k == N - 2:
-                    h = np.append(h, [  # Power Constraint
+                    h = np.append(h,
+                                  [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -933,7 +935,8 @@ class VOptMOSEK:
                     buc.append(1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2)
 
                 else:
-                    h = np.append(h, [  # Power Constraint
+                    h = np.append(h,
+                                  [  # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -1282,10 +1285,10 @@ class VOptMOSEK:
                                 no_solution = True
                             elif optimal is False:
                                 # Reset:
-                                if infeasible is False and reset == False:
+                                if infeasible is False and reset is False:
                                     v = x0_v[0] * np.ones(N)
                                     reset = True
-                                elif infeasible is False and reset == True:
+                                elif infeasible is False and reset is True:
                                     v = v_end * np.ones(N)
                                     v[0] = x0_v[0]
 
@@ -1532,7 +1535,7 @@ class Car:
         self.P_max = opt_config.getfloat('VEHICLE', 'P_max_kW')  # [kW] Power of Engine
 
         self.a_lat_max = opt_config.getfloat('VEHICLE', 'ax_max_mps2')  # [m/s²] Maximum Lateral Acceleration
-        self.a_max = opt_config.getfloat('VEHICLE', 'ay_max_mps2')  # [m/s²] Maximum Laongitudianl Acceleration
+        self.a_max = opt_config.getfloat('VEHICLE', 'ay_max_mps2')  # [m/s²] Maximum Longitudinal Acceleration
         self.a_long_max = opt_config.getfloat('CAR_PARAMETER', 'a_long_max')
         self.a_long_min = opt_config.getfloat('CAR_PARAMETER', 'a_long_min')
         self.v_end = opt_config.getfloat('CAR_PARAMETER', 'v_end')  # Maximum Velocity at End of Interval
