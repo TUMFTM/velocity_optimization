@@ -1832,6 +1832,15 @@ class VOptIPOPT:
         F_yf = []
         F_yr = []
 
+        F_xfl = []
+        F_xfr = []
+        F_xrl = []
+        F_xrr = []
+        F_yfl = []
+        F_yfr = []
+        F_yrl = []
+        F_yrr = []
+
         ################################################################################################################
         # Retrieve solution
         ################################################################################################################
@@ -1859,7 +1868,8 @@ class VOptIPOPT:
                     2 * delta_s[k]))
                 ay.append(kappa[k] * v[k] ** 2)
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
+            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
+                   F_yrl, F_yrr
 
         # Kinematic bicycle model
         elif self.sol_dict[self.key]['Model'] == "KM":
@@ -1883,7 +1893,8 @@ class VOptIPOPT:
             # Calculate engine power
             P_p = F_p * v[0:-1]
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
+            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
+                   F_yrl, F_yrr
 
         # Dynamic bicycle model
         elif self.sol_dict[self.key]['Model'] == "DM":
@@ -1997,6 +2008,7 @@ class VOptIPOPT:
             # Front tire Constraint
             F_xzf = (F_xf / F_zf)
             F_yzf = (F_yf / F_zf)
+            # Rear tire Constraint
             F_xzr = (F_xr / F_zr)
             F_yzr = (F_yr / F_zr)
             '''
@@ -2011,7 +2023,8 @@ class VOptIPOPT:
             ubg.append([1.0] * n)
             lbg.append([0.0] * n)'''
 
-            return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr)
+            return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr), \
+                   F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
 
         elif self.sol_dict[self.key]['Model'] == "FW":
             # --- Extract variables
@@ -2157,8 +2170,23 @@ class VOptIPOPT:
             ax = np.array(ax)
             ay = np.array(ay)
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
+            # Front left tire Constraint
+            F_xzfl = (F_xfl / F_zfl)
+            F_yzfl = (F_yfl / F_zfl)
+            # Front right tire Constraint
+            F_xzfr = (F_xfr / F_zfr)
+            F_yzfr = (F_yfr / F_zfr)
 
+            # Rear left tire Constraint
+            F_xzrl = (F_xrl / F_zrl)
+            F_yzrl = (F_yrl / F_zrl)
+            # Rear right tire Constraint
+            F_xzrr = (F_xrr / F_zrr)
+            F_yzrr = (F_yrr / F_zrr)
+
+            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, np.array(F_xzfl), np.array(F_xzfr), \
+                   np.array(F_yzfl), np.array(F_yzfr), np.array(F_xzrl), np.array(F_xzrr), np.array(F_yzrl), \
+                   np.array(F_yzrr)
 
 if __name__ == '__main__':
     pass

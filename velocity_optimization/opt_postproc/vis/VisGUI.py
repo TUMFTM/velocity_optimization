@@ -76,7 +76,8 @@ class VisVP_Logs_GUI:
                  'slider_vel',
                  'but_next',
                  'but_prev',
-                 'vel_dict', 'F_dict', 'P_dict', 'a_dict', 'ax_dict', 'ay_dict', 'F_f_dict', 'F_r_dict',
+                 'vel_dict', 'F_dict', 'P_dict', 'a_dict', 'ax_dict', 'ay_dict', 'F_f_dict', 'F_r_dict', 'F_fl_dict',
+                 'F_fr_dict', 'F_rl_dict', 'F_rr_dict',
                  'p1_1', 'p1_2', 'p1_3', 'p1_4', 'p1_5', 'p1_6', 'p1_7', 'p1_8', 'p1_9', 'p1_10', 'p1_11', 'p1_11',
                  'p1_12', 'p1_13', 'p1_14', 'p1_15', 'p1_16', 'p1_17', 'p1_18',
                  'p3_1', 'p3_2', 'p3_3', 'p3_4', 'p3_5', 'p3_6', 'p3_7', 'p3_8', 'p3_9', 'p3_10', 'p3_11', 'p3_12',
@@ -148,6 +149,10 @@ class VisVP_Logs_GUI:
         self.ay_dict = {}
         self.F_f_dict = {}
         self.F_r_dict = {}
+        self.F_fl_dict = {}
+        self.F_fr_dict = {}
+        self.F_rl_dict = {}
+        self.F_rr_dict = {}
 
         # Lines within debug plots
         self.p1_1, self.p1_2, self.p1_3, self.p1_4, self.p1_5, self.p1_6, self.p1_7, self.p1_8, self.p1_9, self.p1_10, \
@@ -606,10 +611,25 @@ class VisVP_Logs_GUI:
         ax.add_patch(circle)
 
         for key, value in self.sol_options.items():
-            self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                          color=self.sol_options[key]["Color"], linewidth=LW,
-                                          linestyle=self.sol_options[key]["Linestyle"],
-                                          marker=self.sol_options[key]["Marker"], markevery=2)
+            if self.sol_options[key]['Model'] == "DM":
+                self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                              color=self.sol_options[key]["Color"], linewidth=LW,
+                                              linestyle=self.sol_options[key]["Linestyle"],
+                                              marker=self.sol_options[key]["Marker"], markevery=2)
+                if self.vis_options['b_vis_model_name']:
+                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+                elif self.vis_options['b_vis_solver_name']:
+                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
+            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                              color=self.sol_options[key]["Color"], linewidth=LW,
+                                              linestyle=self.sol_options[key]["Linestyle"],
+                                              marker=self.sol_options[key]["Marker"], markevery=2)
+                self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker='*', markevery=2)
             if self.vis_options['b_vis_model_name']:
                 legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
             elif self.vis_options['b_vis_solver_name']:
@@ -634,10 +654,21 @@ class VisVP_Logs_GUI:
         ax.add_patch(circle)
 
         for key, value in self.sol_options.items():
-            self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                          color=self.sol_options[key]["Color"], linewidth=LW,
-                                          linestyle=self.sol_options[key]["Linestyle"],
-                                          marker=self.sol_options[key]["Marker"], markevery=2)
+            if self.sol_options[key]['Model'] == "DM":
+                self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                              color=self.sol_options[key]["Color"], linewidth=LW,
+                                              linestyle=self.sol_options[key]["Linestyle"],
+                                              marker=self.sol_options[key]["Marker"], markevery=2)
+            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                              color=self.sol_options[key]["Color"], linewidth=LW,
+                                              linestyle=self.sol_options[key]["Linestyle"],
+                                              marker=self.sol_options[key]["Marker"], markevery=2)
+                self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker='*', markevery=2)
+
             if self.vis_options['b_vis_model_name']:
                 legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
             elif self.vis_options['b_vis_solver_name']:

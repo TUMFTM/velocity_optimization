@@ -388,6 +388,14 @@ class VisVP_Logs:
                     F_yzf_op_ipopt, \
                     F_xzr_op_ipopt, \
                     F_yzr_op_ipopt, \
+                    F_xzfl_op_ipopt, \
+                    F_xzfr_op_ipopt, \
+                    F_yzfl_op_ipopt, \
+                    F_yzfr_op_ipopt, \
+                    F_xzrl_op_ipopt, \
+                    F_xzrr_op_ipopt, \
+                    F_yzrl_op_ipopt, \
+                    F_yzrr_op_ipopt, \
                         = self.sol_options[key]['Create_Solver'].transform_sol(sol=sol_ipopt,
                                                                                param_vec_=param_vec,
                                                                                vis_options=self.vis_options)
@@ -401,6 +409,14 @@ class VisVP_Logs:
                     self.sol_options[key].update({'F_yzf': F_yzf_op_ipopt})
                     self.sol_options[key].update({'F_xzr': F_xzr_op_ipopt})
                     self.sol_options[key].update({'F_yzr': F_yzr_op_ipopt})
+                    self.sol_options[key].update({'F_xzfl': F_xzfl_op_ipopt})
+                    self.sol_options[key].update({'F_xzfr': F_xzfr_op_ipopt})
+                    self.sol_options[key].update({'F_yzfl': F_yzfl_op_ipopt})
+                    self.sol_options[key].update({'F_yzfr': F_yzfr_op_ipopt})
+                    self.sol_options[key].update({'F_xzrl': F_xzrl_op_ipopt})
+                    self.sol_options[key].update({'F_xzrr': F_xzrr_op_ipopt})
+                    self.sol_options[key].update({'F_yzrl': F_yzrl_op_ipopt})
+                    self.sol_options[key].update({'F_yzrr': F_yzrr_op_ipopt})
                     self.sol_options[key]['Time'].append(t_op_ipopt)
                     self.sol_options[key]['SolStatus'].append(sol_status_ipopt)
 
@@ -621,12 +637,22 @@ class VisVP_Logs:
                     if self.sol_options[key]['Model'] == "DM":
                         self.vis_gui.F_f_dict[key].set_xdata(self.sol_options[key]['F_yzf'])
                         self.vis_gui.F_f_dict[key].set_ydata(self.sol_options[key]['F_xzf'])
+                    if self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                        self.vis_gui.F_fl_dict[key].set_xdata(self.sol_options[key]['F_yzfl'])
+                        self.vis_gui.F_fl_dict[key].set_ydata(self.sol_options[key]['F_xzfl'])
+                        self.vis_gui.F_fr_dict[key].set_xdata(self.sol_options[key]['F_yzfr'])
+                        self.vis_gui.F_fr_dict[key].set_ydata(self.sol_options[key]['F_xzfr'])
 
                 # --- Rear Axle Tire usage update
                 for key, value in self.sol_options.items():
                     if self.sol_options[key]['Model'] == "DM":
                         self.vis_gui.F_r_dict[key].set_xdata(self.sol_options[key]['F_yzr'])
                         self.vis_gui.F_r_dict[key].set_ydata(self.sol_options[key]['F_xzr'])
+                    if self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                        self.vis_gui.F_rl_dict[key].set_xdata(self.sol_options[key]['F_yzrl'])
+                        self.vis_gui.F_rl_dict[key].set_ydata(self.sol_options[key]['F_xzrl'])
+                        self.vis_gui.F_rr_dict[key].set_xdata(self.sol_options[key]['F_yzrr'])
+                        self.vis_gui.F_rr_dict[key].set_ydata(self.sol_options[key]['F_xzrr'])
 
                 # --- Slack update
                 self.vis_gui.p7_1.set_ydata(s_t_op_osqp)
