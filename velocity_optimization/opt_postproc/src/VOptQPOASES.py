@@ -436,8 +436,6 @@ class VOpt_qpOASES2:
             kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
             ds = sym.symbols('ds:0%d' % (N - 1))
-            # initial velocity [m/s]
-            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
             v_end = sym.symbols('v_end')
             # max. power [kW]
@@ -791,13 +789,14 @@ class VOpt_qpOASES2:
 
             # --- EQUALITY CONSTRAINTS (Velocity, Slip Angle)
             for k in range(N - 1):
-                h = np.append(h, [  # Derivation of Velocity (Christ Eq. 5.2)
-                                  v[k + 1] - v[k] - ds[k] / v[k] *
-                                  (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                     + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                     + F_yr[k] * sym.sin(beta[k])
-                                                     - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                     - F_d[k] * sym.cos(beta[k]))),
+                h = np.append(h,
+                              [  # Derivation of Velocity (Christ Eq. 5.2)
+                                  v[k + 1] - v[k] - ds[k] / v[k]
+                                  * (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                       + F_yr[k] * sym.sin(beta[k])
+                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                       - F_d[k] * sym.cos(beta[k]))),
                                   # Derivation of Slip Angle (Christ Eq. 5.3)
                                   (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
                                   * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
@@ -807,37 +806,39 @@ class VOpt_qpOASES2:
                                         + F_yf[k] * sym.cos(delta[k] - beta[k])
                                         + F_d[k] * sym.sin(beta[k]))), ])
                 # Lower Bound
-                lb = np.append(lb, [  # Derivation of Velocity (Christ Eq. 5.2)
-                                    v[k + 1] - v[k] - ds[k] / v[k] *
-                                    (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                       + F_yr[k] * sym.sin(beta[k])
-                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                       - F_d[k] * sym.cos(beta[k]))),
-                                    # Derivation of Slip Angle (Christ Eq. 5.3)
-                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
-                                    * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
-                                       * (- F_xr[k] * sym.sin(beta[k])
-                                          + F_xf[k] * sym.sin(delta[k] - beta[k])
-                                          + F_yr[k] * sym.cos(beta[k])
-                                          + F_yf[k] * sym.cos(delta[k] - beta[k])
-                                          + F_d[k] * sym.sin(beta[k]))), ])
+                lb = np.append(lb,
+                               [  # Derivation of Velocity (Christ Eq. 5.2)
+                                   v[k + 1] - v[k] - ds[k] / v[k] *
+                                   (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                      + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                      + F_yr[k] * sym.sin(beta[k])
+                                                      - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                      - F_d[k] * sym.cos(beta[k]))),
+                                   # Derivation of Slip Angle (Christ Eq. 5.3)
+                                   (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                                   * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
+                                      * (- F_xr[k] * sym.sin(beta[k])
+                                         + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                         + F_yr[k] * sym.cos(beta[k])
+                                         + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                         + F_d[k] * sym.sin(beta[k]))), ])
                 # Upper Bound
-                ub = np.append(ub, [  # Derivation of Velocity (Christ Eq. 5.2)
-                                    v[k + 1] - v[k] - ds[k] / v[k] *
-                                    (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
-                                                       + F_xf[k] * sym.cos(delta[k] - beta[k])
-                                                       + F_yr[k] * sym.sin(beta[k])
-                                                       - F_yf[k] * sym.sin(delta[k] - beta[k])
-                                                       - F_d[k] * sym.cos(beta[k]))),
-                                    # Derivation of Slip Angle (Christ Eq. 5.3)
-                                    (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
-                                    * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
-                                       * (- F_xr[k] * sym.sin(beta[k])
-                                          + F_xf[k] * sym.sin(delta[k] - beta[k])
-                                          + F_yr[k] * sym.cos(beta[k])
-                                          + F_yf[k] * sym.cos(delta[k] - beta[k])
-                                          + F_d[k] * sym.sin(beta[k]))), ])
+                ub = np.append(ub,
+                               [  # Derivation of Velocity (Christ Eq. 5.2)
+                                   v[k + 1] - v[k] - ds[k] / v[k] *
+                                   (1 / self.Car.m * (+ F_xr[k] * sym.cos(beta[k])
+                                                      + F_xf[k] * sym.cos(delta[k] - beta[k])
+                                                      + F_yr[k] * sym.sin(beta[k])
+                                                      - F_yf[k] * sym.sin(delta[k] - beta[k])
+                                                      - F_d[k] * sym.cos(beta[k]))),
+                                   # Derivation of Slip Angle (Christ Eq. 5.3)
+                                   (beta[k + 1] - beta[k]) / (ds[k] / v[k]) - 1 / (2 * np.pi)
+                                   * (-kappa[k] * v[k] + 1 / (self.Car.m * v[k])
+                                      * (- F_xr[k] * sym.sin(beta[k])
+                                         + F_xf[k] * sym.sin(delta[k] - beta[k])
+                                         + F_yr[k] * sym.cos(beta[k])
+                                         + F_yf[k] * sym.cos(delta[k] - beta[k])
+                                         + F_d[k] * sym.sin(beta[k]))), ])
 
             # INEQUALITY CONSTRAINTS
             # Friction Coefficient
@@ -850,7 +851,8 @@ class VOpt_qpOASES2:
 
             for k in range(N - 1):
                 if k == N - 2:
-                    h = np.append(h, [  # Power Constraint
+                    h = np.append(h, [
+                                      # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -859,7 +861,8 @@ class VOpt_qpOASES2:
                                       # Kamm Circle Rear Axle
                                       - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Lower Bound
-                    lb = np.append(lb, [  # Power Constraint
+                    lb = np.append(lb, [
+                                        # Power Constraint
                                         - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - 0.02 - F_dr[k] * F_br[k],
@@ -868,7 +871,8 @@ class VOpt_qpOASES2:
                                         # Kamm Circle Rear Axle
                                         - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Upper Bound
-                    ub = np.append(ub, [  # Power Constraint
+                    ub = np.append(ub, [
+                                        # Power Constraint
                                         P_max[k] - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - F_dr[k] * F_br[k],
@@ -879,7 +883,8 @@ class VOpt_qpOASES2:
                                         1.0 - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2
                                         - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                 else:
-                    h = np.append(h, [  # Power Constraint
+                    h = np.append(h, [
+                                      # Power Constraint
                                       P_max[k] - v[k] * F_dr[k],
                                       # Braking and Driving Force Constraint
                                       - F_dr[k] * F_br[k],
@@ -909,7 +914,8 @@ class VOpt_qpOASES2:
                                         # Kamm Circle Rear Axle
                                         - (F_xr[k] / (mu_x[k] * F_zr[k])) ** 2 - (F_yr[k] / (mu_y[k] * F_zr[k])) ** 2])
                     # Upper Bound
-                    ub = np.append(ub, [  # Power Constraint
+                    ub = np.append(ub, [
+                                        # Power Constraint
                                         P_max[k] - v[k] * F_dr[k],
                                         # Braking and Driving Force Constraint
                                         - F_dr[k] * F_br[k],
@@ -1175,9 +1181,9 @@ class VOpt_qpOASES2:
             if v_max.size == 0:
                 v_max = self.Car.v_max * np.ones(N)
             # max. acceleration [m/s²]
-            if ax_max == None:
+            if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
-            if ay_max == None:
+            if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
             # initial guess of slip angle [rad]
             beta = np.zeros(N)
