@@ -1331,9 +1331,9 @@ class VOpt_qpOASES2:
             sol.append(delta)
             sol = np.concatenate(sol)
 
-        v, F, P, ax, ay = self.transform_results(sol, ds, kappa, N)
+        v, F, P, ax, ay, F_xf, F_yf, F_xr, F_yr = self.transform_results(sol, ds, kappa, N)
 
-        return v, F, P, ax, ay, t_total, sol_status['success']
+        return v, F, P, ax, ay, F_xf, F_yf, F_xr, F_yr, t_total, sol_status['success']
 
     def transform_results(self, sol, ds, kappa, N):
         """Function to re-calculate the optimization variables of the QP.
@@ -1355,6 +1355,12 @@ class VOpt_qpOASES2:
         :Created on:
             16.06.2020
         """
+        # Initialize Force Vector
+        F_xzf = []
+        F_xzr = []
+        F_yzf = []
+        F_yzr = []
+
         if self.sol_options[self.key]['Model'] == "PM":
             v = np.asarray(sol)
 
@@ -1459,6 +1465,13 @@ class VOpt_qpOASES2:
                 F = F_dr + F_br
                 P = F * v[0:N - 1]
 
+            # Front tire Constraint
+            F_xzf = (F_xf / F_zf)
+            F_yzf = (F_yf / F_zf)
+            # Rear tire Constraint
+            F_xzr = (F_xr / F_zr)
+            F_yzr = (F_yr / F_zr)
+
             do_plot = True
             if do_plot is True:
                 # TUM Color
@@ -1495,7 +1508,7 @@ class VOpt_qpOASES2:
 
                 plt.show()
 
-        return v, F, P, ax, ay
+        return v, F, P, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr)
 
 
 class Car:

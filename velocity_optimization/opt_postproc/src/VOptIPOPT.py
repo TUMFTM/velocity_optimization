@@ -36,7 +36,6 @@ class VOptIPOPT:
     def __init__(self,
                  m: int,
                  sid: str,
-                 slack_every_v: int,
                  params_path: str,
                  vis_options: dict,
                  sol_dict: dict,
@@ -65,7 +64,6 @@ class VOptIPOPT:
         self.m = m
         self.n = m - 1
         self.sid = sid
-        self.slack_every_v = slack_every_v
         self.unit_eps_tre = 0
         self.b_warm = b_warm
         self.vis_options = vis_options
@@ -125,6 +123,9 @@ class VOptIPOPT:
             set_sec = 'SOLVER_EMERGENCY'
         else:
             set_sec = None
+
+        # Slack Variable
+        self.slack_every_v = opt_config.getint('SOLVER_GENERAL', 'slack_every_v')
 
         # Matrices
         one_vec = np.zeros((m, 1))

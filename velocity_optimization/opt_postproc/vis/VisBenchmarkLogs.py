@@ -154,10 +154,8 @@ class VisVP_Logs:
             if self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Create_Solver': VOptIPOPT(m=m,
                                                                          sid=sid,
-                                                                         slack_every_v=self.velqp.slack_every_v,
                                                                          params_path=params_path,
                                                                          b_warm=False,
-                                                                         model='point_mass',
                                                                          vis_options=vis_options,
                                                                          sol_dict=sol_options,
                                                                          key=key)})
@@ -165,9 +163,7 @@ class VisVP_Logs:
             if self.sol_options[key]['Solver'] == "OSQP":
                 self.sol_options[key].update({'Create_Solver': VOptOSQP(m=m,
                                                                         sid=sid,
-                                                                        model="point_mass",
                                                                         params_path=params_path,
-                                                                        fric_model="circle",
                                                                         sol_options=sol_options,
                                                                         key=key)})
             # --- Create MOSEK solver object
@@ -428,6 +424,10 @@ class VisVP_Logs:
                         P_op_osqp, \
                         ax_op_osqp, \
                         ay_op_osqp, \
+                        F_xzf_op_osqp, \
+                        F_yzf_op_osqp, \
+                        F_xzr_op_osqp, \
+                        F_yzr_op_osqp, \
                         t_op_osqp, \
                         sol_status_osqp = \
                         self.sol_options[key]['Create_Solver'].calc_v_osqp(N=self.m,
@@ -446,6 +446,10 @@ class VisVP_Logs:
                     self.sol_options[key].update({'Power': P_op_osqp})
                     self.sol_options[key].update({'Acc_x': ax_op_osqp})
                     self.sol_options[key].update({'Acc_y': ay_op_osqp})
+                    self.sol_options[key].update({'F_xzf': F_xzf_op_osqp})
+                    self.sol_options[key].update({'F_yzf': F_yzf_op_osqp})
+                    self.sol_options[key].update({'F_xzr': F_xzr_op_osqp})
+                    self.sol_options[key].update({'F_yzr': F_yzr_op_osqp})
                     self.sol_options[key]['Time'].append(t_op_osqp * 1000)
                     self.sol_options[key]['SolStatus'].append(sol_status_osqp)
                     print('Overall OSQP runtime:', t_op_osqp * 1000)
@@ -460,6 +464,10 @@ class VisVP_Logs:
                         P_op_mosek, \
                         ax_op_mosek, \
                         ay_op_mosek, \
+                        F_xzf_op_mosek, \
+                        F_yzf_op_mosek, \
+                        F_xzr_op_mosek, \
+                        F_yzr_op_mosek, \
                         t_op_mosek, \
                         sol_status_mosek = \
                         self.sol_options[key]['Create_Solver'].calc_v_mosek(N=self.m,
@@ -478,6 +486,10 @@ class VisVP_Logs:
                     self.sol_options[key].update({'Power': P_op_mosek})
                     self.sol_options[key].update({'Acc_x': ax_op_mosek})
                     self.sol_options[key].update({'Acc_y': ay_op_mosek})
+                    self.sol_options[key].update({'F_xzf': F_xzf_op_mosek})
+                    self.sol_options[key].update({'F_yzf': F_yzf_op_mosek})
+                    self.sol_options[key].update({'F_xzr': F_xzr_op_mosek})
+                    self.sol_options[key].update({'F_yzr': F_yzr_op_mosek})
                     self.sol_options[key]['Time'].append(t_op_mosek * 1000)
                     self.sol_options[key]['SolStatus'].append(sol_status_mosek)
 
@@ -493,6 +505,10 @@ class VisVP_Logs:
                         P_op_qpoases, \
                         ax_op_qpoases, \
                         ay_op_qpoases, \
+                        F_xzf_op_qpoases, \
+                        F_yzf_op_qpoases, \
+                        F_xzr_op_qpoases, \
+                        F_yzr_op_qpoases, \
                         t_op_qpoases, \
                         sol_status_qpoases \
                         = self.sol_options[key]['Create_Solver'].calc_v_qpOASES(N=self.m,
@@ -512,6 +528,10 @@ class VisVP_Logs:
                     self.sol_options[key].update({'Power': P_op_qpoases})
                     self.sol_options[key].update({'Acc_x': ax_op_qpoases})
                     self.sol_options[key].update({'Acc_y': ay_op_qpoases})
+                    self.sol_options[key].update({'F_xzf': F_xzf_op_qpoases})
+                    self.sol_options[key].update({'F_yzf': F_yzf_op_qpoases})
+                    self.sol_options[key].update({'F_xzr': F_xzr_op_qpoases})
+                    self.sol_options[key].update({'F_yzr': F_yzr_op_qpoases})
                     self.sol_options[key]['Time'].append(t_op_qpoases)
                     self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
 
