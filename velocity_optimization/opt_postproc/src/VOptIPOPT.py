@@ -41,8 +41,14 @@ class VOptIPOPT:
                  sol_dict: dict,
                  key: str,
                  b_warm: bool = False):
-        """Class to construct the Interior-Point QP-optimizer IPOPT by defining the objective function \n
-        and constraints to optimize a velocity profile for a given path.
+        """Class to construct the Interior-Point QP-optimizer IPOPT by defining the objective function f(x) \n
+        and constraints g(x) to optimize a velocity profile for a given path.
+
+        .. math::
+            \mathrm{min} f(x) \n
+            \mathrm{s.t.} \quad g(x) \leq 0
+
+        More information to the IPOPT Solver can be found at ..a link: https://coin-or.github.io/Ipopt/
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
@@ -90,10 +96,6 @@ class VOptIPOPT:
     def sol_init(self):
         """Function to initialize the IPOPT solver by defining the objective function \n
         and constraints with the CasADi modeling language.
-
-        .. math::
-            \mathrm{min} f(x) \n
-            \mathrm{s.t.} \quad g(x) \leq 0
 
         :Authors:
             Thomas Herrmann <thomas.herrmann@tum.de> \n
