@@ -17,6 +17,7 @@ import time
 import configparser
 from scipy import sparse
 import matplotlib.pyplot as plt
+import pickle
 
 
 class VOpt_qpOASES:
@@ -196,12 +197,16 @@ class VOpt_qpOASES2:
         mod_local_trajectory_path = os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         sys.path.append(mod_local_trajectory_path)
+
+        filepath = params_path + '/Lambdify_Function/'
+
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + ".pkl"
         if self.sol_options[self.key]['Friction'] == "Diamond":
             file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + "_" \
                    + str(self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+
+        filename = filepath + file
         try:
             f = open(filename)
             available = True
@@ -246,7 +251,7 @@ class VOpt_qpOASES2:
             # initial force [kN]
             F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = sym.symbols('P_max0:%d' % (N - 1))
+            P_max = sym.symbols('P_max0:%d' % (N))
             # max. acceleration in x-direction of the vehicle [m/s²]
             ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
@@ -372,6 +377,7 @@ class VOpt_qpOASES2:
 
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
+            pass
 
     # Kinematic bicycle model
     def sol_init_km(self,
@@ -399,7 +405,8 @@ class VOpt_qpOASES2:
             file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
                    + str(self.sol_options[self.key]['Friction']) + str(
                 self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = params_path + 'Lambdify_Function/' + file
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
         try:
             f = open(filename)
             available = True
@@ -601,7 +608,8 @@ class VOpt_qpOASES2:
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         sys.path.append(mod_local_trajectory_path)
         file = "qpOASES" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
-        filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
         try:
             f = open(filename)
             available = True
@@ -693,7 +701,7 @@ class VOpt_qpOASES2:
                     h.append(-v[k])
                 elif k == 0 and vel_start:
                     ub.append(v_ini - v[k])
-                    lb.append(v_ini - v[k])
+                    lb.append(self.Car.v_min - v[k])
                     h.append(-v[k])
                 else:
                     lb.append(self.Car.v_min - v[k])
@@ -907,7 +915,7 @@ class VOpt_qpOASES2:
                                        # Braking and Driving Force Constraint
                                        - 0.02 - F_dr[k] * F_br[k],
                                        # Constraint Derivative of Driving Force
-                                       - np.inf,
+                                       self.Car.F_br_max * self.Car.v_max,
                                        # Constraint Derivative of Braking Force
                                        self.Car.F_br_max - ((F_br[k + 1] - F_br[k]) / (ds[k] / v[k])),
                                        # Constraint Derivative of Steer Angle
@@ -925,7 +933,7 @@ class VOpt_qpOASES2:
                                        # Constraint Derivative of Driving Force
                                        self.Car.F_dr_max - ((F_dr[k + 1] - F_dr[k]) / (ds[k] / v[k])),
                                        # Constraint Derivative of Braking Force
-                                       np.inf,
+                                       self.Car.F_dr_max * self.Car.v_max,
                                        # Constraint Derivative of Steer Angle
                                        self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
                                        # Kamm Circle Front Axle
@@ -1113,7 +1121,7 @@ class VOpt_qpOASES2:
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N - 1)
+                P_max = self.Car.P_max * np.ones(N)
             # max. velocity [m/s]
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
@@ -1179,7 +1187,7 @@ class VOpt_qpOASES2:
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N - 1)
+                P_max = self.Car.P_max * np.ones(N)
             # max. velocity
             if v_max.size == 0:
                 v_max = self.Car.v_max * np.ones(N)
@@ -1294,7 +1302,7 @@ class VOpt_qpOASES2:
                 sol.append(delta)
                 sol = np.concatenate(sol)
 
-                v, F, P, ax, ay = self.transform_results(sol, ds, kappa, N)
+                # v, F, P, ax, ay = self.transform_results(sol, ds, kappa, N)
 
             if not len(save_obj) == 0 and self.sol_options[self.key]['Model'] == "DM":
                 # adaptive alpha control for dynamic bicylcle model
@@ -1307,7 +1315,7 @@ class VOpt_qpOASES2:
                     t_total = sum(t)
                     count = False
                 elif abs(obj_val) < 1:
-                    alpha = 0.5
+                    alpha = 1
                 elif abs(obj_val) < 3:
                     alpha = 0.4
 

@@ -29,7 +29,7 @@ class VOptMOSEK:
         """Class to optimize a velocity profile for a given path using the solver MOSEK.
         
         .. math::
-            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
+            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n  # noqa: W605
             \mathrm{s.t} \qquad blc \leq A x \leq buc \n
             blx \leq x \leq bux
 
@@ -54,7 +54,7 @@ class VOptMOSEK:
         self.sol_options = sol_options
         self.key = key
 
-        self.Car = Car(param_path=params_path)
+        self.Car = Car(params_path=params_path)
 
         # Select Vehicle Dynamic Model
         if self.sol_options[self.key]['Model'] == "PM":
@@ -1083,12 +1083,12 @@ class VOptMOSEK:
             if len(x0_v) == 0:
                 v = np.ones(N)
             else:
-                v = x0_v
+                v = 0.9 * x0_v
                 if x0_v[0] == 0:
                     v[0] = 0.1
 
             # initial velocity
-            v_ini = x0_v[0]
+            v_ini = 0.9 * x0_v[0]
 
             # Initialize max. power
             if self.sol_options[self.key]['VarPower']:
@@ -1141,10 +1141,10 @@ class VOptMOSEK:
             if len(x0_v) == 0:
                 v = np.ones(N)
             else:
-                v = x0_v
+                v = 0.9 * x0_v
                 if x0_v[0] == 0:
                     v[0] = 0.1
-            v = 10 * np.ones(N)
+            v = 5 * np.ones(N)
             v_ini = x0_v[0]
             # initial guess of slip angle
             beta = np.zeros(N)
@@ -1327,7 +1327,7 @@ class VOptMOSEK:
                         delta += alpha * x_array[5 * N - 2:6 * N - 3]  # delta(N-1): Steering Angle
 
                         if save_obj:
-                            if np.abs(obj) < 0.01:
+                            if np.abs(obj) < 0.001:
                                 if obj == 0:
                                     pass
                                 else:
