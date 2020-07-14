@@ -12,6 +12,7 @@ import numpy as np
 import osqp
 import configparser
 import time
+from sympy import symbols, Matrix, lambdify, hessian, pprint, cos, sin, tan, atan2
 from scipy import sparse
 import matplotlib.pyplot as plt
 
@@ -82,12 +83,14 @@ class VOptOSQP:
         mod_local_trajectory_path = os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         sys.path.append(mod_local_trajectory_path)
+
         if self.sol_options[self.key]['Friction'] == "Circle":
             file = "Osqp" + "_" + "point_mass" + "_" + str(N) + ".pkl"
         elif self.sol_options[self.key]['Friction'] == "Diamond":
             file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
                    + ".pkl"
-        filename = params_path + '/Lambdify_Function/' + file
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
         try:
             f = open(filename)
             available = True
@@ -134,7 +137,7 @@ class VOptOSQP:
             # initial force [kN]
             F_ini = sym.symbols('F_ini')
             # max. power [kW]
-            P_max = sym.symbols('P_max0:%d' % (N - 1))
+            P_max = sym.symbols('P_max0:%d' % (N))
             # max. acceleration in x-direction of the vehicle [m/s²]
             ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
@@ -178,8 +181,10 @@ class VOptOSQP:
                     lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 elif k == 0 and vel_start:
-                    ub.append(v_ini - v[k])
-                    lb.append(v_ini - v[k])
+                    '''ub.append(v_ini - v[k])
+                    lb.append(v_ini - v[k])'''
+                    ub.append(0.0)
+                    lb.append(0.0)
                     h.append(v[k])
                 else:
                     ub.append(v_max[k] - v[k])
@@ -295,7 +300,8 @@ class VOptOSQP:
         elif self.sol_options[self.key]['Friction'] == "Diamond":
             file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
                    + str(self.sol_options[self.key]['Friction']) + ".pkl"
-        filename = params_path + 'Lambdify_Function/' + file
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
 
         try:
             f = open(filename)
@@ -472,8 +478,8 @@ class VOptOSQP:
                     self.sol_options[self.key]['Friction']) + ".pkl"
             filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
 
-            dill.settings['recurse'] = True
-            dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
+            '''dill.settings['recurse'] = True
+            dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))'''
 
     # Dynamic bicycle model
     def sol_init_dm(self,
@@ -504,7 +510,8 @@ class VOptOSQP:
         elif self.sol_options[self.key]['Friction'] == "Diamond":
             file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
                    + ".pkl"
-        filename = params_path + '/Lambdify_Function/' + file
+        filepath = params_path + '/Lambdify_Function/'
+        filename = filepath + file
 
         try:
             f = open(filename)
@@ -597,7 +604,7 @@ class VOptOSQP:
                     h.append(-v[k])
                 elif k == 0 and vel_start:
                     ub.append(v_ini - v[k])
-                    lb.append(v_ini - v[k])
+                    lb.append(self.Car.v_min - v[k])
                     h.append(-v[k])
                 else:
                     lb.append(self.Car.v_min - v[k])
@@ -649,12 +656,11 @@ class VOptOSQP:
             for k in range(N - 1):
                 # tire slip angle (front & rear)
                 alpha_f = np.append(alpha_f,
-                                    delta[k] - sym.atan2((self.Car.l_f * kappa[k] * v[k]
-                                                          / (2 * np.pi) + v[k] * sym.sin(beta[k])),
-                                                         (v[k] * sym.cos(beta[k]))))
-                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k]
-                                                        / (2 * np.pi) - v[k] * sym.sin(beta[k])),
-                                                       (v[k] * sym.cos(beta[k]))))
+                                    delta[k] - sym.atan2((self.Car.l_f * kappa[k] * v[k] / (2 * np.pi)
+                                                          + v[k] * sym.sin(beta[k])), (v[k] * sym.cos(beta[k]))))
+
+                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k] / (2 * np.pi)
+                                                        - v[k] * sym.sin(beta[k])), (v[k] * sym.cos(beta[k]))))
 
                 # aerodynamic resistance [kN]
                 F_d = np.append(F_d, 0.5 * self.Car.c_w * self.Car.rho * self.Car.A * v[k] ** 2)
@@ -844,11 +850,9 @@ class VOptOSQP:
             A_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], A,
                                  'numpy')
             print('a_lam lambdified.')
-            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max],
-                                  lb, modules=['numpy', 'math'])
+            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], lb, modules=['numpy', 'math', 'sympy'])
             print('lbo_lam lambdified.')
-            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max],
-                                  ub, modules=['numpy', 'math'])
+            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], ub, modules=['numpy', 'math', 'sympy'])
             print('lbo lambdified.')
 
             self.P_lam = P_lam
@@ -936,10 +940,11 @@ class VOptOSQP:
                 F_ini = 0.0
 
             # Initialize max. Power
-            if self.sol_options[self.key]['VarPower']:
+            P_max = self.Car.P_max * np.ones(N)
+            '''if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N - 1)
+                P_max = self.Car.P_max * np.ones(N)'''
             # Initialize max. velocity
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
@@ -961,6 +966,7 @@ class VOptOSQP:
                 alpha = 1'''
             # Choose step length
             alpha = self.sol_options[self.key]['Alpha']
+            pass
 
         # Kineamtic bicycle model
         elif self.sol_options[self.key]['Model'] == "KM":
@@ -969,7 +975,7 @@ class VOptOSQP:
                 v = v_end * np.ones(N)
                 v[0] = 0.1
             else:
-                v = x0_v
+                v = 0.9 * x0_v
                 if x0_v[0] == 0:
                     v[0] = 0.1
             # Initialize Force
@@ -1014,10 +1020,11 @@ class VOptOSQP:
             if F_ini == []:
                 F_ini = 0.0
             # Initialize max. power
+            P_max = self.Car.P_max * np.ones(N)
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N - 1)
+                P_max = self.Car.P_max * np.ones(N)
             # Initialize max. velocity
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
@@ -1081,11 +1088,9 @@ class VOptOSQP:
                 A = sparse.csc_matrix(self.A_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max,
                                                  ax_max, ay_max))
                 # pprint(A)
-                lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
-                                           ay_max))
+                lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
                 # pprint(lbo)
-                ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
-                                           ay_max))
+                ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
 
             # Start timer
             t0 = time.perf_counter()
@@ -1169,14 +1174,14 @@ class VOptOSQP:
                     elif abs(res.info.obj_val) < 0.01:
                         alpha = 1
                         t_total = sum(t)
-                        count = False
+                        #count = False
                     elif abs(res.info.obj_val) < 1:
                         alpha = 0.5
                     elif abs(res.info.obj_val) < 3:
                         alpha = 0.4
 
                 elif not len(save_obj) == 0:
-                    # adaptive alpha control for friction circel with ppint mass model and kineamtic bicylce model
+                    # adaptive alpha control for friction circel with point mass model and kineamtic bicylce model
                     if abs(res.info.obj_val) < 2 and self.sol_options[self.key]['Friction'] == "Circle":
                         alpha = 0.2
                     if abs(res.info.obj_val) < 0.2 and (self.sol_options[self.key]['Friction'] == "Circle"
@@ -1408,6 +1413,7 @@ class Car:
             :Created on:
             16.06.2020
         """
+
         opt_config = configparser.ConfigParser()
         if not opt_config.read(params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')

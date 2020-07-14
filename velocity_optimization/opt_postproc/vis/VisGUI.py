@@ -276,7 +276,9 @@ class VisVP_Logs_GUI:
 
         ax_freq = plt.axes([0.1, 0.01, 0.8, 0.02])
         self.slider_vel = Slider(ax_freq, 'Id', 0, self.vis_handler.row_count,
-                                 valinit=0, valstep=self.vis_handler.log_lines)
+                                 valinit=0)
+        # self.slider_vel = Slider(ax_freq, 'Id', 0, self.vis_handler.row_count,
+        # valinit=0, valstep=self.vis_handler.log_lines)
 
         self.slider_vel.on_changed(update)
 
