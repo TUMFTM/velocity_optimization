@@ -17,7 +17,6 @@ import time
 import configparser
 from scipy import sparse
 import matplotlib.pyplot as plt
-import pickle
 
 
 class VOpt_qpOASES:
@@ -30,8 +29,8 @@ class VOpt_qpOASES:
         """Class to optimize a velocity profile for a given path using the solver qpOASES.
 
         .. math::
-            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
-            \mathrm{s.t} \qquad lba \leq A_m x \leq uba
+            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n # noqa: W605
+            \mathrm{s.t} \qquad lba \leq A_m x \leq uba # noqa: W605
 
         :param Hm: Hessian problem matrix
         :param Am: Linearized constraints matrix (Jacobian)
@@ -377,7 +376,6 @@ class VOpt_qpOASES2:
 
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
-            pass
 
     # Kinematic bicycle model
     def sol_init_km(self,

@@ -1,7 +1,6 @@
 import sympy as sym
 import numpy as np
 import configparser
-import os
 from velocity_optimization.src.params_vp_sqp import params_vp_sqp
 
 

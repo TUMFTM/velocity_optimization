@@ -12,7 +12,6 @@ import numpy as np
 import osqp
 import configparser
 import time
-from sympy import symbols, Matrix, lambdify, hessian, pprint, cos, sin, tan, atan2
 from scipy import sparse
 import matplotlib.pyplot as plt
 
@@ -28,8 +27,8 @@ class VOptOSQP:
         """Class to optimize a velocity profile for a given path using the solver OSQP.
 
         .. math::
-            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
-            \mathrm{s.t} \qquad lba \leq A_m x \leq uba
+            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n # noqa: W605
+            \mathrm{s.t} \qquad lba \leq A_m x \leq uba # noqa: W605
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
@@ -181,10 +180,10 @@ class VOptOSQP:
                     lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 elif k == 0 and vel_start:
-                    '''ub.append(v_ini - v[k])
-                    lb.append(v_ini - v[k])'''
-                    ub.append(0.0)
-                    lb.append(0.0)
+                    ub.append(v_ini - v[k])
+                    lb.append(self.Car.v_min - v[k])
+                    '''ub.append(0.0)
+                    lb.append(0.0)'''
                     h.append(v[k])
                 else:
                     ub.append(v_max[k] - v[k])
@@ -850,9 +849,11 @@ class VOptOSQP:
             A_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], A,
                                  'numpy')
             print('a_lam lambdified.')
-            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], lb, modules=['numpy', 'math', 'sympy'])
+            lb_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max],
+                                  lb, modules=['numpy', 'math', 'sympy'])
             print('lbo_lam lambdified.')
-            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max], ub, modules=['numpy', 'math', 'sympy'])
+            ub_lam = sym.lambdify([v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max],
+                                  ub, modules=['numpy', 'math', 'sympy'])
             print('lbo lambdified.')
 
             self.P_lam = P_lam
@@ -1088,9 +1089,11 @@ class VOptOSQP:
                 A = sparse.csc_matrix(self.A_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max,
                                                  ax_max, ay_max))
                 # pprint(A)
-                lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
+                                           ay_max))
                 # pprint(lbo)
-                ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
+                                           ay_max))
 
             # Start timer
             t0 = time.perf_counter()
@@ -1174,7 +1177,7 @@ class VOptOSQP:
                     elif abs(res.info.obj_val) < 0.01:
                         alpha = 1
                         t_total = sum(t)
-                        #count = False
+                        # count = False
                     elif abs(res.info.obj_val) < 1:
                         alpha = 0.5
                     elif abs(res.info.obj_val) < 3:
@@ -1202,7 +1205,7 @@ class VOptOSQP:
             ay = np.zeros(N - 1)
             F_xf = []
             F_yf = []
-            F_xr= []
+            F_xr = []
             F_yr = []
         else:
             if self.sol_options[self.key]['Model'] == "PM":

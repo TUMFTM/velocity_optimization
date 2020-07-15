@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.4",
     author="Thomas Herrmann",
     author_email="thomas.herrmann@tum.de",
-    description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and runtime-variable input parameters.",
+    description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and runtime-variable input parameters.", # noqa: E501
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TUMFTM/velocity_optimization",

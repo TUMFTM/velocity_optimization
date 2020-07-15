@@ -45,8 +45,8 @@ class VOptIPOPT:
         and constraints g(x) to optimize a velocity profile for a given path.
 
         .. math::
-            \mathrm{min} f(x) \n
-            \mathrm{s.t.} \quad g(x) \leq 0
+            \mathrm{min} f(x) \n # noqa: W605
+            \mathrm{s.t.} \quad g(x) \leq 0 # noqa: W605
 
         More information to the IPOPT Solver can be found at ..a link: https://coin-or.github.io/Ipopt/
 
