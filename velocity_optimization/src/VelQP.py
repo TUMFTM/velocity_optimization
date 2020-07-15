@@ -216,13 +216,13 @@ class VelQP:
                        's_tre_w_quad_': sqp_config.getfloat('SOLVER_PERFORMANCE', 'penalty_slack_tire_quad')
                        }
             if self.sqp_stgs['b_sparse_matrix_fill']:
-                self.sparsity_pat = {'F_ini_r': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_ini_cst_jac_:_1:', 'r'))), # noqa: E501
-                                     'F_ini_c': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_ini_cst_jac_:_1:', 'c'))), # noqa: E501
+                self.sparsity_pat = {'F_ini_r': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_ini_cst_jac_:_1:', 'r'))),  # noqa: E501
+                                     'F_ini_c': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_ini_cst_jac_:_1:', 'c'))),  # noqa: E501
                                      'F_r': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_cst_jac_1:_1:', 'r'))),
                                      'F_c': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_cst_jac_1:_1:', 'c'))),
                                      'P_r': np.array(json.loads(sqp_sparsity.get('symqp.P_sym_cst_jac_:_1:', 'r'))),
                                      'P_c': np.array(json.loads(sqp_sparsity.get('symqp.P_sym_cst_jac_:_1:', 'c'))),
-                                     'Tre_r': np.array(json.loads(sqp_sparsity.get('symqp.Tre_sym_cst1_jac_:_1:', 'r'))), # noqa: E501
+                                     'Tre_r': np.array(json.loads(sqp_sparsity.get('symqp.Tre_sym_cst1_jac_:_1:', 'r'))),  # noqa: E501
                                      'Tre_c': np.array(json.loads(sqp_sparsity.get('symqp.Tre_sym_cst1_jac_:_1:', 'c')))
                                      }
 
@@ -251,7 +251,7 @@ class VelQP:
                                      'F_c': np.array(json.loads(sqp_sparsity.get('symqp.F_sym_cst_jac_:_1:', 'c'))),
                                      'P_r': np.array(json.loads(sqp_sparsity.get('symqp.P_sym_cst_jac_:_1:', 'r'))),
                                      'P_c': np.array(json.loads(sqp_sparsity.get('symqp.P_sym_cst_jac_:_1:', 'c'))),
-                                     'Tre_r': np.array(json.loads(sqp_sparsity.get('symqp.Tre_sym_cst1_jac_:_1:', 'r'))), # noqa: E501
+                                     'Tre_r': np.array(json.loads(sqp_sparsity.get('symqp.Tre_sym_cst1_jac_:_1:', 'r'))),  # noqa: E501
                                      'Tre_c': np.array(json.loads(sqp_sparsity.get('symqp.Tre_sym_cst1_jac_:_1:', 'c')))
                                      }
 
