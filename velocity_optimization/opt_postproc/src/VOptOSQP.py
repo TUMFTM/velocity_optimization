@@ -14,6 +14,7 @@ import configparser
 import time
 from scipy import sparse
 import matplotlib.pyplot as plt
+# flake8: noqa
 
 
 class VOptOSQP:
@@ -27,8 +28,8 @@ class VOptOSQP:
         """Class to optimize a velocity profile for a given path using the solver OSQP.
 
         .. math::
-            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n # noqa: W605
-            \mathrm{s.t} \qquad lba \leq A_m x \leq uba # noqa: W605
+            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
+            \mathrm{s.t} \qquad lba \leq A_m x \leq uba
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'

@@ -15,6 +15,7 @@ import os
 import sys
 import configparser
 import time
+# flake8: noqa
 
 
 class VOptMOSEK:
@@ -29,9 +30,9 @@ class VOptMOSEK:
         """Class to optimize a velocity profile for a given path using the solver MOSEK.
          # noqa: W293
         .. math::
-            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n  # noqa: W605
-            \mathrm{s.t} \qquad blc \leq A x \leq buc \n # noqa: W605
-            blx \leq x \leq bux # noqa: W605
+            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
+            \mathrm{s.t} \qquad blc \leq A x \leq buc \n
+            blx \leq x \leq bux
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
