@@ -28,11 +28,13 @@ class VOptMOSEK:
                  sol_options: dict,
                  key: str):
         """Class to optimize a velocity profile for a given path using the solver MOSEK.
-         # noqa: W293
+
         .. math::
             \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
             \mathrm{s.t} \qquad blc \leq A x \leq buc \n
             blx \leq x \leq bux
+
+        More information to the MOSEK Solver can be found at https://docs.mosek.com/9.2/pythonapi/index.html
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
