@@ -185,8 +185,6 @@ class VOptOSQP:
                 elif k == 0 and vel_start:
                     ub.append(v_ini - v[k])
                     lb.append(self.Car.v_min - v[k])
-                    '''ub.append(0.0)
-                    lb.append(0.0)'''
                     h.append(v[k])
                 else:
                     ub.append(v_max[k] - v[k])

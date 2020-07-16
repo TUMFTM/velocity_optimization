@@ -299,8 +299,8 @@ class VOpt_qpOASES2:
                     lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 elif k == 0 and vel_start:
-                    ub.append(0)
-                    lb.append(0)
+                    ub.append(v_ini - v[k])
+                    lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 else:
                     ub.append(v_max[k] - v[k])
@@ -448,6 +448,8 @@ class VOpt_qpOASES2:
             kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
             ds = sym.symbols('ds:0%d' % (N - 1))
+            # initial velocity [m/s]
+            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
             v_end = sym.symbols('v_end')
             # max. power [kW]
@@ -503,8 +505,8 @@ class VOpt_qpOASES2:
                     lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 elif k == 0 and vel_start:
-                    ub.append(0.0)
-                    lb.append(0.0)
+                    ub.append(v_ini - v[k])
+                    lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 else:
                     lb.append(self.Car.v_min - v[k])
@@ -563,9 +565,9 @@ class VOpt_qpOASES2:
 
             # Lambdify
             print('Lambdify Matrix A, lb and ub')
-            A_lam = sym.lambdify([v, ds, kappa, v_end, P_max, ax_max, ay_max], A, 'numpy')
-            lb_lam = sym.lambdify([v, ds, kappa, v_end, P_max, ax_max, ay_max], lb, 'numpy')
-            ub_lam = sym.lambdify([v, ds, kappa, v_end, P_max, ax_max, ay_max], ub, 'numpy')
+            A_lam = sym.lambdify([v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max], A, 'numpy')
+            lb_lam = sym.lambdify([v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max], lb, 'numpy')
+            ub_lam = sym.lambdify([v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max], ub, 'numpy')
             self.P_lam = P_lam
             self.q_lam = q_lam
             self.A_lam = A_lam
@@ -585,7 +587,9 @@ class VOpt_qpOASES2:
                 file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
                        + str(self.sol_options[self.key]['Friction']) + str(
                     self.sol_options[self.key]['Friction']) + ".pkl"
-            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+            filepath = params_path + '/Lambdify_Function/'
+            filename = filepath + file
+            os.makedirs(filepath, exist_ok=True)
 
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
@@ -1160,11 +1164,12 @@ class VOpt_qpOASES2:
                     v[0] = 0.1
             if not v_end:
                 v_end = self.Car.v_end
+            v_ini = x0_v[0]
             # max. power [kW]
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N - 1)
+                P_max = self.Car.P_max * np.ones(N)
             # max. acceleration [m/s²]
             if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
@@ -1241,9 +1246,9 @@ class VOpt_qpOASES2:
             elif self.sol_options[self.key]['Model'] == "KM":
                 P = self.P_lam(v, ds)
                 q = np.array(self.q_lam(v, ds).T)
-                A = self.A_lam(v, ds, kappa, v_end, P_max, ax_max, ay_max)
-                lbo = np.array(self.lb_lam(v, ds, kappa, v_end, P_max, ax_max, ay_max))
-                ubo = np.array(self.ub_lam(v, ds, kappa, v_end, P_max, ax_max, ay_max))
+                A = self.A_lam(v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max)
+                lbo = np.array(self.lb_lam(v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max))
+                ubo = np.array(self.ub_lam(v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max))
             elif self.sol_options[self.key]['Model'] == "DM":
 
                 P = sparse.csc_matrix(self.P_lam(v, ds))

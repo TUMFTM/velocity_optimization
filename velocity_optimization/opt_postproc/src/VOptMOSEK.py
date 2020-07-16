@@ -616,12 +616,12 @@ class VOptMOSEK:
             elif self.sol_options[self.key]['Friction'] == "Diamond":
                 file = "Mosek" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(
                     self.sol_options[self.key]['Friction']) + ".pkl"
-            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+            filepath = params_path + '/Lambdify_Function/'
+            filename = filepath + file
 
             dill.settings['recurse'] = True
             dill.dump([cval_lam, csubj, qval_lam, qsubi, qsubj, aval_lam, asubi,
-                       asubj, blc_lam, buc_lam, bkc, blx_lam, bux_lam, bkx],
-                      open(filename, "wb"))
+                       asubj, blc_lam, buc_lam, bkc, blx_lam, bux_lam, bkx], open(filename, "wb"))
 
     # Dynamic bicycle model
     def sol_init_dm(self,
@@ -1130,7 +1130,7 @@ class VOptMOSEK:
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N - 1)
+                P_max = self.Car.P_max * np.ones(N)
 
             # choose step length
             # alpha = 0.4

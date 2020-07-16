@@ -100,17 +100,16 @@ if __name__ == "__main__":
                    'b_save_tikz_MA': b_save_tikz_MA}
 
     # Define solver options
-    sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
+    sol_options = {'solver1': {'Model': "DM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
                                                             # DM (dynamisches Einspurmodell), FW (Zweispurmodell,
                                                             # only for IPOPT available)
-                               'Solver': "OSQP",            # IPOPT, OSQP, MOSEK, qpOASES
-                               'Friction': "Diamond",        # Circle, Diamond (only for PM and KM)
+                               'Solver': "qpOASES",            # IPOPT, OSQP, MOSEK, qpOASES
+                               'Friction': "Circle",        # Circle, Diamond (only for PM and KM)
                                'VarFriction': False,        # True, False
                                'VarPower': False,           # True, False
                                'Slack': False,              # True, False
-                               'Alpha': 1,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
-                               'F_Z': 0.5,                  # (only for DM to check influence of parameter)
-                               'DM': "F_z"                  # (only for DM to check influence of parameter)
+                               'Alpha': 0.1,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
+                                                            # alpha = 0.1 recommended for DM
                                }
                    }
 
