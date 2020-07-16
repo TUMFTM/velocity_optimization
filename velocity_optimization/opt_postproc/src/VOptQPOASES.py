@@ -17,7 +17,6 @@ import time
 import configparser
 from scipy import sparse
 import matplotlib.pyplot as plt
-# flake8: noqa: W605
 
 
 class VOpt_qpOASES:

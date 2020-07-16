@@ -15,7 +15,6 @@ import os
 import sys
 import configparser
 import time
-# flake8: noqa: W605
 
 
 class VOptMOSEK:
