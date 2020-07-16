@@ -5,7 +5,7 @@ except ImportError:
 import numpy as np
 import time
 import configparser
-# flake8: noqa: W605
+# flake8 --ignore=W605
 
 
 class VOptIPOPT:
