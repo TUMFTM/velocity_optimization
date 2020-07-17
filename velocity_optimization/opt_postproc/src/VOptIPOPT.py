@@ -1862,12 +1862,16 @@ class VOptIPOPT:
             # Calculate Acceleration ax
             kappa = param_vec_[1:self.m + 1]
             delta_s = param_vec_[self.m + 1:2 * self.m]
+            # vehicle mass [t]
+            m_t = opt_config.getfloat('VEHICLE', 'mass_t')
             ax = []
             ay = []
             for k in range(self.m - 1):
-                ax.append((v[k + 1] ** 2 - v[k] ** 2) / (
-                    2 * delta_s[k]))
+                '''ax.append((v[k + 1] ** 2 - v[k] ** 2) / (
+                    2 * delta_s[k]))'''
+                ax.append(F_p[k]/m_t)
                 ay.append(kappa[k] * v[k] ** 2)
+            ax = np.array(ax)
 
             return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
                 F_yrl, F_yrr
