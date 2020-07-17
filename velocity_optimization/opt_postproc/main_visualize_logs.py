@@ -54,7 +54,6 @@ if __name__ == "__main__":
     b_vis_solver_name = True
     b_vis_fric_model = False
     b_vis_alpha = False
-    b_vis_var_friction = False
 
     # do global plot of states for entire log?
     b_global_plot = False
@@ -80,7 +79,6 @@ if __name__ == "__main__":
                    'b_vis_solver_name': b_vis_solver_name,
                    'b_vis_fric_model': b_vis_fric_model,
                    'b_vis_alpha': b_vis_alpha,
-                   'b_vis_var_friction': b_vis_var_friction,
                    'b_global_plot': b_global_plot,
                    'glob_lim': glob_lim,
                    'b_immediate_plot_update': b_immediate_plot_update,

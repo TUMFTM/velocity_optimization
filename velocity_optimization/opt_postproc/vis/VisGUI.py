@@ -212,16 +212,6 @@ class VisVP_Logs_GUI:
                 if self.sol_options[key]['Alpha'] == 0.25:
                     self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
 
-            elif self.vis_options['b_vis_var_friction']:
-                if self.sol_options[key]['VarFriction']:
-                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                else:
-                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-                if self.sol_options[key]['Model'] == "DM":
-                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-                if self.sol_options[key]['Model'] == "FW":
-                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
-
     def draw_gui(self):
 
         """

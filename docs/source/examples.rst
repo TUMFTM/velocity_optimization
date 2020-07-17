@@ -107,7 +107,6 @@ most important values of the velocity SQP that have been logged.
         b_vis_solver_name = True
         b_vis_fric_model = False
         b_vis_alpha = False
-        b_vis_var_friction = False
 
         # do global plot of states for entire log?
         b_global_plot = False
@@ -133,7 +132,6 @@ most important values of the velocity SQP that have been logged.
                        'b_vis_solver_name': b_vis_solver_name,
                        'b_vis_fric_model': b_vis_fric_model,
                        'b_vis_alpha': b_vis_alpha,
-                       'b_vis_var_friction': b_vis_var_friction,
                        'b_global_plot': b_global_plot,
                        'glob_lim': glob_lim,
                        'b_immediate_plot_update': b_immediate_plot_update,
@@ -175,21 +173,74 @@ v optimal (IPOPT) and v optimal (qpOASES) are shown:
 .. image:: DebugWindow.png
    :width: 600
 
-In addition, plots of the the driving force, motor power, slack variables and acceleration are \n
-visualized in the GUI:
+In addition, plots of the the driving force, motor power, slack variables and acceleration are visualized in the GUI:
 
 There are several options to select for the visualization which are described in the following table.
 
-.. list-table:: Title
-   :widths: 25 25 50
+.. list-table:: Visualization Options (Default values in brackets)
+   :widths: 25 10 65
    :header-rows: 1
 
-   * - Heading row 1, column 1
-     - Heading row 1, column 2
-     - Heading row 1, column 3
-   * - Row 1, column 1
+   * - Name
+     - Value
+     - Description
+   * - csv_name, csv_name_ltpl
+     - Path
+     - Path to the log-file or csv-file of the input data
+   * - m
+     - > 1 (115)
+     - Length of the planing horizon. Depends on the data of the log-file/csv-data.
+   * - sid
+     - PerfSQP/Emerg/SQP
+     - Choose if a velocity profile is calculated for a performance path or an emergency path.
+   * - params_pat
+     - Path
+     - Path to the directory of the visulaization paramter
+   * - input_path
+     - Path
+     - Path to the directory of the input data (variable power/friction data)
+   * - log_lines
+     - Int (4)
+     - Number of lines in the log-file which belong to a single planing horizon. See more information at the description of the log-file structure.
+   * - b_movie
+     - True/False
+     - Choose if all optimization problems is solved without stopping between different planning horizons (True) or not (False).
+   * - b_run_OSQP
+     - True/False
+     - Choose if the optimization problem is solved with the OSQP solver (reference solver) again (True) or not (False)
+   * - b_cacl_qpOASES
+     - True/False
+     - Choose if the optimization problem is solved with the solver qpOASES (True) or not (False).
+   * - b_con_power
+     - True/False
+     - Choose if a constant value for the max. power is used (True) or not(False).
+   * - b_idx
+     - Int (0)
+     - Select a specific planning horizon to be plotted in the GUI. The nuber of the planning horizon should be multiplied by the number of log_lines. Choose 0 as the default value.
+   * - b_plot_course
+     - True/False
+     - Create a plot of the racetrack with the choosen index (b_dix) of the planning horizon (True) or not (False).
+   * - b_vis_solver_name
+     - True/False
+     - Select the solver name as the subindex of the legend entrys (True) or not.
+   * - b_vis_model_name
+     - True/False
+     - Select the driving dynamics model name as the subindex of the legend entrys (True) or not.
+   * - b_vis_fric_model
+     - True/False
+     - Select the name of the friction model as the subindex of the legend entrys (True) or not.
+   * - b_vis_alpha
+     - True/False
+     - Select the value of alpha as the subindex of the legend entrys (True) or not.
+   * - b_global_plot
      -
-     - Row 1, column 3
-   * - Row 2, column 1
-     - Row 2, column 2
-     - Row 2, column 3
+     -
+   * - b_immediate_plot_update
+     - True/False
+     - Update the plots in the GUI after solving the optimization problem for each planning horizon (True) or not (False).
+   * - b_calc_time_plot
+     - True/False
+     - Show and update the plot of the calculation time
+   * - b_save_tikz
+     - True/False
+     - Save (True) the plot of the calcultaion time or not (False).
