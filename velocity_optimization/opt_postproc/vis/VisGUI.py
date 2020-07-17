@@ -222,16 +222,6 @@ class VisVP_Logs_GUI:
                 if self.sol_options[key]['Model'] == "FW":
                     self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
 
-            elif self.vis_options['b_vis_dynamic_model']:
-                if key == "solver1":
-                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                if key == "solver2":
-                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-                if key == "solver3":
-                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-                if key == "solver4":
-                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
-
     def draw_gui(self):
 
         """

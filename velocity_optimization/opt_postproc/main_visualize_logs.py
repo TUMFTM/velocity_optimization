@@ -17,16 +17,13 @@ if __name__ == "__main__":
 
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
-    csv_name = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_05_21_13_42.log'
+    csv_name = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_06_08_09_15.log'
     # csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
-    csv_name_ltpl = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_05_21_13_42.log'
+    csv_name_ltpl = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_06_08_09_15.log'
     # csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
-    # '/velocity_optimization/logs/sqp_perf_2020_05_05_10_39.log'
-    # '/velocity_optimization/logs/sqp_perf_2020_05_21_13_42.log'
-
     # Number of velocity points
-    m = 30  # 115
+    m = 90
 
     # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
     sid = 'PerfSQP'
@@ -40,18 +37,16 @@ if __name__ == "__main__":
     # visualize all logs consecutively?
     b_movie = False
     # re-calculate QP from log-input?
-    b_run_OSQP = False
+    b_run_OSQP = True
 
     # run qpOASES solver?
-    b_calc_qpOASES = False
+    b_calc_qpOASES = True
 
     # Constant(True)/Variable(False) Power
     b_con_power = True
 
     # Choose Starting Idx of Log-File
     b_idx = 552
-    # Save the plots?
-    b_save_tikz_MA = False
     # Plot Race Course with planning horizon
     b_plot_course = False
     # Select Legend Item (Model, Solver, Friction, Alpha)
@@ -60,10 +55,6 @@ if __name__ == "__main__":
     b_vis_fric_model = False
     b_vis_alpha = False
     b_vis_var_friction = False
-    # Plot Calculation Time
-    b_vis_calc_time = False
-    # Plot Front/ Rear Tire Friction Circle (only for dynamic bicycle model)
-    b_vis_dynamic_model = False
 
     # do global plot of states for entire log?
     b_global_plot = False
@@ -90,24 +81,21 @@ if __name__ == "__main__":
                    'b_vis_fric_model': b_vis_fric_model,
                    'b_vis_alpha': b_vis_alpha,
                    'b_vis_var_friction': b_vis_var_friction,
-                   'b_vis_dynamic_model': b_vis_dynamic_model,
-                   'b_vis_calc_time': b_vis_calc_time,
                    'b_global_plot': b_global_plot,
                    'glob_lim': glob_lim,
                    'b_immediate_plot_update': b_immediate_plot_update,
                    'b_calc_time_plot': b_calc_time_plot,
-                   'b_save_tikz': b_save_tikz,
-                   'b_save_tikz_MA': b_save_tikz_MA}
+                   'b_save_tikz': b_save_tikz}
 
     # Define solver options
-    sol_options = {'solver1': {'Model': "DM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
+    sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
                                                             # DM (dynamisches Einspurmodell), FW (Zweispurmodell,
                                                             # only for IPOPT available)
-                               'Solver': "qpOASES",            # IPOPT, OSQP, MOSEK, qpOASES
-                               'Friction': "Circle",        # Circle, Diamond (only for PM and KM)
-                               'VarFriction': False,        # True, False
+                               'Solver': "IPOPT",            # IPOPT, OSQP, MOSEK, qpOASES
+                               'Friction': "Diamond",        # Circle, Diamond (only for PM and KM)
+                               'VarFriction': True,        # True, False
                                'VarPower': False,           # True, False
-                               'Slack': False,              # True, False
+                               'Slack': True,              # True, False
                                'Alpha': 0.1,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
                                                             # alpha = 0.1 recommended for DM
                                }
