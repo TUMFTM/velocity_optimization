@@ -46,7 +46,7 @@ if __name__ == "__main__":
     b_con_power = True
 
     # Choose Starting Idx of Log-File
-    b_idx = 552
+    b_idx = 0
     # Plot Race Course with planning horizon
     b_plot_course = False
     # Select Legend Item (Model, Solver, Friction, Alpha)

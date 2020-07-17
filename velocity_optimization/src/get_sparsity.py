@@ -126,5 +126,5 @@ if __name__ == '__main__':
 
     calc_sparsity(params_path=params_path_,
                   logging_path=logging_path_,
-                  m_perf=50,
-                  m_emerg=50)
+                  m_perf=5,
+                  m_emerg=5)
