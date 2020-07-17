@@ -1826,6 +1826,9 @@ class VOptIPOPT:
         m = self.m
         trj = self.trj
 
+        # vehicle mass [t]
+        m_t = opt_config.getfloat('VEHICLE', 'mass_t')
+
         # Initialization of output vector
         F_xf = []
         F_xr = []
@@ -1862,13 +1865,10 @@ class VOptIPOPT:
             # Calculate Acceleration ax
             kappa = param_vec_[1:self.m + 1]
             delta_s = param_vec_[self.m + 1:2 * self.m]
-            # vehicle mass [t]
-            m_t = opt_config.getfloat('VEHICLE', 'mass_t')
+
             ax = []
             ay = []
             for k in range(self.m - 1):
-                '''ax.append((v[k + 1] ** 2 - v[k] ** 2) / (
-                    2 * delta_s[k]))'''
                 ax.append(F_p[k]/m_t)
                 ay.append(kappa[k] * v[k] ** 2)
             ax = np.array(ax)
@@ -1888,13 +1888,15 @@ class VOptIPOPT:
             # Calculate engine force and acceleartion
             kappa = param_vec_[1:self.m + 1]
             delta_s = param_vec_[self.m + 1:2 * self.m]
+            acc = []
             ax = []
             ay = []
             F_p = []
             for k in range(self.m - 1):
-                ax.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * delta_s[k]))
+                acc.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * delta_s[k]))
                 ay.append(kappa[k] * v[k] ** 2)
-                F_p.append(1.16 * ax[k] - 0.854 * 0.001 * v[k] ** 2)
+                F_p.append(1.16 * acc[k] - 0.854 * 0.001 * v[k] ** 2)
+                ax.append(F_p[k] / m_t)
             # Calculate engine power
             P_p = F_p * v[0:-1]
 
