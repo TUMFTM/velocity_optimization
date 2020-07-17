@@ -153,7 +153,7 @@ class VOptIPOPT:
         # max. veicle velocity [m/s]
         v_max = opt_config.getfloat('CAR_PARAMETER', 'v_max')  # [m/s] Maximum Velocity
         # max. acceleartion [m/s²]
-        a_max = opt_config.getfloat('VEHICLE', 'ax_max_mps2')  # [m/s²] Maximum Laongitudianl Acceleratio
+        a_max = opt_config.getfloat('VEHICLE', 'ax_max_mps2')  # [m/s²] Maximum Laongitudianl Acceleration
         # max. lateral acceleration [m/s²]
         a_lat_max = opt_config.getfloat('VEHICLE', 'ay_max_mps2')  # [m/s²] Maximum Lateral Acceleration
         # max. slack angle [rad]

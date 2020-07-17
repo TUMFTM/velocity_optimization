@@ -17,13 +17,13 @@ if __name__ == "__main__":
 
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
-    csv_name = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_06_08_09_15.log'
+    csv_name = vel_opt_path + '/logs/sqp_perf_2020_07_03_16_12.log'
     # csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
-    csv_name_ltpl = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_06_08_09_15.log'
+    csv_name_ltpl = vel_opt_path + '/logs/sqp_perf_2020_06_08_09_15.log'
     # csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
-    # Number of velocity points
-    m = 90
+    # Number of velocity points, TODO: read from file name
+    m = 115
 
     # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
     sid = 'PerfSQP'
@@ -40,10 +40,10 @@ if __name__ == "__main__":
     b_run_OSQP = True
 
     # run qpOASES solver?
-    b_calc_qpOASES = True
+    b_calc_qpOASES = False
 
     # Constant(True)/Variable(False) Power
-    b_con_power = True
+    b_con_power = False
 
     # Choose Starting Idx of Log-File
     b_idx = 0

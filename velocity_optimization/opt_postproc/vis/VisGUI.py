@@ -485,7 +485,7 @@ class VisVP_Logs_GUI:
         plt.legend([r'$\epsilon_\mathrm{o,OSQP}$',
                     r'$\epsilon_\mathrm{ini}$',
                     r'$\epsilon_\mathrm{max}$',
-                    r'$\epsilon_\mathrm{o,IPOPT_PM}$',
+                    r'$\epsilon_\mathrm{o,IPOPT_{PM}}$',
                     r'$\epsilon_\mathrm{o,qpOASES}$'],
                    mode='expand', ncol=5)
 
