@@ -55,6 +55,10 @@ class VisVP_Runtime:
                  [0, max(cnt)],
                  color='red', linestyle='--', linewidth=LW)
 
+        plt.plot([np.median(dt_solver), np.median(dt_solver)],
+                 [0, max(cnt)],
+                 color='black', linestyle='-.', linewidth=LW)
+
         if vis_options['b_save_tikz']:
             tikzplotlib.save('SQP_' + name_solver + '_runtime.tex')
 

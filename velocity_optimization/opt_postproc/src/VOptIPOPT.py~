@@ -36,19 +36,14 @@ class VOptIPOPT:
     def __init__(self,
                  m: int,
                  sid: str,
+                 slack_every_v: int,
                  params_path: str,
                  vis_options: dict,
                  sol_dict: dict,
                  key: str,
                  b_warm: bool = False):
-        """Class to construct the Interior-Point QP-optimizer IPOPT by defining the objective function f(x) \n
-        and constraints g(x) to optimize a velocity profile for a given path.
-
-        .. math::
-            \mathrm{min} f(x) \n
-            \mathrm{s.t.} \quad g(x) \leq 0
-
-        More information to the IPOPT Solver can be found at https://coin-or.github.io/Ipopt/
+        """Class to construct the Interior-Point QP-optimizer IPOPT by defining the objective function \n
+        and constraints to optimize a velocity profile for a given path.
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
@@ -70,6 +65,7 @@ class VOptIPOPT:
         self.m = m
         self.n = m - 1
         self.sid = sid
+        self.slack_every_v = slack_every_v
         self.unit_eps_tre = 0
         self.b_warm = b_warm
         self.vis_options = vis_options
@@ -96,6 +92,10 @@ class VOptIPOPT:
     def sol_init(self):
         """Function to initialize the IPOPT solver by defining the objective function \n
         and constraints with the CasADi modeling language.
+
+        .. math::
+            \mathrm{min} f(x) \n
+            \mathrm{s.t.} \quad g(x) \leq 0
 
         :Authors:
             Thomas Herrmann <thomas.herrmann@tum.de> \n
@@ -126,9 +126,6 @@ class VOptIPOPT:
         else:
             set_sec = None
 
-        # Slack Variable
-        self.slack_every_v = opt_config.getint('SOLVER_GENERAL', 'slack_every_v')
-
         # Matrices
         one_vec = np.zeros((m, 1))
         one_vec[0] = 1  # Vector [1,0,...,0] mx1
@@ -143,7 +140,7 @@ class VOptIPOPT:
         # max. power [kw] if constant max. power
         if self.sol_dict[self.key]['VarPower'] is False:
             # max. power of both e-machines [kW]
-            P_max = opt_config.getfloat('VEHICLE', 'P_max_kW')
+            P_max = opt_config.getfloat('CAR_PARAMETER', 'P_max')
         # max. tractional force [kN]
         F_max = opt_config.getfloat('VEHICLE', 'F_max_kN')
         # max. braking force [kN]
@@ -153,9 +150,9 @@ class VOptIPOPT:
         # max. veicle velocity [m/s]
         v_max = opt_config.getfloat('CAR_PARAMETER', 'v_max')  # [m/s] Maximum Velocity
         # max. acceleartion [m/s²]
-        a_max = opt_config.getfloat('VEHICLE', 'ax_max_mps2')  # [m/s²] Maximum Laongitudianl Acceleratio
+        a_max = opt_config.getfloat('CAR_PARAMETER', 'a_max')  # [m/s²] Maximum Laongitudianl Acceleratio
         # max. lateral acceleration [m/s²]
-        a_lat_max = opt_config.getfloat('VEHICLE', 'ay_max_mps2')  # [m/s²] Maximum Lateral Acceleration
+        a_lat_max = opt_config.getfloat('CAR_PARAMETER', 'a_lat_max')  # [m/s²] Maximum Lateral Acceleration
         # max. slack angle [rad]
         beta_max = opt_config.getfloat('CAR_PARAMETER', 'beta_max')
         # max. gear rate [1/s]
@@ -182,6 +179,7 @@ class VOptIPOPT:
         k_dr = opt_config.getfloat('CAR_PARAMETER', 'k_dr')
         # Distribution of Braking Force (Front/Rear) [-]
         k_br = opt_config.getfloat('CAR_PARAMETER', 'k_br')
+        k_br = self.sol_dict[self.key]['F_Z']
         # Distribution of lateral Tire Force
         k_roll = opt_config.getfloat('CAR_PARAMETER', 'k_roll')
         # Drift Coefficient at Front Tire [-]
@@ -1000,8 +998,10 @@ class VOptIPOPT:
             ma_x = F_xf + F_xr - F_d
 
             # normal force at axle (front & rear)
-            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
-            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
+            F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg / (l_r + l_f) * ma_x + 0.5 * c_lf \
+                   * rho * A * v[: - 1] ** 2
+            F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg / (l_r + l_f) * ma_x + 0.5 * c_lr \
+                   * rho * A * v[: - 1] ** 2
 
             # force in y-direction at axle (front & rear)
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
@@ -1012,33 +1012,34 @@ class VOptIPOPT:
             # total lateral accelaration at CoG
             ma_y = F_yr + F_xf * cs.sin(delta) + F_yf * cs.cos(delta)
 
-            ############################################################################################################
+            ################################################################################################################
             # Equality Constraints
-            ############################################################################################################
+            ################################################################################################################
             # --- dot_v = ....
-            v_dot_cst = v[1:] - v[: - 1] - ds \
-                / v[: - 1] * (1 / m_t
-                              * (+ F_xr * cs.cos(beta[: - 1])
-                                 + F_xf * cs.cos(delta - beta[: - 1])
-                                 + F_yr * cs.sin(beta[: - 1]) - F_yf
-                                 * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
+            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] \
+                        * (1 / m_t
+                           * (+ F_xr * cs.cos(beta[: - 1])
+                              + F_xf * cs.cos(delta - beta[: - 1])
+                              + F_yr * cs.sin(beta[: - 1]) - F_yf
+                              * cs.sin(delta - beta[: - 1]) - F_d * cs.cos(beta[: - 1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
-            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) \
-                - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
-                                     * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
-                                        + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
-                                        + F_d * cs.sin(beta[:-1])))
+            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) \
+                           * (-kappa[: - 1] * v[: - 1] + 1 / (m_t * v[:-1])
+                              * (- F_xr * cs.sin(beta[:-1]) + F_xf * cs.sin(delta - beta[:-1])
+                                 + F_yr * cs.cos(beta[:-1]) + F_yf * cs.cos(delta - beta[:-1])
+                                 + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] \
-                - ds / v[: - 1] * (1 / I_zz * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
+            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] \
+                            * (1 / I_zz
+                               * (F_xf * cs.sin(delta) * l_f + F_yf * cs.cos(delta) * l_f - F_yr * l_r))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1232,6 +1233,7 @@ class VOptIPOPT:
             # max accelearation in y-direction [m/s²]
             ay_max = cs.SX.sym('ay_max', n)
 
+
             ############################################################################################################
             # Objective function
             ############################################################################################################
@@ -1309,11 +1311,11 @@ class VOptIPOPT:
 
             # tire slip angle (front & rear/ left & right) [rad]
             alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1]
-                                        / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
             alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1]
-                                        / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
 
             alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
                                 v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
@@ -1352,14 +1354,14 @@ class VOptIPOPT:
 
             # tire force in y-direction (front & rear/ left & right) [kN]
             F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 \
-                * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
             F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 \
-                * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
             F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 \
-                * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
             F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 \
-                * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
             ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
@@ -1368,37 +1370,36 @@ class VOptIPOPT:
             # Equality Constraints
             ############################################################################################################
             # --- dot_v = ....
-            v_dot_cst = v[1:] - v[: - 1] - ds \
-                / v[: - 1] * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
-                                         + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
-                                         + (F_yrl + F_yrr) * cs.sin(beta[:-1])
-                                         - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
-                                         - F_d * cs.cos(beta[:-1])))
+            v_dot_cst = v[1:] - v[: - 1] - ds / v[: - 1] \
+                        * (1 / m_t * (+ (F_xrl + F_xrr) * cs.cos(beta[:-1])
+                                      + (F_xfl + F_xfr) * cs.cos(delta - beta[:-1])
+                                      + (F_yrl + F_yrr) * cs.sin(beta[:-1])
+                                      - (F_yfl + F_yfr) * cs.sin(delta - beta[:-1])
+                                      - F_d * cs.cos(beta[:-1])))
             g.append(v_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_beta = ...
-            beta_dot_cst = (beta[1:] - beta[:-1]) \
-                / (ds / v[:-1]) - 1 / (2 * np.pi) * (-kappa[: - 1] * v[: - 1]
-                                                     + 1 / (m_t * v[:-1])
-                                                     * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
-                                                        + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
-                                                        + (F_yrl + F_yrr) * cs.cos(beta[:-1])
-                                                        + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
-                                                        + F_d * cs.sin(beta[:-1])))
+            beta_dot_cst = (beta[1:] - beta[:-1]) / (ds / v[:-1]) - 1 / (2 * np.pi) \
+                           * (-kappa[: - 1] * v[: - 1]
+                              + 1 / (m_t * v[:-1])
+                              * (- (F_xrl + F_xrr) * cs.sin(beta[:-1])
+                                 + (F_xfl + F_xfr) * cs.sin(delta - beta[:-1])
+                                 + (F_yrl + F_yrr) * cs.cos(beta[:-1])
+                                 + (F_yfl + F_yfr) * cs.cos(delta - beta[:-1])
+                                 + F_d * cs.sin(beta[:-1])))
             g.append(beta_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
 
             # --- dot_omega = ...
-            omega_dot_cst = kappa[1:] * v[1:] \
-                - kappa[1:] * v[:-1] - ds / v[: - 1] \
-                            * (1 / I_zz * (+ (F_xrr - F_xrl) * tw_r / 2 - (F_yrl + F_yrr)
-                                           * l_r + ((F_xfr - F_xfl) * cs.cos(delta)
-                                                    + (F_yfl - F_yfr) * cs.sin(delta))
-                                           * tw_f / 2 + ((F_yfl + F_yfr) * cs.cos(delta)
-                                                         + (F_xfl + F_xfr) * cs.sin(delta)) * l_f))
+            omega_dot_cst = kappa[1:] * v[1:] - kappa[1:] * v[:-1] - ds / v[: - 1] \
+                            * (1 / I_zz *
+                               (+ (F_xrr - F_xrl) * tw_r / 2
+                                - (F_yrl + F_yrr) * l_r
+                                + ((F_xfr - F_xfl) * cs.cos(delta) + (F_yfl - F_yfr) * cs.sin(delta)) * tw_f / 2
+                                + ((F_yfl + F_yfr) * cs.cos(delta) + (F_xfl + F_xfr) * cs.sin(delta)) * l_f))
             g.append(omega_dot_cst)
             ubg.append([0.0] * n)
             lbg.append([0.0] * n)
@@ -1820,9 +1821,7 @@ class VOptIPOPT:
         :Created on:
             01.01.2020
         """
-        opt_config = configparser.ConfigParser()
-        if not opt_config.read(self.params_path + 'sqp_config.ini'):
-            raise ValueError('Specified cost config file does not exist or is empty!')
+
         m = self.m
         trj = self.trj
 
@@ -1831,15 +1830,6 @@ class VOptIPOPT:
         F_xr = []
         F_yf = []
         F_yr = []
-
-        F_xfl = []
-        F_xfr = []
-        F_xrl = []
-        F_xrr = []
-        F_yfl = []
-        F_yfr = []
-        F_yrl = []
-        F_yrr = []
 
         ################################################################################################################
         # Retrieve solution
@@ -1851,8 +1841,7 @@ class VOptIPOPT:
             v = np.array(sol['x'][0:m])
             # Extract slack variable
             if self.sol_dict[self.key]['Slack']:
-                # eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
-                pass
+                eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
 
             # Calculate engine force
             F_p, tire_cst, a, pwr_cst = trj(sol['x'], param_vec_)
@@ -1869,8 +1858,7 @@ class VOptIPOPT:
                     2 * delta_s[k]))
                 ay.append(kappa[k] * v[k] ** 2)
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
-                F_yrl, F_yrr
+            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
 
         # Kinematic bicycle model
         elif self.sol_dict[self.key]['Model'] == "KM":
@@ -1894,8 +1882,7 @@ class VOptIPOPT:
             # Calculate engine power
             P_p = F_p * v[0:-1]
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
-                F_yrl, F_yrr
+            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
 
         # Dynamic bicycle model
         elif self.sol_dict[self.key]['Model'] == "DM":
@@ -1926,44 +1913,48 @@ class VOptIPOPT:
             # Forces
             ############################################################################################################
             # gravittational constatns [m/s²]
-            grav = opt_config.getfloat('CAR_PARAMETER', 'g')
+            grav = 9.81
             # rolling friction coefficient[-]
-            f_r = opt_config.getfloat('CAR_PARAMETER', 'f_r')
+            f_r = 0.01
             # length from CoG to Front Axle [m]
-            l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
+            l_f = 1.51
             # length from CoG to Rear Axle [m]
-            l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
+            l_r = 1.388
             # Air Resistance Coefficient [-]
-            c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
+            c_w = 1.4e-03
             # Front Surface [m²]
-            A = opt_config.getfloat('CAR_PARAMETER', 'A')
+            A = 1
             # Air Density [kg/m³]
-            rho = opt_config.getfloat('CAR_PARAMETER', 'rho')
+            rho = 1.2041
             # Distribution of Engine Force (Front/Rear) [-]
-            k_dr = opt_config.getfloat('CAR_PARAMETER', 'k_dr')
+            k_dr = 0
             # Distribution of Braking Force (Front/Rear) [-]
-            k_br = opt_config.getfloat('CAR_PARAMETER', 'k_br')
+            k_br = 0.7
             # Drift Coefficient at Front Tire [-]
-            c_lf = opt_config.getfloat('CAR_PARAMETER', 'c_lf')
+            c_lf = 2.35e-03
             # Drift Coefficient at Rear Tire [-]
-            c_lr = opt_config.getfloat('CAR_PARAMETER', 'c_lr')
+            c_lr = 3e-03
             # Height of CoG [m]
-            h_cg = opt_config.getfloat('CAR_PARAMETER', 'h_cg')
+            h_cg = 0.35
+            # Yaw Inertia Coefficient [t m²]
+            I_zz = 1.260
 
-            m_t = opt_config.getfloat('VEHICLE', 'mass_t')
+            m_t = 1.16
+
+            q = 0.854  # [] Air Resistance Coefficient: 0.5*rho*A*c_w
 
             # Tire Model (Magic Formula)
-            F_z0 = opt_config.getfloat('CAR_PARAMETER', 'F_z0')  # [kN]
-            B_f = opt_config.getfloat('CAR_PARAMETER', 'B_f')
-            C_f = opt_config.getfloat('CAR_PARAMETER', 'C_f')
-            D_f = opt_config.getfloat('CAR_PARAMETER', 'D_f')
-            E_f = opt_config.getfloat('CAR_PARAMETER', 'E_f')
-            eps_f = opt_config.getfloat('CAR_PARAMETER', 'eps_f')
-            B_r = opt_config.getfloat('CAR_PARAMETER', 'B_r')
-            C_r = opt_config.getfloat('CAR_PARAMETER', 'C_r')
-            D_r = opt_config.getfloat('CAR_PARAMETER', 'D_r')
-            E_r = opt_config.getfloat('CAR_PARAMETER', 'E_r')
-            eps_r = opt_config.getfloat('CAR_PARAMETER', 'eps_r')
+            F_z0 = 3  # [kN]
+            B_f = 9.62
+            C_f = 2.59
+            D_f = 4.120
+            E_f = 1
+            eps_f = -0.0813
+            B_r = 8.62
+            C_r = 2.65
+            D_r = 4.617
+            E_r = 1
+            eps_r = -0.1263
 
             # front and rear roll friction
             F_roll_f = f_r * m_t * grav * l_r / (l_r + l_f)
@@ -1982,9 +1973,9 @@ class VOptIPOPT:
             ma_x = F_xf + F_xr - F_d
 
             F_zf = m_t * grav * l_r / (l_r + l_f) - h_cg \
-                / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
+                   / (l_r + l_f) * ma_x + 0.5 * c_lf * rho * A * v[: - 1] ** 2
             F_zr = m_t * grav * l_f / (l_r + l_f) + h_cg \
-                / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
+                   / (l_r + l_f) * ma_x + 0.5 * c_lr * rho * A * v[: - 1] ** 2
 
             F_yf = D_f * (1 + eps_f * F_zf / F_z0) * F_zf / F_z0 * cs.sin(
                 C_f * cs.atan2(B_f * alpha_f - E_f * (B_f * alpha_f - cs.atan2(B_f * alpha_f, 1)), 1))
@@ -2009,7 +2000,6 @@ class VOptIPOPT:
             # Front tire Constraint
             F_xzf = (F_xf / F_zf)
             F_yzf = (F_yf / F_zf)
-            # Rear tire Constraint
             F_xzr = (F_xr / F_zr)
             F_yzr = (F_yr / F_zr)
             '''
@@ -2024,8 +2014,7 @@ class VOptIPOPT:
             ubg.append([1.0] * n)
             lbg.append([0.0] * n)'''
 
-            return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr), \
-                F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
+            return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr)
 
         elif self.sol_dict[self.key]['Model'] == "FW":
             # --- Extract variables
@@ -2053,49 +2042,51 @@ class VOptIPOPT:
             # Forces
             ############################################################################################################
             # gravittational constatns [m/s²]
-            grav = opt_config.getfloat('CAR_PARAMETER', 'g')
+            grav = 9.81
             # rolling friction coefficient[-]
-            f_r = opt_config.getfloat('CAR_PARAMETER', 'f_r')
+            f_r = 0.01
             # length from CoG to Front Axle [m]
-            l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
+            l_f = 1.51
             # length from CoG to Rear Axle [m]
-            l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
+            l_r = 1.388
             # Air Resistance Coefficient [-]
-            c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
+            c_w = 1.4e-03
             # Front Surface [m²]
-            A = opt_config.getfloat('CAR_PARAMETER', 'A')
+            A = 1
             # Air Density [kg/m³]
-            rho = opt_config.getfloat('CAR_PARAMETER', 'rho')
+            rho = 1.2041
             # Distribution of Engine Force (Front/Rear) [-]
-            k_dr = opt_config.getfloat('CAR_PARAMETER', 'k_dr')
+            k_dr = 0
             # Distribution of Braking Force (Front/Rear) [-]
-            k_br = opt_config.getfloat('CAR_PARAMETER', 'k_br')
+            k_br = 0.7
 
-            k_roll = opt_config.getfloat('CAR_PARAMETER', 'k_roll')
+            k_roll = 0.5
             # Drift Coefficient at Front Tire [-]
-            c_lf = opt_config.getfloat('CAR_PARAMETER', 'c_lf')
+            c_lf = 2.35e-03
             # Drift Coefficient at Rear Tire [-]
-            c_lr = opt_config.getfloat('CAR_PARAMETER', 'c_lr')
+            c_lr = 3e-03
             # Height of CoG [m]
-            h_cg = opt_config.getfloat('CAR_PARAMETER', 'h_cg')
+            h_cg = 0.35
+            # Spurbreite vorne [m]
+            tw_f = 1.581
+            # Spurbreite hinten [m]
+            tw_r = 1.541
 
-            tw_f = opt_config.getfloat('CAR_PARAMETER', 'tw_f')
-            tw_r = opt_config.getfloat('CAR_PARAMETER', 'tw_r')
-
-            m_t = opt_config.getfloat('VEHICLE', 'mass_t')
+            # Vehicle Mass [t]
+            m_t = 1.16
 
             # Tire Model (Magic Formula)
-            F_z0 = opt_config.getfloat('CAR_PARAMETER', 'F_z0')  # [kN]
-            B_f = opt_config.getfloat('CAR_PARAMETER', 'B_f')
-            C_f = opt_config.getfloat('CAR_PARAMETER', 'C_f')
-            D_f = opt_config.getfloat('CAR_PARAMETER', 'D_f')
-            E_f = opt_config.getfloat('CAR_PARAMETER', 'E_f')
-            eps_f = opt_config.getfloat('CAR_PARAMETER', 'eps_f')
-            B_r = opt_config.getfloat('CAR_PARAMETER', 'B_r')
-            C_r = opt_config.getfloat('CAR_PARAMETER', 'C_r')
-            D_r = opt_config.getfloat('CAR_PARAMETER', 'D_r')
-            E_r = opt_config.getfloat('CAR_PARAMETER', 'E_r')
-            eps_r = opt_config.getfloat('CAR_PARAMETER', 'eps_r')
+            F_z0 = 3  # [kN]
+            B_f = 9.62
+            C_f = 2.59
+            D_f = 4.120
+            E_f = 1
+            eps_f = -0.0813
+            B_r = 8.62
+            C_r = 2.65
+            D_r = 4.617
+            E_r = 1
+            eps_r = -0.1263
 
             # roll friction (front & rear/ left & right) [kN]
             F_roll_fl = 0.5 * f_r * m_t * grav * l_r / (l_r + l_f)
@@ -2105,11 +2096,11 @@ class VOptIPOPT:
 
             # tire slip angle (front & rear/ left & right) [rad]
             alpha_fl = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1]
-                                        / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
             alpha_fr = delta - cs.atan2((l_f * kappa[: - 1] * v[: - 1] / (2 * np.pi) + v[: - 1] * cs.sin(beta[: - 1])),
-                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1]
-                                        / (2 * np.pi))
+                                        v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_f * kappa[: - 1] * v[: - 1] / (
+                                                    2 * np.pi))
 
             alpha_rl = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
                                 v[: - 1] * cs.cos(beta[: - 1]) - 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
@@ -2148,14 +2139,14 @@ class VOptIPOPT:
 
             # tire force in y-direction (front & rear/ left & right) [kN]
             F_yfl = D_f * (1 + eps_f * F_zfl / F_z0) * F_zfl / F_z0 \
-                * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fl - E_f * (B_f * alpha_fl - cs.atan2(B_f * alpha_fl, 1)), 1))
             F_yfr = D_f * (1 + eps_f * F_zfr / F_z0) * F_zfr / F_z0 \
-                * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
+                    * cs.sin(C_f * cs.atan2(B_f * alpha_fr - E_f * (B_f * alpha_fr - cs.atan2(B_f * alpha_fr, 1)), 1))
 
             F_yrl = D_r * (1 + eps_r * F_zrl / F_z0) * F_zrl / F_z0 \
-                * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rl - E_r * (B_r * alpha_rl - cs.atan2(B_r * alpha_rl, 1)), 1))
             F_yrr = D_r * (1 + eps_r * F_zrr / F_z0) * F_zrr / F_z0 \
-                * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
+                    * cs.sin(C_r * cs.atan2(B_r * alpha_rr - E_r * (B_r * alpha_rr - cs.atan2(B_r * alpha_rr, 1)), 1))
 
             # total force in y-direction at CoG
             ma_y = F_yrl + F_yrr + (F_xfl + F_xfr) * cs.sin(delta) + (F_yfl + F_yfr) * cs.cos(delta)
@@ -2171,23 +2162,7 @@ class VOptIPOPT:
             ax = np.array(ax)
             ay = np.array(ay)
 
-            # Front left tire Constraint
-            F_xzfl = (F_xfl / F_zfl)
-            F_yzfl = (F_yfl / F_zfl)
-            # Front right tire Constraint
-            F_xzfr = (F_xfr / F_zfr)
-            F_yzfr = (F_yfr / F_zfr)
-
-            # Rear left tire Constraint
-            F_xzrl = (F_xrl / F_zrl)
-            F_yzrl = (F_yrl / F_zrl)
-            # Rear right tire Constraint
-            F_xzrr = (F_xrr / F_zrr)
-            F_yzrr = (F_yrr / F_zrr)
-
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, np.array(F_xzfl), np.array(F_xzfr), \
-                np.array(F_yzfl), np.array(F_yzfr), np.array(F_xzrl), np.array(F_xzrr), np.array(F_yzrl), \
-                np.array(F_yzrr)
+            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr
 
 
 if __name__ == '__main__':

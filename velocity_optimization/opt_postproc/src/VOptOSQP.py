@@ -1,8 +1,4 @@
 try:
-    import casadi as cs
-except ImportError:
-    print('Warning: No module CasADi found. Not necessary on car but for development.')
-try:
     import sympy as sym
 except ImportError:
     print('Warning: No module sympy found. Not necessary on car but for development.')
@@ -13,138 +9,28 @@ except ImportError:
 import os
 import sys
 import numpy as np
-import time
+import osqp
 import configparser
+import time
 from scipy import sparse
 import matplotlib.pyplot as plt
 
 
-class VOpt_qpOASES:
+class VOptOSQP:
 
-    __slots__ = 'solver'
-
-    def __init__(self,
-                 Hm: np.ndarray,
-                 Am: np.ndarray):
-        """Class to optimize a velocity profile for a given path using the solver qpOASES.
-
-        .. math::
-            \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
-            \mathrm{s.t} \qquad lba \leq A_m x \leq uba
-
-        :param Hm: Hessian problem matrix
-        :param Am: Linearized constraints matrix (Jacobian)
-
-        :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
-
-        :Created on:
-            01.01.2020
-        """
-
-        self.solver = None
-
-        # --- Initialization of qpOASES solver object
-        self.sol_init(Hm=Hm,
-                      Am=Am)
-
-    def sol_init(self,
-                 Hm: np.ndarray,
-                 Am: np.ndarray):
-        """Function to initialize the qpOASES solver.
-
-        :param Hm: Hessian problem matrix
-        :param Am: Linearized constraints matrix (Jacobian)
-
-        :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
-
-        :Created on:
-            01.01.2020
-        """
-
-        opts_qpOASES = {"terminationTolerance": 1e-2,
-                        "printLevel": "low",
-                        "hessian_type": "posdef",
-                        "error_on_fail": False,
-                        "sparse": True}
-
-        # --- Create solver size
-        Hm = cs.DM(Hm)
-        Am = cs.DM(Am)
-
-        # --- Initialize QP-structure
-        QP = dict()
-        QP['h'] = Hm.sparsity()
-        QP['a'] = Am.sparsity()
-
-        self.solver = cs.conic('solver', 'qpoases', QP, opts_qpOASES)
-
-    def solve(self,
-              x0: np.ndarray,
-              Hm: np.ndarray,
-              gv: np.ndarray,
-              Am: np.ndarray,
-              lba: np.ndarray,
-              uba: np.ndarray) -> list:
-        """Function to solve qpOASES optimization problem.
-
-        :param x0: initial guess of optimization variables,
-        :param Hm: Hessian problem matrix
-        :param gv: Jacobian of problem's objective function,
-        :param Am: Linearized constraints matrix
-        :param lba: lower boundary vector constraints
-        :param uba: upper boundary vector constraints
-
-        :return: x_opt: optimized qpOASES solution vector
-
-        :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
-
-        :Created on:
-            01.01.2020
-        """
-
-        # Hessian is constant, no need to overwrite
-        # Hm = DM(Hm)
-        Am = cs.DM(Am)
-        gv = cs.DM(gv)
-
-        # --- Solve QP
-        t0 = time.perf_counter()
-
-        # --- Hessian is constant, no need for update
-        # r = self.solver(x0=x0, h=Hm, g=gv, a=Am, lba=lba, uba=uba)
-        r = self.solver(x0=x0, g=gv, a=Am, lba=lba, uba=uba)
-
-        # --- Re-initialize qpOASES if solver fails
-        if not self.solver.stats()['success']:
-            self.sol_init(Hm=Hm, Am=Am)
-
-        t1 = time.perf_counter()
-
-        # --- Retrieve optimization variables
-        x_opt = r['x']
-
-        print("qpOASES time in ms: ", (t1 - t0) * 1000)
-
-        return x_opt
-
-
-class VOpt_qpOASES2:
     def __init__(self,
                  m: int,
                  sid: str,
                  params_path: str,
                  sol_options: dict,
                  key: str):
-        """Class to optimize a velocity profile for a given path using the solver qpOASES.
+        """Class to optimize a velocity profile for a given path using the solver OSQP.
 
         .. math::
             \min_x \qquad 1/2~x^T H_m x + q^T_v x \n
             \mathrm{s.t} \qquad lba \leq A_m x \leq uba
 
-        More information to the qpOASES Solver can be found at https://www.coin-or.org/qpOASES/doc/3.0/manual.pdf
+        More information to the OSQP Solver can be found at https://osqp.org/
 
         :param m: number of velocity points
         :param sid: optimized ID 'PerfSQP' or 'EmergSQP'
@@ -153,37 +39,33 @@ class VOpt_qpOASES2:
         :param key: key of the used solver
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
-            01.01.2020
+            16.06.2020
         """
 
         self.m = m
         self.sid = sid
         self.F_ini_osqp = []
+
+        self.Car = Car(params_path=params_path)
         self.sol_options = sol_options
         self.key = key
 
-        self.Car = Car(params_path=params_path)
-
-        # --- Select vehicle dynamic model
-        # Point mass model
+        # select the vehicle dynamic model
         if self.sol_options[self.key]['Model'] == "PM":
             self.sol_init_pm(params_path=params_path)
-        # Kinematic bicycle model
         if self.sol_options[self.key]['Model'] == "KM":
             self.sol_init_km(params_path=params_path)
-        # Dynamic bicycle model
         if self.sol_options[self.key]['Model'] == "DM":
             self.sol_init_dm(params_path=params_path)
 
     # Point mass model
     def sol_init_pm(self,
                     params_path: str):
-        """Function to initialize the qpOASES solver by defining the objective function \n
-        and constraints with the CasADi modeling language for the point-mass model.\n
+        """Function to initialize the OSQP solver with the point-mass model \n
+        by defining the objective function and constraints.\n
         Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
         :param params_path: absolute path to folder containing config file .ini
@@ -203,14 +85,12 @@ class VOpt_qpOASES2:
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         sys.path.append(mod_local_trajectory_path)
 
-        filepath = params_path + '/Lambdify_Function/'
-
         if self.sol_options[self.key]['Friction'] == "Circle":
-            file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + ".pkl"
-        if self.sol_options[self.key]['Friction'] == "Diamond":
-            file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + "_" \
-                   + str(self.sol_options[self.key]['Friction']) + ".pkl"
-
+            file = "Osqp" + "_" + "point_mass" + "_" + str(N) + ".pkl"
+        elif self.sol_options[self.key]['Friction'] == "Diamond":
+            file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                   + ".pkl"
+        filepath = params_path + '/Lambdify_Function/'
         filename = filepath + file
         try:
             f = open(filename)
@@ -225,6 +105,7 @@ class VOpt_qpOASES2:
         if available:
             dill.settings['recurse'] = True
             self.P_lam, self.q_lam, self.A_lam, self.lb_lam, self.ub_lam = dill.load(open(filename, "rb"))
+            print("Loaded Data")
 
         else:
             # Decide if Velocity at the beginning and end of the planning horizon is fixed
@@ -232,6 +113,7 @@ class VOpt_qpOASES2:
             vel_end = True
 
             # --- Define Variables ana Parameter:
+
             ############################################################################################################
             # Optimization Variables
             ############################################################################################################
@@ -287,7 +169,9 @@ class VOpt_qpOASES2:
             F_dr = []
             # Calculate force and acceleration
             for k in range(N - 1):
+                # Calculate acceleration from velocity and step length
                 a.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * ds[k]))
+                # Driving Force [kN]
                 F_dr.append(self.Car.m * a[k] + 0.5 * self.Car.rho * self.Car.c_w * self.Car.A * v[k] ** 2)
 
             # --- Boundary Conditions
@@ -327,6 +211,9 @@ class VOpt_qpOASES2:
                     ub.append(1 - a[k] ** 2 / ax_max[k] ** 2 - (kappa[k] * v[k] ** 2) ** 2 / ay_max[k] ** 2)
                     h.append(a[k] ** 2 / ax_max[k] ** 2 + (kappa[k] * v[k] ** 2) ** 2 / ay_max[k] ** 2)
 
+                '''acc ** 2 / ax_max ** 2 + (kappa_param[: - 1] * (v[: - 1] ** 2)) ** 2 / ay_max ** 2 - \
+                oneone_vec_short'''
+
             elif self.sol_options[self.key]['Friction'] == "Diamond":
                 for k in range(N - 1):  # Lateral Acceleration Constraint (DIAMOND) (1/4)
                     lb.append(- np.inf)
@@ -348,7 +235,7 @@ class VOpt_qpOASES2:
                     ub.append(1 + a[k] / ax_max[k] + (kappa[k] * v[k] ** 2) / ay_max[k])
                     h.append(- a[k] / ax_max[k] - (kappa[k] * v[k] ** 2) / ay_max[k])
 
-            # Power
+            # Power Constraint
             for k in range(N - 1):
                 lb.append(- np.inf)
                 ub.append(P_max[k] - F_dr[k] * v[k])
@@ -371,11 +258,15 @@ class VOpt_qpOASES2:
 
             # Save Lambdified_Function
             print('Save Matrix to File')
+            mod_local_trajectory_path = os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            sys.path.append(mod_local_trajectory_path)
             if self.sol_options[self.key]['Friction'] == "Circle":
-                file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + ".pkl"
+                file = "Osqp" + "_" + "point_mass" + "_" + str(N) + ".pkl"
             elif self.sol_options[self.key]['Friction'] == "Diamond":
-                file = "qpOASES" + "_" + "point_mass" + "_" + str(N) + "_" \
-                       + str(self.sol_options[self.key]['Friction']) + ".pkl"
+                file = "Osqp" + "_" + "point_mass" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                       + ".pkl"
+
             filepath = params_path + '/Lambdify_Function/'
             filename = filepath + file
             os.makedirs(filepath, exist_ok=True)
@@ -386,8 +277,8 @@ class VOpt_qpOASES2:
     # Kinematic bicycle model
     def sol_init_km(self,
                     params_path: str):
-        """Function to initialize the qpOASES solver by defining the objective function \n
-        and constraints with the CasADi modeling language for the kinematic-bicycle model.\n
+        """Function to initialize the OSQP solver with the kinematic bicycle model \n
+        by defining the objective function and constraints.\n
         Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
         :param params_path: absolute path to folder containing config file .ini
@@ -398,19 +289,19 @@ class VOpt_qpOASES2:
         :Created on:
             16.06.2020
         """
-        # Planing horizon
+
+        # Length of planning horizion
         N = self.m
 
+        # Open Lambdified Functions if they are saved
         if self.sol_options[self.key]['Friction'] == "Circle":
-            # if self.fric_model == "circle":
-            file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
-        if self.sol_options[self.key]['Friction'] == "Diamond":
-            # elif self.fric_model == "diamond":
-            file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
-                   + str(self.sol_options[self.key]['Friction']) + str(
-                self.sol_options[self.key]['Friction']) + ".pkl"
+            file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
+        elif self.sol_options[self.key]['Friction'] == "Diamond":
+            file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
+                   + str(self.sol_options[self.key]['Friction']) + ".pkl"
         filepath = params_path + '/Lambdify_Function/'
         filename = filepath + file
+
         try:
             f = open(filename)
             available = True
@@ -438,7 +329,7 @@ class VOpt_qpOASES2:
             # velocity [m/s]
             v = sym.symbols('v0:%d' % (N))
             # Optimization Vector
-            var = v
+            var = v  # + delta + F_dr + v_delta
 
             ############################################################################################################
             # Parameter
@@ -447,12 +338,10 @@ class VOpt_qpOASES2:
             kappa = sym.symbols('kappa0:%d' % (N))
             # discretization step length [m]
             ds = sym.symbols('ds:0%d' % (N - 1))
-            # initial velocity [m/s]
-            v_ini = sym.symbols('v_ini')
             # end velocity [m/s]
             v_end = sym.symbols('v_end')
             # max. power [kW]
-            P_max = sym.symbols('P_max0:%d' % (N))
+            P_max = sym.symbols('P_max0:%d' % (N - 1))
             # max. acceleration in x-direction of the vehicle [m/s²]
             ax_max = sym.symbols('ax_max0:%d' % (N))
             # max. acceleration in y-direction of the vehicle [m/s²]
@@ -476,17 +365,19 @@ class VOpt_qpOASES2:
             ############################################################################################################
             # Constraints
             ############################################################################################################
-            # Calculate Acceleration and Driving Force
+            # Calculate Acceleration [m/s²] and Driving Force [kN]
             a = []
             F_dr = []
             for k in range(N - 1):
                 a.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * ds[k]))
                 F_dr.append(self.Car.m * a[k] + 0.5 * self.Car.rho * self.Car.c_w * self.Car.A * v[k] ** 2)
-            # Calculate Steer Angle
+
+            # Calculate Steer Angle [rad]
             delta = []
             for k in range(N):
                 delta.append(sym.atan2(kappa[k] * self.Car.L, 1))
-            # Calculate Time Step
+
+            # Calculate Time Step [s]
             dt = []
             for k in range(N - 1):
                 dt.append(-v[k] / a[k] + ((v[k] / a[k]) ** 2 + 2 * ds[k] / a[k]) ** 0.5)
@@ -504,8 +395,8 @@ class VOpt_qpOASES2:
                     lb.append(self.Car.v_min - v[k])
                     h.append(v[k])
                 elif k == 0 and vel_start:
-                    ub.append(v_ini - v[k])
-                    lb.append(self.Car.v_min - v[k])
+                    ub.append(0.0)
+                    lb.append(0.0)
                     h.append(v[k])
                 else:
                     lb.append(self.Car.v_min - v[k])
@@ -528,8 +419,8 @@ class VOpt_qpOASES2:
             if self.sol_options[self.key]['Friction'] == "Circle":
                 for k in range(N - 1):  # Lateral Acceleration Constraint (CIRCLE)
                     lb.append(-np.inf)
-                    ub.append(self.Car.a_lat_max ** 2 - a[k] ** 2 - (kappa[k] * v[k] ** 2) ** 2)
-                    h.append(a[k] ** 2 + (kappa[k] * v[k] ** 2) ** 2)
+                    ub.append(1 - a[k] ** 2 / ax_max[k] ** 2 - (kappa[k] * v[k] ** 2) ** 2 / ay_max[k] ** 2)
+                    h.append(a[k] ** 2 / ax_max[k] ** 2 + (kappa[k] * v[k] ** 2) ** 2 / ay_max[k] ** 2)
 
             elif self.sol_options[self.key]['Friction'] == "Diamond":
                 for k in range(N - 1):  # Lateral Acceleration Constraint (DIAMOND) (1/4)
@@ -564,9 +455,9 @@ class VOpt_qpOASES2:
 
             # Lambdify
             print('Lambdify Matrix A, lb and ub')
-            A_lam = sym.lambdify([v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max], A, 'numpy')
-            lb_lam = sym.lambdify([v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max], lb, 'numpy')
-            ub_lam = sym.lambdify([v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max], ub, 'numpy')
+            A_lam = sym.lambdify([v, ds, kappa, v_end, P_max, ax_max, ay_max], A, 'numpy')
+            lb_lam = sym.lambdify([v, ds, kappa, v_end, P_max, ax_max, ay_max], lb, 'numpy')
+            ub_lam = sym.lambdify([v, ds, kappa, v_end, P_max, ax_max, ay_max], ub, 'numpy')
             self.P_lam = P_lam
             self.q_lam = q_lam
             self.A_lam = A_lam
@@ -578,26 +469,22 @@ class VOpt_qpOASES2:
             mod_local_trajectory_path = os.path.dirname(
                 os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
             sys.path.append(mod_local_trajectory_path)
-            if self.sol_options[self.key]['Friction'] == "Circle":
-                # if self.fric_model == "circle":
-                file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
-            if self.sol_options[self.key]['Friction'] == "Diamond":
-                # elif self.fric_model == "diamond":
-                file = "qpOASES" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" \
-                       + str(self.sol_options[self.key]['Friction']) + str(
-                    self.sol_options[self.key]['Friction']) + ".pkl"
-            filepath = params_path + '/Lambdify_Function/'
-            filename = filepath + file
-            os.makedirs(filepath, exist_ok=True)
 
-            dill.settings['recurse'] = True
-            dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
+            if self.sol_options[self.key]['Friction'] == "Circle":
+                file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + ".pkl"
+            elif self.sol_options[self.key]['Friction'] == "Diamond":
+                file = "Osqp" + "_" + "kinematic_bicycle" + "_" + str(N) + "_" + str(
+                    self.sol_options[self.key]['Friction']) + ".pkl"
+            filename = mod_local_trajectory_path + '/vp_qp/opt_postproc/src/Lambdify_Function/' + file
+
+            '''dill.settings['recurse'] = True
+            dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))'''
 
     # Dynamic bicycle model
     def sol_init_dm(self,
                     params_path: str):
-        """Function to initialize the qpOASES solver by defining the objective function \n
-        and constraints with the CasADi modeling language for the dynamic-bicycle model.\n
+        """Function to initialize the OSQP solver with the dynamic-bicycle model \n
+        by defining the objective function and constraints.\n
         Saves the matrix and vectors in order to re-use the same QP and avoid recalculations.
 
         :param params_path: absolute path to folder containing config file .ini
@@ -609,20 +496,27 @@ class VOpt_qpOASES2:
             16.06.2020
         """
 
-        # Planing horizon
+        # Length of planning horizion
         N = self.m
 
+        # Open lambdified functions if possible
         mod_local_trajectory_path = os.path.dirname(
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         sys.path.append(mod_local_trajectory_path)
-        file = "qpOASES" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
+
+        if self.sol_options[self.key]['Friction'] == "Circle":
+            file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
+        elif self.sol_options[self.key]['Friction'] == "Diamond":
+            file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + "_" + str(self.sol_options[self.key]['Friction']) \
+                   + ".pkl"
         filepath = params_path + '/Lambdify_Function/'
         filename = filepath + file
+
         try:
             f = open(filename)
             available = True
         except IOError:
-            print("File not accessible")
+            print("Lambda functions file not accessible! Rebuilding ...")
             available = False
         finally:
             if available:
@@ -796,9 +690,8 @@ class VOpt_qpOASES2:
                                  / self.Car.F_z0 * sym.sin(self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k]
                                                                                     - self.Car.E_r
                                                                                     * (self.Car.B_r * alpha_r[k]
-                                                                                       - sym.atan2(self.Car.B_r
-                                                                                                   * alpha_r[k], 1)),
-                                                                                    1)))
+                                                                                    - sym.atan2(self.Car.B_r
+                                                                                                * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
                 ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sym.sin(delta[k]) + F_yf[k] * sym.cos(delta[k]))
@@ -920,7 +813,7 @@ class VOpt_qpOASES2:
                                        # Braking and Driving Force Constraint
                                        - 0.02 - F_dr[k] * F_br[k],
                                        # Constraint Derivative of Driving Force
-                                       self.Car.F_br_max * self.Car.v_max,
+                                       - np.inf,
                                        # Constraint Derivative of Braking Force
                                        self.Car.F_br_max - ((F_br[k + 1] - F_br[k]) / (ds[k] / v[k])),
                                        # Constraint Derivative of Steer Angle
@@ -938,7 +831,7 @@ class VOpt_qpOASES2:
                                        # Constraint Derivative of Driving Force
                                        self.Car.F_dr_max - ((F_dr[k + 1] - F_dr[k]) / (ds[k] / v[k])),
                                        # Constraint Derivative of Braking Force
-                                       self.Car.F_dr_max * self.Car.v_max,
+                                       np.inf,
                                        # Constraint Derivative of Steer Angle
                                        self.Car.delta_max - ((delta[k + 1] - delta[k]) / (ds[k] / v[k])),
                                        # Kamm Circle Front Axle
@@ -970,11 +863,14 @@ class VOpt_qpOASES2:
             self.ub_lam = ub_lam
 
             # Save Lambdified_Function
-            print('Save Matrix to File')
-            mod_local_trajectory_path = os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-            sys.path.append(mod_local_trajectory_path)
-            file = "qpOASES" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
+            print('Save Lambdified functions to File')
+
+            if self.sol_options[self.key]['Friction'] == "Circle":
+                file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + ".pkl"
+            elif self.sol_options[self.key]['Friction'] == "Diamond":
+                file = "Osqp" + "_" + "dynamic_bicycle" + "_" + str(N) + "_" + str(
+                    self.sol_options[self.key]['Friction']) + ".pkl"
+
             filepath = params_path + '/Lambdify_Function/'
             filename = filepath + file
             os.makedirs(filepath, exist_ok=True)
@@ -982,96 +878,20 @@ class VOpt_qpOASES2:
             dill.settings['recurse'] = True
             dill.dump([P_lam, q_lam, A_lam, lb_lam, ub_lam], open(filename, "wb"))
 
-    def create_solver(self,
-                      Hm: np.ndarray,
-                      Am: np.ndarray):
-        """Function to initialize the qpOASES solver.
-
-        :param Hm: Hessian problem matrix
-        :param Am: Linearized constraints matrix (Jacobian)
-
-        :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de> \n
-            Tobias Klotz <tobias.klotz@tum.de>
-
-        :Created on:
-            16.06.2020
-        """
-
-        self.solver = None
-
-        opts_qpOASES = {"terminationTolerance": 1e-3,
-                        "printLevel": "low",
-                        "hessian_type": "posdef",
-                        "error_on_fail": False,
-                        "sparse": True}
-
-        # --- Create solver size
-        Hm = cs.DM(Hm)
-        Am = cs.DM(Am)
-
-        # --- Initialize QP-structure
-        QP = dict()
-        QP['h'] = Hm.sparsity()
-        QP['a'] = Am.sparsity()
-
-        self.solver = cs.conic('solver', 'qpoases', QP, opts_qpOASES)
-
-    def solve(self,
-              x0: np.ndarray,
-              Hm: np.ndarray,
-              gv: np.ndarray,
-              Am: np.ndarray,
-              lba: np.ndarray,
-              uba: np.ndarray) -> list:
-        """Function to solve qpOASES optimization problem.
-
-        :param x0: initial guess of optimization variables,
-        :param Hm: Hessian problem matrix
-        :param gv: Jacobian of problem's objective function,
-        :param Am: Linearized constraints matrix
-        :param lba: lower boundary vector constraints
-        :param uba: upper boundary vector constraints
-
-        :return: x_opt: optimized qpOASES solution vector
-
-        :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de>
-
-        :Created on:
-            01.01.2020
-        """
-
-        Hm = cs.DM(Hm)
-        Am = cs.DM(Am)
-        gv = cs.DM(gv)
-
-        # --- Solve QP
-        r = self.solver(x0=x0, h=Hm, g=gv, a=Am, lba=lba, uba=uba)
-
-        # --- Re-initialize qpOASES if solver fails
-        if not self.solver.stats()['success']:
-            pass
-
-        # --- Retrieve optimization variables
-        x_opt = r['x']
-        cost = r['cost']
-        print(self.solver.stats()['success'])
-
-        return x_opt, cost, self.solver.stats()
-
-    def calc_v_qpOASES(self,
-                       N: int,
-                       ds: np.ndarray,
-                       kappa: np.ndarray,
-                       P_max: np.array = None,
-                       ax_max: np.array = None,
-                       ay_max: np.array = None,
-                       x0_v: np.ndarray = None,
-                       v_max: np.ndarray = None,
-                       v_end: float = None,
-                       F_ini: float = None):
-        """Function to update the paramter vector and initial guess for the solution.
+    def calc_v_osqp(self,
+                    N: int,
+                    ds: np.ndarray,
+                    kappa: np.ndarray,
+                    P_max: float = None,
+                    ax_max: np.array = None,
+                    ay_max: np.array = None,
+                    x0_v: np.ndarray = None,
+                    v_max: np.ndarray = None,
+                    v_end: float = None,
+                    F_ini: float = None
+                    ):
+        """Function to update the matrix and functions for the optimization problem. \n
+        Solve the optimization problem with the solver OSQP.
 
         :param N: number of velocity points
         :param ds: discretization step length of given path [m]
@@ -1084,28 +904,24 @@ class VOpt_qpOASES2:
         :param v_end: hard constrained max. allowed value of end velocity in optimization horizon [m/s]
         :param F_ini: hard constrained initial force [kN]
 
-        :return: sol: solution of the QP \n
-            dt_qpOASES: runtime of the solver qpOASES [ms] \n
-            sol_status: status of the solution (solved, infeasible, etc.)
+        :return: v: v: optimized velocity [m/s] \n
+            F: optimize powertrain force [kN] \n
+            P: optimized power force [kW] \n
+            ax: acceleration in x-direction of CoG [m/s²] \n
+            ay: acceleration in y-direction of CoG [m/s²]
+            t_total: runtime of the solver OSQP [ms] \n
+            res.info.status: status of the solution (solved, infeasible, etc.)
 
         :Authors:
-            Thomas Herrmann <thomas.herrmann@tum.de> \n
             Tobias Klotz <tobias.klotz@tum.de>
 
         :Created on:
-            01.01.2020
+            16.06.2020
         """
 
-        # Calculate orientation along the planning horizon of the vehicle from the discretization step length and
-        # curvature
-        psi = np.zeros(N)
-        psi[0] = 0.0
-        for k in range(len(kappa) - 1):
-            psi[k + 1] = psi[k] + kappa[k] * ds[k]
-
-        # Initialize point mass model
+        # Initialisation of Optimization with the Point mass model
         if self.sol_options[self.key]['Model'] == "PM":
-            # initial guess of velocity profile
+            # Initialize Velocity
             if not v_end:
                 v_end = self.Car.v_end
             if len(x0_v) == 0:
@@ -1117,185 +933,287 @@ class VOpt_qpOASES2:
                 else:
                     v[0] = x0_v[0]
 
+            # Initialize Velocity k=0
             v_ini = x0_v[0]
 
-            # inital force [kN]
+            # Initialize Force k=0
             if F_ini == []:
                 F_ini = 0.0
-            # max. power [kW]
-            if self.sol_options[self.key]['VarPower']:
+
+            # Initialize max. Power
+            P_max = self.Car.P_max * np.ones(N)
+            '''if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N)
-            # max. velocity [m/s]
+                P_max = self.Car.P_max * np.ones(N)'''
+            # Initialize max. velocity
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
-            # max.a cceleration [m/s²]
+            # Initialize max. acceleration
             if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
             if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
 
-            # initial optimization vector
-            x0 = np.zeros(N)
-
-            # choose step length
+            '''# Choose step length
             if self.sol_options[self.key]['Friction'] == "Diamond":
-                alpha = 1
+                if self.sol_options[self.key]['VarPower']:
+                    alpha = 0.2
+                else:
+                    alpha = 1
             elif self.sol_options[self.key]['Friction'] == "Circle":
-                alpha = 0.5
-
-            # Step length
+                alpha = 0.4
+            else:
+                alpha = 1'''
+            # Choose step length
             alpha = self.sol_options[self.key]['Alpha']
+            pass
 
-        # initialize kinematic bicycle model
+        # Kineamtic bicycle model
         elif self.sol_options[self.key]['Model'] == "KM":
-            # initial velocity
+            # Initialize Velocity
             if len(x0_v) == 0:
                 v = v_end * np.ones(N)
                 v[0] = 0.1
             else:
-                v = x0_v
+                v = 0.9 * x0_v
                 if x0_v[0] == 0:
                     v[0] = 0.1
-            if not v_end:
-                v_end = self.Car.v_end
-            v_ini = x0_v[0]
-            # max. power [kW]
-            if self.sol_options[self.key]['VarPower']:
-                pass
-            else:
-                P_max = self.Car.P_max * np.ones(N)
-            # max. acceleration [m/s²]
-            if ax_max is None:
-                ax_max = self.Car.a_max * np.ones(N)
-            if ay_max is None:
-                ay_max = self.Car.a_lat_max * np.ones(N)
-            # initial optimization vector
-            x0 = np.zeros(N)
-
-            # Step length
-            alpha = self.sol_options[self.key]['Alpha']
-
-        # dynamic bicycle model
-        elif self.sol_options[self.key]['Model'] == "DM":
-            # initial velocity
-            if not v_end:
-                v_end = self.Car.v_end
-            v = np.ones(N) * 5
-            v_ini = x0_v[0]
-
-            # iniital force [kN]
+            # Initialize Force
             if F_ini == []:
                 F_ini = 0.0
-            # max. power [kW]
+            # Initialize max. Power
             if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N)
-            # max. velocity
-            if v_max.size == 0:
+                P_max = self.Car.P_max * np.ones(N - 1)
+            # Initialize max. velocity
+            if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
-            # max. acceleration [m/s²]
+            # Initialize max. acceleartion
             if ax_max is None:
                 ax_max = self.Car.a_max * np.ones(N)
             if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
-            # initial guess of slip angle [rad]
-            beta = np.zeros(N)
-            # initial guess of driving force [kN]
-            F_dr = np.zeros(N - 1)
-            # initial guess of braking force [kN]
-            F_br = np.zeros(N - 1)
+            # Initialize end velocity
+            if v_end is None:
+                v_end = self.Car.v_end
 
+            # Choose step length
+            alpha = self.sol_options[self.key]['Alpha']
+
+        # Dynamic bicycle model
+        elif self.sol_options[self.key]['Model'] == "DM":
+            # Initialize end velocity
+            if not v_end:
+                v_end = self.Car.v_end
+            # Initialize start velocity
+            if x0_v[0] == 0:
+                v_ini = 0.1
+            # Initialize velocity
+            else:
+                v_ini = x0_v[0]
+            v = v_end * np.ones(N)
+            if x0_v[0] == 0:
+                v[0] = 0.1
+
+            # Initialize Force
+            if F_ini == []:
+                F_ini = 0.0
+            # Initialize max. power
+            P_max = self.Car.P_max * np.ones(N)
+            if self.sol_options[self.key]['VarPower']:
+                pass
+            else:
+                P_max = self.Car.P_max * np.ones(N)
+            # Initialize max. velocity
+            if v_max == []:
+                v_max = self.Car.v_max * np.ones(N)
+            # Initialize max. acceleartion
+            if ax_max is None:
+                ax_max = self.Car.a_max * np.ones(N)
+            if ay_max is None:
+                ay_max = self.Car.a_lat_max * np.ones(N)
+
+            # Initialize Optimization variables
+            beta = np.zeros(N)  # slip angle
+            F_dr = np.zeros(N - 1)  # driving force
+            F_br = np.zeros(N - 1)  # braking force
             if F_ini > 0:
                 F_dr[0] = F_ini
             else:
                 F_br[0] = F_ini
-            # initial steer angle [rad]
-            delta = np.zeros(N - 1)
-            # fit curvature to length of planing horizon [1/m]
-            kappa = kappa[0:N]
+            delta = np.zeros(N - 1)  # steer angle
 
-            # inital optimization vector
-            x0 = np.zeros(5 * N - 3)
+            kappa = kappa[0:N]  # curvature
 
-            # alpha = 0.01
             # Choose step length
-            alpha = self.sol_options[self.key]['Alpha']
+            alpha = self.sol_options[self.key]['Alpha']  # alpha = 0.1
 
-        # initialization of while-loop
-        count = True
-        t = []
-        save_obj = []
-        counter = 0
+        # While-Loop to Solve the QPs
+        count = True    # maximum number iterations reached
+        infeasible = False    # solution is infeasible
+        t = []  # save calculation time
+        save_obj = []   # save objective
+        counter = 0     # count the iterations
+        v_start = 0.1
         while count:
             # Fill Matrix P, q, A, b, G, h
             if self.sol_options[self.key]['Model'] == "PM":
-                # Compute Matrix Inputs with values from last iteration
-                P = self.P_lam(v, ds)
-                q = np.array(self.q_lam(v, ds).T)
-                A = self.A_lam(v, F_ini, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max)
-                lbo = np.array(self.lb_lam(v, F_ini, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
-                ubo = np.array(self.ub_lam(v, F_ini, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
-            elif self.sol_options[self.key]['Model'] == "KM":
-                P = self.P_lam(v, ds)
-                q = np.array(self.q_lam(v, ds).T)
-                A = self.A_lam(v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max)
-                lbo = np.array(self.lb_lam(v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max))
-                ubo = np.array(self.ub_lam(v, ds, kappa, v_ini, v_end, P_max, ax_max, ay_max))
-            elif self.sol_options[self.key]['Model'] == "DM":
-
                 P = sparse.csc_matrix(self.P_lam(v, ds))
+                # pprint(P)
                 q = np.array(self.q_lam(v, ds).T)
+                # pprint(q)
+                A = sparse.csc_matrix(self.A_lam(v, F_ini, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                # pprint(A)
+                lbo = np.array(self.lb_lam(v, F_ini, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                # pprint(lbo)
+                ubo = np.array(self.ub_lam(v, F_ini, ds, kappa, v_ini, v_end, v_max, P_max, ax_max, ay_max))
+                # pprint(ubo)
+            elif self.sol_options[self.key]['Model'] == "KM":
+                P = sparse.csc_matrix(self.P_lam(v, ds))
+                # pprint(P)
+                q = np.array(self.q_lam(v, ds).T)
+                # pprint(q)
+                A = sparse.csc_matrix(self.A_lam(v, ds, kappa, v_end, P_max, ax_max, ay_max))
+                # pprint(A)
+                lbo = np.array(self.lb_lam(v, ds, kappa, v_end, P_max, ax_max, ay_max))
+                # pprint(lbo)
+                ubo = np.array(self.ub_lam(v, ds, kappa, v_end, P_max, ax_max, ay_max))
+                # pprint(ubo)
+            elif self.sol_options[self.key]['Model'] == "DM":
+                P = sparse.csc_matrix(self.P_lam(v, ds))
+                # pprint(P)
+                q = np.array(self.q_lam(v, ds).T)
+                # pprint(q)
                 A = sparse.csc_matrix(self.A_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max,
                                                  ax_max, ay_max))
+                # pprint(A)
                 lbo = np.array(self.lb_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
                                            ay_max))
+                # pprint(lbo)
                 ubo = np.array(self.ub_lam(v, beta, F_dr, F_br, delta, ds, kappa, v_ini, v_end, v_max, P_max, ax_max,
                                            ay_max))
 
-            # QP-Oases Test
+            # Start timer
             t0 = time.perf_counter()
-            # Create Solver
-            self.create_solver(Hm=P, Am=A)
 
-            P_spar = sparse.csc_matrix(P)
-            A_spar = sparse.csc_matrix(A)
+            # Create an OSQP object
+            prob = osqp.OSQP()
+
+            # Setup workspace
+            prob.setup(P, q, A, lbo, ubo, warm_start=True, verbose=0)
+
             # Solve
-            x, obj_val, sol_status = self.solve(x0=x0, Hm=P_spar, gv=q, Am=A_spar, lba=lbo, uba=ubo)
+            res = prob.solve()
 
+            # Stop Timer
             t1 = time.perf_counter()
+
             # save Calculation Time
             t.append(t1 - t0)
+            print(res.info.status)
 
-            # Count iterations
-            if counter == 30:
-                t_total = sum(t) * 1000
+            if counter == 30:  # stop while-loop due to max. iteartions reached
+                t_total = sum(t)
                 count = False
             else:
                 counter += 1
 
-            # Adapt optimization variables
-            v_new = []
-            # point-mass model
-            if self.sol_options[self.key]['Model'] == "PM" or self.sol_options[self.key]['Model'] == "KM":
-                for k in range(N):
-                    v_new.append(v[k] + alpha * x[k])
-                v = v_new
+            # Check if solution could be found
+            if res.info.status == 'maximum iterations reached':
+                t_total = sum(t)
+                # count = False
+                print('No solution')
 
-            elif self.sol_options[self.key]['Model'] == "DM":
-                sol = np.array(x)
-                # v(N): Velocity
-                v += alpha * sol[0:N].reshape(sol[0:N].shape[0],)
-                # beta(N): Slip Angle
-                beta += alpha * sol[N:2 * N].reshape(sol[N:2 * N].shape[0],)
-                # F_dr(N-1): Driving Force
-                F_dr += alpha * sol[2 * N:3 * N - 1].reshape(sol[2 * N:3 * N - 1].shape[0],)
-                # F_br(N-1): Braking Force
-                F_br += alpha * sol[3 * N - 1:4 * N - 2].reshape(sol[3 * N - 1:4 * N - 2].shape[0],)
-                # delta(N-1): Steering Angle
-                delta += alpha * sol[4 * N - 2:5 * N - 3].reshape(sol[4 * N - 2:5 * N - 3].shape[0],)
+            # Adapt Velocity, Acceleration, Delta and Time with new values
+            if res.info.status == 'primal infeasible':
+                # Try restart if no solution could be found
+                if self.sol_options[self.key]['Model'] == "PM" or self.sol_options[self.key]['Model'] == "KM":
+                    if abs(res.info.obj_val) < 0.1:
+                        pass
+                    else:
+                        if infeasible:
+                            print('Try new start')
+                            v = v_end * np.ones(N)
+                            v_start = 0.9 * v_start
+                            v[0] = v_start
+                            F_ini = 0.0
+                            alpha = 1
+
+                        else:
+                            print('Try new start')
+                            v = v_end * np.ones(N)
+                            v_start = 0.9 * x0_v[0]
+                            v[0] = v_start
+                            # F_ini = 0.0
+                            alpha = 0.1
+                            infeasible = True
+
+            else:
+                # Adapt optimaization variables with solution
+                if self.sol_options[self.key]['Model'] == "PM":
+                    v += alpha * res.x[0:N]  # v(N): Velocity
+
+                elif self.sol_options[self.key]['Model'] == "KM":
+                    v += alpha * res.x[0:N]  # v(N): Velocity
+
+                elif self.sol_options[self.key]['Model'] == "DM":
+                    if counter == 2:
+                        alpha = 0.2
+                    v += alpha * res.x[0:N]  # v(N): Velocity
+                    beta += alpha * res.x[N:2 * N]  # beta(N): Slip Angle
+                    F_dr += alpha * res.x[2 * N:3 * N - 1]  # F_dr(N-1): Driving Force
+                    F_br += alpha * res.x[3 * N - 1:4 * N - 2]  # F_br(N-1): Braking Force
+                    delta += alpha * res.x[4 * N - 2:5 * N - 3]  # delta(N-1): Steering Angle
+
+                # Check objective if it is below the tolerance
+                if not len(save_obj) == 0 and self.sol_options[self.key]['Model'] == "DM":
+                    # adaptive alpha control for dynamic bicylcle model
+                    if abs(res.info.obj_val) < 0.001:
+                        t_total = sum(t)
+                        count = False
+                        pass
+                    elif abs(res.info.obj_val) < 0.01:
+                        alpha = 1
+                        t_total = sum(t)
+                        # count = False
+                    elif abs(res.info.obj_val) < 1:
+                        alpha = 0.5
+                    elif abs(res.info.obj_val) < 3:
+                        alpha = 0.4
+
+                elif not len(save_obj) == 0:
+                    # adaptive alpha control for friction circel with point mass model and kineamtic bicylce model
+                    if abs(res.info.obj_val) < 2 and self.sol_options[self.key]['Friction'] == "Circle":
+                        alpha = 0.2
+                    if abs(res.info.obj_val) < 0.2 and (self.sol_options[self.key]['Friction'] == "Circle"
+                                                        ):
+                        alpha = 0.2
+                    if abs(res.info.obj_val) < 0.01:
+                        t_total = sum(t)
+                        count = False
+
+                save_obj = np.append(save_obj, res.info.obj_val)
+
+        # Return solution, velocity and result
+        if res.info.status == 'primal infeasible':
+            v = np.zeros(N)
+            F = np.zeros(N - 1)
+            P = np.zeros(N - 1)
+            ax = np.zeros(N - 1)
+            ay = np.zeros(N - 1)
+            F_xf = []
+            F_yf = []
+            F_xr = []
+            F_yr = []
+        else:
+            if self.sol_options[self.key]['Model'] == "PM":
+                sol = v
+
+            if self.sol_options[self.key]['Model'] == "KM":
+                sol = v
+            if self.sol_options[self.key]['Model'] == "DM":
                 sol = []
                 sol.append(v)
                 sol.append(beta)
@@ -1304,46 +1222,9 @@ class VOpt_qpOASES2:
                 sol.append(delta)
                 sol = np.concatenate(sol)
 
-                # v, F, P, ax, ay = self.transform_results(sol, ds, kappa, N)
+            v, F, P, ax, ay, F_xf, F_yf, F_xr, F_yr = self.transform_results(sol, ds, kappa, N)
 
-            if not len(save_obj) == 0 and self.sol_options[self.key]['Model'] == "DM":
-                # adaptive alpha control for dynamic bicylcle model
-                if abs(obj_val) < 0.001:
-                    t_total = sum(t)
-                    count = False
-                    pass
-                elif abs(obj_val) < 0.01:
-                    alpha = 1
-                    t_total = sum(t)
-                    count = False
-                elif abs(obj_val) < 1:
-                    alpha = 0.4
-                elif abs(obj_val) < 3:
-                    alpha = 0.4
-
-            # Stop criteria
-            if not len(save_obj) == 0:
-                if abs(obj_val) < 0.0001:
-                    t_total = sum(t) * 1000
-                    count = False
-            save_obj = np.append(save_obj, obj_val)
-
-        if self.sol_options[self.key]['Model'] == "PM":
-            sol = v
-        if self.sol_options[self.key]['Model'] == "KM":
-            sol = v
-        if self.sol_options[self.key]['Model'] == "DM":
-            sol = []
-            sol.append(v)
-            sol.append(beta)
-            sol.append(F_dr)
-            sol.append(F_br)
-            sol.append(delta)
-            sol = np.concatenate(sol)
-
-        v, F, P, ax, ay, F_xf, F_yf, F_xr, F_yr = self.transform_results(sol, ds, kappa, N)
-
-        return v, F, P, ax, ay, F_xf, F_yf, F_xr, F_yr, t_total, sol_status['success']
+        return v, F, P, ax, ay, F_xf, F_yf, F_xr, F_yr, t_total, res.info.status
 
     def transform_results(self, sol, ds, kappa, N):
         """Function to re-calculate the optimization variables of the QP.
@@ -1370,9 +1251,8 @@ class VOpt_qpOASES2:
         F_xzr = []
         F_yzf = []
         F_yzr = []
-
         if self.sol_options[self.key]['Model'] == "PM":
-            v = np.asarray(sol)
+            v = sol
 
             # Calculate Acceleration
             ax = (v[1:self.m] ** 2 - v[0:self.m - 1] ** 2) / (2 * ds[0:self.m - 1])
@@ -1386,7 +1266,7 @@ class VOpt_qpOASES2:
             P = F * v[0:-1]
 
         elif self.sol_options[self.key]['Model'] == "KM":
-            v = np.asarray(sol)
+            v = sol
 
             # Calculate Acceleration
             ax = (v[1:self.m] ** 2 - v[0:self.m - 1] ** 2) / (2 * ds[0:self.m - 1])
@@ -1430,8 +1310,8 @@ class VOpt_qpOASES2:
                                     delta[k] - sym.atan2(
                                         (self.Car.l_f * kappa[k] * v[k] / (2 * np.pi) + v[k] * sym.sin(beta[k])),
                                         (v[k] * sym.cos(beta[k]))))
-                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k] * v[k]
-                                                        / (2 * np.pi) - v[k] * sym.sin(beta[k])),
+                alpha_r = np.append(alpha_r, sym.atan2((self.Car.l_r * kappa[k]
+                                                        * v[k] / (2 * np.pi) - v[k] * sym.sin(beta[k])),
                                                        (v[k] * sym.cos(beta[k]))))
 
                 # aerodynamic resistance [kN]
@@ -1448,25 +1328,26 @@ class VOpt_qpOASES2:
                 # force at axle in z-direction (front & rear)
                 F_zf = np.append(F_zf, self.Car.m * self.Car.g * self.Car.l_r
                                  / (self.Car.l_r + self.Car.l_f) - self.Car.h_cg
-                                 / (self.Car.l_r + self.Car.l_f)
-                                 * ma_x[k] + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
+                                 / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lf * self.Car.rho * self.Car.A * v[k] ** 2)
                 F_zr = np.append(F_zr, self.Car.m * self.Car.g * self.Car.l_f
                                  / (self.Car.l_r + self.Car.l_f) + self.Car.h_cg
-                                 / (self.Car.l_r + self.Car.l_f)
-                                 * ma_x[k] + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
+                                 / (self.Car.l_r + self.Car.l_f) * ma_x[k]
+                                 + 0.5 * self.Car.c_lr * self.Car.rho * self.Car.A * v[k] ** 2)
 
                 # force at axle in y-direction (front & rear)
-                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[
-                    k] / self.Car.F_z0 * sym.sin(
-                    self.Car.C_f * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f
-                                             * (self.Car.B_f * alpha_f[k] - sym.atan2(self.Car.B_f * alpha_f[k], 1)),
-                                             1)))
+                F_yf = np.append(F_yf, self.Car.D_f * (1 + self.Car.eps_f * F_zf[k] / self.Car.F_z0) * F_zf[k]
+                                 / self.Car.F_z0
+                                 * sym.sin(self.Car.C_f
+                                           * sym.atan2(self.Car.B_f * alpha_f[k] - self.Car.E_f
+                                                       * (self.Car.B_f * alpha_f[k]
+                                                          - sym.atan2(self.Car.B_f * alpha_f[k], 1)), 1)))
                 F_yr = np.append(F_yr, self.Car.D_r * (1 + self.Car.eps_r * F_zr[k] / self.Car.F_z0) * F_zr[k]
                                  / self.Car.F_z0
-                                 * sym.sin(self.Car.C_r * sym.atan2(self.Car.B_r * alpha_r[k]
-                                                                    - self.Car.E_r
-                                                                    * (self.Car.B_r * alpha_r[k]
-                                                                       - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
+                                 * sym.sin(self.Car.C_r
+                                           * sym.atan2(self.Car.B_r * alpha_r[k] - self.Car.E_r
+                                                       * (self.Car.B_r * alpha_r[k]
+                                                          - sym.atan2(self.Car.B_r * alpha_r[k], 1)), 1)))
 
                 # total force in y-direction at CoG
                 ma_y = np.append(ma_y, F_yr[k] + F_xf[k] * sym.sin(delta[k]) + F_yf[k] * sym.cos(delta[k]))
@@ -1482,7 +1363,7 @@ class VOpt_qpOASES2:
             F_xzr = (F_xr / F_zr)
             F_yzr = (F_yr / F_zr)
 
-            do_plot = True
+            do_plot = False
             if do_plot is True:
                 # TUM Color
                 TUMBlue = [0 / 255, 101 / 255, 189 / 255]
@@ -1532,9 +1413,10 @@ class Car:
         :Authors:
             Tobias Klotz <tobias.klotz@tum.de>
 
-        :Created on:
+            :Created on:
             16.06.2020
         """
+
         opt_config = configparser.ConfigParser()
         if not opt_config.read(params_path + 'sqp_config.ini'):
             raise ValueError('Specified cost config file does not exist or is empty!')
@@ -1588,7 +1470,3 @@ class Car:
 
         self.g = opt_config.getfloat('CAR_PARAMETER', 'g')  # [m/s²] Gravitational Constant on Earth
         self.rho = opt_config.getfloat('CAR_PARAMETER', 'rho')  # [kg/m³] Air Density
-
-
-if __name__ == '__main__':
-    pass

@@ -14,6 +14,21 @@ BIGGER_SIZE = 18
 # Line Width
 LW = 1.5
 
+# TUM Color
+TUMBlue = [0 / 255, 101 / 255, 189 / 255]
+TUMWhite = [255 / 255, 255 / 255, 255 / 255]
+TUMBlack = [0 / 255, 0 / 255, 0 / 255]
+TUMBlue1 = [0 / 255, 51 / 255, 89 / 255]
+TUMBlue2 = [0 / 255, 82 / 255, 147 / 255]
+TUMGray1 = [51 / 255, 51 / 255, 51 / 255]
+TUMGray2 = [127 / 255, 127 / 255, 127 / 255]
+TUMGray3 = [204 / 255, 204 / 255, 204 / 255]
+TUMBlue3 = [100 / 255, 160 / 255, 200 / 255]
+TUMBlue4 = [152 / 255, 198 / 255, 234 / 255]
+TUMIvory = [218 / 255, 215 / 255, 203 / 255]
+TUMOrange = [227 / 255, 114 / 255, 34 / 255]
+TUMGreen = [162 / 255, 173 / 255, 0 / 255]
+
 # controls default text sizes
 plt.rc('font', size=SMALL_SIZE)
 # fontsize of the axes title
@@ -52,6 +67,7 @@ class VisVP_Logs_GUI:
     __slots__ = ('m',
                  'vis_handler',
                  'vis_options',
+                 'sol_options',
                  'main_fig',
                  'params_opt',
                  'constants_opt',
@@ -60,23 +76,31 @@ class VisVP_Logs_GUI:
                  'slider_vel',
                  'but_next',
                  'but_prev',
-                 'p1_1', 'p1_2', 'p1_3', 'p1_4', 'p1_5', 'p1_6',
-                 'p3_1', 'p3_2', 'p3_3', 'p3_4',
+                 'vel_dict', 'F_dict', 'P_dict', 'a_dict', 'ax_dict', 'ay_dict', 'F_f_dict', 'F_r_dict', 'F_fl_dict',
+                 'F_fr_dict', 'F_rl_dict', 'F_rr_dict',
+                 'p1_1', 'p1_2', 'p1_3', 'p1_4', 'p1_5', 'p1_6', 'p1_7', 'p1_8', 'p1_9', 'p1_10', 'p1_11', 'p1_11',
+                 'p1_12', 'p1_13', 'p1_14', 'p1_15', 'p1_16', 'p1_17', 'p1_18',
+                 'p3_1', 'p3_2', 'p3_3', 'p3_4', 'p3_5', 'p3_6', 'p3_7', 'p3_8', 'p3_9', 'p3_10', 'p3_11', 'p3_12',
+                 'p3_13', 'p3_14', 'p3_15',
                  'p4_1',
-                 'p5_1', 'p5_2',
-                 'p6_1', 'p6_2', 'p6_3',
-                 'p7_1', 'p7_2', 'p7_3', 'p7_4', 'p7_5')
+                 'p5_1', 'p5_2', 'p5_3', 'p5_4', 'p5_5', 'p5_6', 'p5_7', 'p5_8', 'p5_9', 'p5_10', 'p5_11', 'p5_12',
+                 'p5_13', 'p5_14', 'p5_15',
+                 'p6_1', 'p6_2', 'p6_3', 'p6_4', 'p6_5', 'p6_6', 'p6_7', 'p6_8', 'p6_9', 'p6_10', 'p6_11', 'p6_12',
+                 'p6_13', 'p6_14', 'p6_15', 'p6_16',
+                 'p7_1', 'p7_2', 'p7_3', 'p7_4', 'p7_5', 'p7_6')
 
     def __init__(self,
                  vis_handler,
                  m: int,
                  vis_options: dict,
-                 params_path: str):
+                 params_path: str,
+                 sol_options: dict):
 
         """
         Python version: 3.5
         Created by: Thomas Herrmann (thomas.herrmann@tum.de)
         Created on: 01.02.2020
+        Modified by: Tobias Klotz
 
         Documentation: Class creating a GUI to visualize logged data from the velocity optimization SQP.
 
@@ -85,11 +109,13 @@ class VisVP_Logs_GUI:
         m: number of velocity optimization variables
         vis_options: user specified visualization options
         params_path: absolute path to folder containing config file .ini
+        sol_options: user specified solver options
         """
 
         self.m = m
         self.vis_handler = vis_handler
         self.vis_options = vis_options
+        self.sol_options = sol_options
         self.main_fig = None
 
         self.params_opt = params_vp_sqp(m=m,
@@ -114,16 +140,77 @@ class VisVP_Logs_GUI:
         self.but_next = None
         self.but_prev = None
 
-        # Lines within debug plots
-        self.p1_1, self.p1_2, self.p1_3, self.p1_4, self.p1_5, self.p1_6 = None, None, None, None, None, None
-        self.p3_1, self.p3_2, self.p3_3, self.p3_4 = None, None, None, None
-        self.p4_1 = None
-        self.p5_1, self.p5_2 = None, None
-        self.p6_1, self.p6_2, self.p6_3 = None, None, None
-        self.p7_1, self.p7_2, self.p7_3, self.p7_4, self.p7_5 = None, None, None, None, None
+        # Initialize dictionary
+        self.vel_dict = {}
+        self.F_dict = {}
+        self.P_dict = {}
+        self.a_dict = {}
+        self.ax_dict = {}
+        self.ay_dict = {}
+        self.F_f_dict = {}
+        self.F_r_dict = {}
+        self.F_fl_dict = {}
+        self.F_fr_dict = {}
+        self.F_rl_dict = {}
+        self.F_rr_dict = {}
 
+        # Lines within debug plots
+        self.p1_1, self.p1_2, self.p1_3, self.p1_4, self.p1_5, self.p1_6, self.p1_7, self.p1_8, self.p1_9, self.p1_10, \
+            self.p1_11, self.p1_12, self.p1_13, self.p1_14, self.p1_15, self.p1_16, self.p1_17, self.p1_18 = \
+            None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
+        self.p3_1, self.p3_2, self.p3_3, self.p3_4, self.p3_5, self.p3_6, self.p3_7, self.p3_8, self.p3_9, \
+            self.p3_10, self.p3_11, self.p3_12, self.p3_13, self.p3_14, self.p3_15 = \
+            None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
+        self.p4_1 = None
+        self.p5_1, self.p5_2, self.p5_3, self.p5_4, self.p5_5, self.p5_6, self.p5_7, self.p5_8, self.p5_9, self.p5_10, \
+            self.p5_11, self.p5_12, self.p5_13, self.p5_14, self.p5_15 = \
+            None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
+        self.p6_1, self.p6_2, self.p6_3, self.p6_4, self.p6_5, self.p6_6, self.p6_7, self.p6_8, self.p6_9, self.p6_10, \
+            self.p6_11, self.p6_12, self.p6_13, self.p6_14, self.p6_15, self.p6_16 = \
+            None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None
+        self.p7_1, self.p7_2, self.p7_3, self.p7_4, self.p7_5, self.p7_6 = None, None, None, None, None, None
+
+        self.line_definition()
         self.draw_gui()
         self.initialize_plots()
+
+    def line_definition(self):
+        # Define Color, Line Style and Marker
+        for key, value in self.sol_options.items():
+            if self.vis_options['b_vis_model_name']:
+                if self.sol_options[key]['Model'] == "PM":
+                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
+                if self.sol_options[key]['Model'] == "KM":
+                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
+                if self.sol_options[key]['Model'] == "DM":
+                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
+                if self.sol_options[key]['Model'] == "FW":
+                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
+            elif self.vis_options['b_vis_solver_name']:
+                if self.sol_options[key]['Solver'] == "IPOPT":
+                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
+                if self.sol_options[key]['Solver'] == "OSQP":
+                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
+                if self.sol_options[key]['Solver'] == "qpOASES":
+                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
+                if self.sol_options[key]['Solver'] == "MOSEK":
+                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
+
+            elif self.vis_options['b_vis_fric_model']:
+                if self.sol_options[key]['Friction'] == "Circle":
+                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
+                if self.sol_options[key]['Friction'] == "Diamond":
+                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
+
+            elif self.vis_options['b_vis_alpha']:
+                if self.sol_options[key]['Alpha'] == 1:
+                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
+                if self.sol_options[key]['Alpha'] == 0.75:
+                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
+                if self.sol_options[key]['Alpha'] == 0.5:
+                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
+                if self.sol_options[key]['Alpha'] == 0.25:
+                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
 
     def draw_gui(self):
 
@@ -169,7 +256,9 @@ class VisVP_Logs_GUI:
 
         ax_freq = plt.axes([0.1, 0.01, 0.8, 0.02])
         self.slider_vel = Slider(ax_freq, 'Id', 0, self.vis_handler.row_count,
-                                 valinit=0, valstep=self.vis_handler.log_lines)
+                                 valinit=0)
+        # self.slider_vel = Slider(ax_freq, 'Id', 0, self.vis_handler.row_count,
+        # valinit=0, valstep=self.vis_handler.log_lines)
 
         self.slider_vel.on_changed(update)
 
@@ -213,39 +302,39 @@ class VisVP_Logs_GUI:
                       color='green', linewidth=LW, markersize=LW * 3)
         p4, = ax.plot(np.zeros((self.m, 1)),
                       color='gray', linewidth=LW, linestyle=':')
+        legend = [r'$v_\mathrm{o,OSQP}$',
+                  r'$v_\mathrm{max}$',
+                  r'$v_\mathrm{end}$',
+                  r'$v_\mathrm{ini}$']
 
-        if self.vis_options['b_calc_IPOPT']:
+        if self.vis_options['b_calc_qpOASES']:
             p5, = ax.plot(np.zeros((self.m, 1)),
-                          color='blue', linewidth=LW, linestyle=':',
+                          color='gray', linewidth=LW, linestyle=':',
                           marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
+            legend.append(r'$v_\mathrm{o,qpOASES}$')
         else:
             p5 = None
 
-        if self.vis_options['b_calc_qpOASES']:
-            p6, = ax.plot(np.zeros((self.m, 1)),
-                          color='red', linewidth=LW, linestyle=':',
-                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
-        else:
-            p6 = None
+        for key, value in self.sol_options.items():
+            self.vel_dict[key], = ax.plot(np.zeros((self.m, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
+                                          linestyle=self.sol_options[key]["Linestyle"],
+                                          marker=self.sol_options[key]["Marker"], markevery=5)
+            if self.vis_options['b_vis_model_name']:
+                legend.append(r'$v_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+            elif self.vis_options['b_vis_solver_name']:
+                legend.append(r'$v_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
 
         self.p1_1 = p1
         self.p1_2 = p2
         self.p1_3 = p3
         self.p1_4 = p4
-        if self.vis_options['b_calc_IPOPT']:
-            self.p1_5 = p5
         if self.vis_options['b_calc_qpOASES']:
-            self.p1_6 = p6
+            self.p1_5 = p5
 
         plt.ylabel(r'$v$' + ' in ' r'$\mathrm{\frac{m}{s}}$')
 
-        plt.legend([r'$v_\mathrm{o,OSQP}$',
-                    r'$v_\mathrm{max}$',
-                    r'$v_\mathrm{end}$',
-                    r'$v_\mathrm{ini}$',
-                    r'$v_\mathrm{o,IPOPT}$',
-                    r'$v_\mathrm{o,qpOASES}$'],
-                   mode='expand', ncol=6)
+        plt.legend(legend,
+                   mode='expand', ncol=11)
 
         ################################################################################################################
         # --- Force
@@ -257,6 +346,8 @@ class VisVP_Logs_GUI:
         # --- Rm x tick labels
         ax.set_xticklabels([])
 
+        legend = [r'$F_\mathrm{o,OSQP}$',
+                  r'tol']
         p1, = ax.plot(x_dots,
                       np.zeros((self.m - 1, 1)),
                       color='black', linewidth=LW, linestyle='-')
@@ -265,26 +356,33 @@ class VisVP_Logs_GUI:
                        0 + 1,
                        0 - 1],
                       linestyle='-', marker='_', color='red', linewidth=LW, markersize=LW * 3)
-        p3, = ax.plot(x_dots,
-                      np.zeros((self.m - 1, 1)),
-                      color='blue', linewidth=LW, linestyle='--',
-                      marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
-        p4, = ax.plot(x_dots,
-                      np.zeros((self.m - 1, 1)),
-                      color='red', linewidth=LW, linestyle='--',
-                      marker='s', markersize=LW * 2, fillstyle='none', markevery=14)
+
+        if self.vis_options['b_calc_qpOASES']:
+            p3, = ax.plot(x_dots,
+                          np.zeros((self.m - 1, 1)),
+                          color='orange', linewidth=LW, linestyle=':',
+                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
+            legend.append(r'$F_\mathrm{o,qpOASES}$')
+        else:
+            p3 = None
+
+        for key, value in self.sol_options.items():
+            self.F_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
+                                        linestyle=self.sol_options[key]["Linestyle"],
+                                        marker=self.sol_options[key]["Marker"], markevery=5)
+            if self.vis_options['b_vis_model_name']:
+                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+            elif self.vis_options['b_vis_solver_name']:
+                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
 
         self.p3_1 = p1
         self.p3_2 = p2
-        self.p3_3 = p3
-        self.p3_4 = p4
+        if self.vis_options['b_calc_qpOASES']:
+            self.p3_3 = p3
 
         plt.ylabel(r'$F$' + ' in ' r'$\mathrm{kN}$')
-        plt.legend([r'$F_\mathrm{o,OSQP}$',
-                    r'tol',
-                    r'$F_\mathrm{o,IPOPT}$',
-                    r'$F_\mathrm{o,qpOASES}$'],
-                   mode='expand', ncol=4)
+        plt.legend(legend,
+                   mode='expand', ncol=5)
 
         ################################################################################################################
         # --- Delta Force
@@ -310,7 +408,8 @@ class VisVP_Logs_GUI:
         ax = ax4
 
         ax.set_ylim([Y_POWER_MIN_KW, Y_POWER_MAX_KW])
-
+        legend = [r'$P_\Sigma$',
+                  r'$P_\mathrm{\Sigma,max}$']
         if self.params_opt['b_var_power']:
             p1, = ax.plot(x_dots,
                           np.zeros((self.m - 1, 1)),
@@ -324,13 +423,32 @@ class VisVP_Logs_GUI:
         p2, = ax.plot(np.zeros((self.m - 1, 1)),
                       color='red', linewidth=LW, linestyle='--')
 
+        if self.vis_options['b_calc_qpOASES']:
+            p3, = ax.plot(x_dots,
+                          np.zeros((self.m - 1, 1)),
+                          color='orange', linewidth=LW, linestyle=':',
+                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
+            legend.append(r'$P_\mathrm{o,qpOASES}$')
+        else:
+            p3 = None
+
+        for key, value in self.sol_options.items():
+            self.P_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
+                                        linestyle=self.sol_options[key]["Linestyle"],
+                                        marker=self.sol_options[key]["Marker"], markevery=5)
+            if self.vis_options['b_vis_model_name']:
+                legend.append(r'$P_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+            elif self.vis_options['b_vis_solver_name']:
+                legend.append(r'$P_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
         self.p5_1 = p1
         self.p5_2 = p2
+        self.p5_3 = p3
 
         plt.ylabel(r'$P$' + ' in ' r'$\mathrm{kW}$')
         plt.xlabel(r'$s_{\mathrm{loc},j}$')
-        plt.legend([r'$P_\Sigma$',
-                    r'$P_\mathrm{\Sigma,max}$'],
+
+        plt.legend(legend,
                    loc='lower right', ncol=2)
 
         # --- Combine x-axes
@@ -367,7 +485,7 @@ class VisVP_Logs_GUI:
         plt.legend([r'$\epsilon_\mathrm{o,OSQP}$',
                     r'$\epsilon_\mathrm{ini}$',
                     r'$\epsilon_\mathrm{max}$',
-                    r'$\epsilon_\mathrm{o,IPOPT}$',
+                    r'$\epsilon_\mathrm{o,IPOPT_PM}$',
                     r'$\epsilon_\mathrm{o,qpOASES}$'],
                    mode='expand', ncol=5)
 
@@ -377,6 +495,10 @@ class VisVP_Logs_GUI:
         ax = self.main_fig.add_subplot(2, 2, 4)
         ax.set_xlim([- X_AYMAX_MPS2, X_AYMAX_MPS2])
         ax.set_ylim([- Y_AXMAX_MPS2, Y_AXMAX_MPS2])
+
+        legend = [r'$\bar{\mu}$',
+                  r'$\bar{\mu} + \epsilon_\mathrm{max}$',
+                  r'$\mu_\mathrm{o}$']
 
         # --- Case of constant friction limits
         p1, = ax.plot([self.constants_opt.params['aymax_mps2_'],
@@ -410,6 +532,20 @@ class VisVP_Logs_GUI:
 
         p, = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
                      marker='x', linestyle='', markersize=LW * 3, color='black')
+        if self.vis_options['b_calc_qpOASES']:
+            p5, = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                          marker='x', linestyle='', markersize=LW * 3, color='orange')
+
+        for key, value in self.sol_options.items():
+            self.a_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                        color=self.sol_options[key]["Color"], linewidth=LW,
+                                        linestyle=self.sol_options[key]["Linestyle"],
+                                        marker=self.sol_options[key]["Marker"], markevery=2)
+            if self.vis_options['b_vis_model_name']:
+                legend.append(r'$\mu_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+            elif self.vis_options['b_vis_solver_name']:
+                legend.append(r'$\mu_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
         ax.axis('equal')
 
         # --- Case of variable friction limits draw maximum available friction limits
@@ -431,12 +567,12 @@ class VisVP_Logs_GUI:
         self.p6_2 = p3
         self.p6_3 = p4
 
+        self.p6_4 = p5
+
         plt.xlabel(r'$a_\mathrm{y}$' + ' in ' + r'$\frac{m}{s^2}$')
         plt.ylabel(r'$a_\mathrm{x}$' + ' in ' + r'$\frac{m}{s^2}$')
 
-        plt.legend([r'$\bar{\mu}$',
-                    r'$\bar{\mu} + \epsilon_\mathrm{max}$',
-                    r'$\mu_\mathrm{o}$'])
+        plt.legend(legend)
 
         # --- Draw maximum motor acceleration potential
         ax.plot([- self.constants_opt.params['axmax_mps2_'], self.constants_opt.params['axmax_mps2_']],
@@ -444,6 +580,87 @@ class VisVP_Logs_GUI:
                  self.constants_opt.params['Fmax_kN_'] / self.constants_opt.params['m_t_']],
                 linestyle='--', color='red', linewidth=LW)
 
+        ################################################################################################################
+        # --- Front Axle Tire usage
+        ################################################################################################################
+        ax = self.main_fig.add_subplot(4, 4, 7)
+        ax.set_xlim([- 1, 1])
+        ax.set_ylim([- 1, 1])
+
+        circle = plt.Circle((0, 0), 1, facecolor='none',
+                            edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
+        legend = []
+        ax.add_patch(circle)
+
+        for key, value in self.sol_options.items():
+            if self.sol_options[key]['Model'] == "DM":
+                self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                              color=self.sol_options[key]["Color"], linewidth=LW,
+                                              linestyle=self.sol_options[key]["Linestyle"],
+                                              marker=self.sol_options[key]["Marker"], markevery=2)
+                if self.vis_options['b_vis_model_name']:
+                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+                elif self.vis_options['b_vis_solver_name']:
+                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
+            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker=self.sol_options[key]["Marker"], markevery=2)
+                self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker='*', markevery=2)
+            if self.vis_options['b_vis_model_name']:
+                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+            elif self.vis_options['b_vis_solver_name']:
+                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
+        plt.xlabel(r'$F_\mathrm{y,f} / F_\mathrm{z,f}$')
+        plt.ylabel(r'$F_\mathrm{x,f} / F_\mathrm{z,f}$')
+        plt.title('Front Tire')
+
+        ax.axis('equal')
+
+        ################################################################################################################
+        # --- Rear Axle Tire usage
+        ################################################################################################################
+        ax = self.main_fig.add_subplot(4, 4, 8)
+        ax.set_xlim([- 1, 1])
+        ax.set_ylim([- 1, 1])
+
+        circle = plt.Circle((0, 0), 1, facecolor='none',
+                            edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
+        legend = []
+        ax.add_patch(circle)
+
+        for key, value in self.sol_options.items():
+            if self.sol_options[key]['Model'] == "DM":
+                self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                              color=self.sol_options[key]["Color"], linewidth=LW,
+                                              linestyle=self.sol_options[key]["Linestyle"],
+                                              marker=self.sol_options[key]["Marker"], markevery=2)
+            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker=self.sol_options[key]["Marker"], markevery=2)
+                self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                               color=self.sol_options[key]["Color"], linewidth=LW,
+                                               linestyle=self.sol_options[key]["Linestyle"],
+                                               marker='*', markevery=2)
+
+            if self.vis_options['b_vis_model_name']:
+                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+            elif self.vis_options['b_vis_solver_name']:
+                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
+        plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
+        plt.ylabel(r'$F_\mathrm{x,r} / F_\mathrm{z,r}$')
+        plt.title('Rear Tire')
+
+        ax.axis('equal')
         # --- Show main window
         # plt.show()
 

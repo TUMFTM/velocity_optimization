@@ -72,35 +72,45 @@ most important values of the velocity SQP that have been logged.
 
     if __name__ == "__main__":
 
-        csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_30_14_59.log'
-        csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
+        csv_name = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_06_08_09_15.log'
+        csv_name_ltpl = vel_opt_path + '/velocity_optimization/logs/sqp_perf_2020_06_08_09_15.log'
 
         # Number of velocity points
-        m = 115
+        m = 90
+
         # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
         sid = 'PerfSQP'
 
-        params_path = os.path.dirname(os.path.abspath(__file__)) + '/params/'
-        input_path = os.path.dirname(os.path.abspath(__file__)) + '/inputs/veh_dyn_info/'
+        params_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
+        input_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/inputs/'
 
         # Number of log lines spanning one data block
         log_lines = 4
 
         # visualize all logs consecutively?
         b_movie = False
-
         # re-calculate QP from log-input?
         b_run_OSQP = True
 
         # run qpOASES solver?
         b_calc_qpOASES = True
 
-        # do global plot of states for entire log?
-        b_global_plot = True
-        glob_lim = np.inf
+        # Constant(True)/Variable(False) Power
+        b_con_power = True
 
-        # calculate solution from log input using NLP solver IPOPT?
-        b_calc_IPOPT = True
+        # Choose Starting Idx of Log-File
+        b_idx = 0
+        # Plot Race Course with planning horizon
+        b_plot_course = False
+        # Select Legend Item (Model, Solver, Friction, Alpha)
+        b_vis_model_name = False
+        b_vis_solver_name = True
+        b_vis_fric_model = False
+        b_vis_alpha = False
+
+        # do global plot of states for entire log?
+        b_global_plot = False
+        glob_lim = np.inf
 
         # plot immediately or only solver data replay?
         b_immediate_plot_update = True
@@ -109,17 +119,38 @@ most important values of the velocity SQP that have been logged.
         b_calc_time_plot = True
 
         # save plots as tikz files?
-        b_save_tikz = True
+        b_save_tikz = False
 
+        # visulaization options
         vis_options = {'b_movie': b_movie,
                        'b_run_OSQP': b_run_OSQP,
                        'b_calc_qpOASES': b_calc_qpOASES,
+                       'b_con_power': b_con_power,
+                       'b_idx': b_idx,
+                       'b_vis_model_name': b_vis_model_name,
+                       'b_plot_course': b_plot_course,
+                       'b_vis_solver_name': b_vis_solver_name,
+                       'b_vis_fric_model': b_vis_fric_model,
+                       'b_vis_alpha': b_vis_alpha,
                        'b_global_plot': b_global_plot,
                        'glob_lim': glob_lim,
-                       'b_calc_IPOPT': b_calc_IPOPT,
                        'b_immediate_plot_update': b_immediate_plot_update,
                        'b_calc_time_plot': b_calc_time_plot,
                        'b_save_tikz': b_save_tikz}
+
+        # Define solver options
+        sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
+                                                                # DM (dynamisches Einspurmodell), FW (Zweispurmodell,
+                                                                # only for IPOPT available)
+                                   'Solver': "IPOPT",            # IPOPT, OSQP, MOSEK, qpOASES
+                                   'Friction': "Diamond",        # Circle, Diamond (only for PM and KM)
+                                   'VarFriction': True,        # True, False
+                                   'VarPower': False,           # True, False
+                                   'Slack': True,              # True, False
+                                   'Alpha': 0.1,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
+                                                                # alpha = 0.1 recommended for DM
+                                   }
+                       }
 
         # --- Set up visualization object
         rL = VisVP_Logs(csv_name=csv_name,
@@ -129,7 +160,8 @@ most important values of the velocity SQP that have been logged.
                         log_lines=log_lines,
                         vis_options=vis_options,
                         params_path=params_path,
-                        input_path=input_path)
+                        input_path=input_path,
+                        sol_options=sol_options)
 
         # --- Start GUI
         rL.vis_log(int(0))
@@ -140,3 +172,109 @@ v optimal (IPOPT) and v optimal (qpOASES) are shown:
 
 .. image:: DebugWindow.png
    :width: 600
+
+In addition, plots of the the driving force, motor power, slack variables and acceleration are visualized in the GUI:
+
+There are several options to select for the visualization which are described in the following table. These values are
+saved in the vis_options dictionnary.
+
+.. list-table:: Visualization Options (Default values in brackets)
+   :widths: 25 10 65
+   :header-rows: 1
+
+   * - Name
+     - Value
+     - Description
+   * - csv_name, csv_name_ltpl
+     - Path
+     - Path to the log-file or csv-file of the input data
+   * - m
+     - > 1 (115)
+     - Length of the planing horizon. Depends on the data of the log-file/csv-data.
+   * - sid
+     - PerfSQP/Emerg/SQP
+     - Choose if a velocity profile is calculated for a performance path or an emergency path.
+   * - params_pat
+     - Path
+     - Path to the directory of the visulaization paramter
+   * - input_path
+     - Path
+     - Path to the directory of the input data (variable power/friction data)
+   * - log_lines
+     - Int (4)
+     - Number of lines in the log-file which belong to a single planing horizon. See more information at the description of the log-file structure.
+   * - b_movie
+     - True/False
+     - Choose if all optimization problems is solved without stopping between different planning horizons (True) or not (False).
+   * - b_run_OSQP
+     - True/False
+     - Choose if the optimization problem is solved with the OSQP solver (reference solver) again (True) or not (False)
+   * - b_cacl_qpOASES
+     - True/False
+     - Choose if the optimization problem is solved with the solver qpOASES (True) or not (False).
+   * - b_con_power
+     - True/False
+     - Choose if a constant value for the max. power is used (True) or not(False).
+   * - b_idx
+     - Int (0)
+     - Select a specific planning horizon to be plotted in the GUI. The nuber of the planning horizon should be multiplied by the number of log_lines. Choose 0 as the default value.
+   * - b_plot_course
+     - True/False
+     - Create a plot of the racetrack with the choosen index (b_dix) of the planning horizon (True) or not (False).
+   * - b_vis_solver_name
+     - True/False
+     - Select the solver name as the subindex of the legend entrys (True) or not.
+   * - b_vis_model_name
+     - True/False
+     - Select the driving dynamics model name as the subindex of the legend entrys (True) or not.
+   * - b_vis_fric_model
+     - True/False
+     - Select the name of the friction model as the subindex of the legend entrys (True) or not.
+   * - b_vis_alpha
+     - True/False
+     - Select the value of alpha as the subindex of the legend entrys (True) or not.
+   * - b_global_plot
+     -
+     -
+   * - b_immediate_plot_update
+     - True/False
+     - Update the plots in the GUI after solving the optimization problem for each planning horizon (True) or not (False).
+   * - b_calc_time_plot
+     - True/False
+     - Show and update the plot of the calculation time
+   * - b_save_tikz
+     - True/False
+     - Save (True) the plot of the calcultaion time or not (False).
+
+The configuration of the solver can be selected in the sol_options dictionnary. Attention, no every combination is possible.
+E.g. the four-wheel model can only be solved with the IPOPT solver.
+
+.. list-table:: Visualization Options (Default values in brackets)
+   :widths: 25 10 65
+   :header-rows: 1
+
+   * - Name
+     - Value
+     - Description
+   * - Model
+     - PMM/kESM/dESM/ZSM
+     - Select the vehicle dynamic model as the point-mass model (PMM), kinematic bicycle model (kESM), dynamic bicycle model (dESM) or four-wheel model (ZSM, only in combination with the solver IPOPT).
+   * - Solver
+     - IPOPT/OSQP/qpOASES/MOSEK
+     - Select betweeen the solver IPOPT (Nonlinear interior point) and the SQP solver OSQP (Alternating direction method of multipliers), MOSEK (Interior Point) and qpOASES (Active-Set).
+   * - Friction
+     - Circle/Diamond
+     - Select between the friction circle and friction diamond as the acceleration constraint for the PMM and kESM.
+   * - VarFriction
+     - True/False
+     - Choose if the optimization problem is solved with a variable friction along the track (True) or not (False).
+   * - VarPower
+     - True/False
+     - Choose if variable power constraint is uses to solve the optimization problem (True) or not (False).
+   * - Slack
+     - True/False
+     - Choose if slack variables are used in the optimization (True) or not (False). Only available for the PMM in combination with the solver IPOPT, OSQP and qpOASES.
+   * - Alpha
+     - 0-1 (1)
+     - Select the initial step length for the SQP methods (OSQP, MOSEK, qpOASES). For the PMM and kESM a value betweeen 0,4 and 1 is recommended. For the dESM alpha should be choosen to 0,1.
+

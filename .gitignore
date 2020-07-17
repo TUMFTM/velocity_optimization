@@ -22,3 +22,5 @@ velocity_optimization/src/__pycache__/
 velocity_optimization/opt_postproc/src/__pycache__/
 
 velocity_optimization.egg-info/
+
+*.pkl
