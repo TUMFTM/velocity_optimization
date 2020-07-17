@@ -175,7 +175,8 @@ v optimal (IPOPT) and v optimal (qpOASES) are shown:
 
 In addition, plots of the the driving force, motor power, slack variables and acceleration are visualized in the GUI:
 
-There are several options to select for the visualization which are described in the following table.
+There are several options to select for the visualization which are described in the following table. These values are
+saved in the vis_options dictionnary.
 
 .. list-table:: Visualization Options (Default values in brackets)
    :widths: 25 10 65
@@ -244,3 +245,36 @@ There are several options to select for the visualization which are described in
    * - b_save_tikz
      - True/False
      - Save (True) the plot of the calcultaion time or not (False).
+
+The configuration of the solver can be selected in the sol_options dictionnary. Attention, no every combination is possible.
+E.g. the four-wheel model can only be solved with the IPOPT solver.
+
+.. list-table:: Visualization Options (Default values in brackets)
+   :widths: 25 10 65
+   :header-rows: 1
+
+   * - Name
+     - Value
+     - Description
+   * - Model
+     - PMM/kESM/dESM/ZSM
+     - Select the vehicle dynamic model as the point-mass model (PMM), kinematic bicycle model (kESM), dynamic bicycle model (dESM) or four-wheel model (ZSM, only in combination with the solver IPOPT).
+   * - Solver
+     - IPOPT/OSQP/qpOASES/MOSEK
+     - Select betweeen the solver IPOPT (Nonlinear interior point) and the SQP solver OSQP (Alternating direction method of multipliers), MOSEK (Interior Point) and qpOASES (Active-Set).
+   * - Friction
+     - Circle/Diamond
+     - Select between the friction circle and friction diamond as the acceleration constraint for the PMM and kESM.
+   * - VarFriction
+     - True/False
+     - Choose if the optimization problem is solved with a variable friction along the track (True) or not (False).
+   * - VarPower
+     - True/False
+     - Choose if variable power constraint is uses to solve the optimization problem (True) or not (False).
+   * - Slack
+     - True/False
+     - Choose if slack variables are used in the optimization (True) or not (False). Only available for the PMM in combination with the solver IPOPT, OSQP and qpOASES.
+   * - Alpha
+     - 0-1 (1)
+     - Select the initial step length for the SQP methods (OSQP, MOSEK, qpOASES). For the PMM and kESM a value betweeen 0,4 and 1 is recommended. For the dESM alpha should be choosen to 0,1.
+
