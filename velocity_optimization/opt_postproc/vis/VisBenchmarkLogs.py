@@ -374,6 +374,7 @@ class VisVP_Logs:
                                                                                                ay_max=ay_max_new_ipopt)
 
                     v_op_ipopt, \
+                        s_t_op_ipopt, \
                         F_op_ipopt, \
                         P_op_ipopt, \
                         ax_op_ipopt, \
@@ -395,6 +396,7 @@ class VisVP_Logs:
                                                                                vis_options=self.vis_options)
 
                     self.sol_options[key].update({'Velocity': v_op_ipopt})
+                    self.sol_options[key].update({'Slack': s_t_op_ipopt})
                     self.sol_options[key].update({'Force': F_op_ipopt})
                     self.sol_options[key].update({'Power': P_op_ipopt})
                     self.sol_options[key].update({'Acc_x': ax_op_ipopt})
@@ -676,8 +678,14 @@ class VisVP_Logs:
                 self.vis_gui.p7_1.set_ydata(s_t_op_osqp)
                 self.vis_gui.p7_2.set_ydata(x0_s_t)
                 self.vis_gui.p7_3.set_ydata([self.velqp.sym_sc_['s_v_t_lim_']] * len(s_t_op_osqp))
+                for key, value in self.sol_options.items():
+                    if (self.sol_options[key]['Model'] == "PM" or self.sol_options[key]['Model'] == "KM") and \
+                            self.sol_options[key]['Solver'] == "IPOPT":
+                        self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack'])
+
                 if self.vis_options['b_calc_qpOASES']:
                     self.vis_gui.p7_5.set_ydata(eps_op_qpoases)
+
 
                 # self.vis_gui.main_fig.canvas.draw()
 

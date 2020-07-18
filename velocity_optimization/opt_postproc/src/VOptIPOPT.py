@@ -1830,6 +1830,7 @@ class VOptIPOPT:
         m_t = opt_config.getfloat('VEHICLE', 'mass_t')
 
         # Initialization of output vector
+        eps_tre = []
         F_xf = []
         F_xr = []
         F_yf = []
@@ -1854,8 +1855,7 @@ class VOptIPOPT:
             v = np.array(sol['x'][0:m])
             # Extract slack variable
             if self.sol_dict[self.key]['Slack']:
-                # eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
-                pass
+                eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
 
             # Calculate engine force
             F_p, tire_cst, a, pwr_cst = trj(sol['x'], param_vec_)
@@ -1873,7 +1873,7 @@ class VOptIPOPT:
                 ay.append(kappa[k] * v[k] ** 2)
             ax = np.array(ax)
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
+            return v, eps_tre, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
                 F_yrl, F_yrr
 
         # Kinematic bicycle model
@@ -1882,8 +1882,7 @@ class VOptIPOPT:
             v = np.array(sol['x'][0:m])
             # Extract slack variable
             if self.sol_dict[self.key]['Slack']:
-                # eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
-                pass
+                eps_tre = np.array(sol['x'][m:m + int(np.ceil(m / self.slack_every_v))])
 
             # Calculate engine force and acceleartion
             kappa = param_vec_[1:self.m + 1]
@@ -1900,8 +1899,8 @@ class VOptIPOPT:
             # Calculate engine power
             P_p = F_p * v[0:-1]
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
-                F_yrl, F_yrr
+            return v, eps_tre, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, \
+                   F_xrr, F_yrl, F_yrr
 
         # Dynamic bicycle model
         elif self.sol_dict[self.key]['Model'] == "DM":
@@ -2030,8 +2029,8 @@ class VOptIPOPT:
             ubg.append([1.0] * n)
             lbg.append([0.0] * n)'''
 
-            return v, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), np.array(F_yzr), \
-                F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
+            return v, eps_tre, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), \
+                   np.array(F_yzr), F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
 
         elif self.sol_dict[self.key]['Model'] == "FW":
             # --- Extract variables
@@ -2191,7 +2190,7 @@ class VOptIPOPT:
             F_xzrr = (F_xrr / F_zrr)
             F_yzrr = (F_yrr / F_zrr)
 
-            return v, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, np.array(F_xzfl), np.array(F_xzfr), \
+            return v, eps_tre, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, np.array(F_xzfl), np.array(F_xzfr), \
                 np.array(F_yzfl), np.array(F_yzfr), np.array(F_xzrl), np.array(F_xzrr), np.array(F_yzrl), \
                 np.array(F_yzrr)
 
