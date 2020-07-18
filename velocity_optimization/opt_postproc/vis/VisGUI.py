@@ -463,10 +463,10 @@ class VisVP_Logs_GUI:
         ax = self.main_fig.add_subplot(5, 2, 2)
         ax.set_ylim([Y_SLACK_TRE_MIN, Y_SLACK_TRE_MAX])
         legend = [r'$\epsilon_\mathrm{o,OSQP}$',
-                    r'$\epsilon_\mathrm{ini}$',
-                    r'$\epsilon_\mathrm{max}$',
-                    r'$\epsilon_\mathrm{o,IPOPT_PM}$',
-                    r'$\epsilon_\mathrm{o,qpOASES}$']
+                  r'$\epsilon_\mathrm{ini}$',
+                  r'$\epsilon_\mathrm{max}$',
+                  r'$\epsilon_\mathrm{o,IPOPT_PM}$',
+                  r'$\epsilon_\mathrm{o,qpOASES}$']
 
         p1, = ax.plot(np.zeros((self.n, 1)),
                       color='black', linewidth=LW, linestyle='-')
@@ -489,7 +489,6 @@ class VisVP_Logs_GUI:
                     legend.append(r'$\epsilon_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
                 elif self.vis_options['b_vis_solver_name']:
                     legend.append(r'$\epsilon_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
-
 
         self.p7_1 = p1
         self.p7_2 = p2

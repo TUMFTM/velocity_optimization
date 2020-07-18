@@ -686,7 +686,6 @@ class VisVP_Logs:
                 if self.vis_options['b_calc_qpOASES']:
                     self.vis_gui.p7_5.set_ydata(eps_op_qpoases)
 
-
                 # self.vis_gui.main_fig.canvas.draw()
 
                 if self.vis_options['b_save_tikz']:

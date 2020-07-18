@@ -1869,12 +1869,12 @@ class VOptIPOPT:
             ax = []
             ay = []
             for k in range(self.m - 1):
-                ax.append(F_p[k]/m_t)
+                ax.append(F_p[k] / m_t)
                 ay.append(kappa[k] * v[k] ** 2)
             ax = np.array(ax)
 
-            return v, eps_tre, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, \
-                F_yrl, F_yrr
+            return v, eps_tre, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, \
+                F_xrr, F_yrl, F_yrr
 
         # Kinematic bicycle model
         elif self.sol_dict[self.key]['Model'] == "KM":
@@ -1900,7 +1900,7 @@ class VOptIPOPT:
             P_p = F_p * v[0:-1]
 
             return v, eps_tre, np.array(F_p), P_p, ax, ay, F_xf, F_yf, F_xr, F_yr, F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, \
-                   F_xrr, F_yrl, F_yrr
+                F_xrr, F_yrl, F_yrr
 
         # Dynamic bicycle model
         elif self.sol_dict[self.key]['Model'] == "DM":
@@ -2030,7 +2030,7 @@ class VOptIPOPT:
             lbg.append([0.0] * n)'''
 
             return v, eps_tre, np.array(F_p), P_p, ax, ay, np.array(F_xzf), np.array(F_yzf), np.array(F_xzr), \
-                   np.array(F_yzr), F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
+                np.array(F_yzr), F_xfl, F_xfr, F_yfl, F_yfr, F_xrl, F_xrr, F_yrl, F_yrr
 
         elif self.sol_dict[self.key]['Model'] == "FW":
             # --- Extract variables
