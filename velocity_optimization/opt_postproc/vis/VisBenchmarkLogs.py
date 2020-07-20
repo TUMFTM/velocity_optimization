@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 import linecache
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.opt_postproc.src.VOptIPOPT import VOptIPOPT
-from velocity_optimization.opt_postproc.src.VOptMOSEK import VOptMOSEK
 from velocity_optimization.opt_postproc.src.VOptOSQP import VOptOSQP
 from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
 from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES2
@@ -68,9 +67,6 @@ class VisVP_Logs:
                  'sol_status_qpoases_pm',
                  'sol_status_qpoases_km',
                  'sol_status_qpoases_dm',
-                 'sol_status_mosek_pm',
-                 'sol_status_mosek_km',
-                 'sol_status_mosek_dm',
                  'P_max')
 
     def __init__(self,
@@ -166,14 +162,7 @@ class VisVP_Logs:
                                                                         params_path=params_path,
                                                                         sol_options=sol_options,
                                                                         key=key)})
-            # --- Create MOSEK solver object
-            if self.sol_options[key]['Solver'] == "MOSEK":
-                self.sol_options[key].update({'Create_Solver': VOptMOSEK(m=m,
-                                                                         sid=sid,
-                                                                         params_path=params_path,
-                                                                         vis_options=vis_options,
-                                                                         sol_options=sol_options,
-                                                                         key=key)})
+
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
                 self.sol_options[key].update({'Create_Solver': VOpt_qpOASES2(m=m,
@@ -244,7 +233,7 @@ class VisVP_Logs:
         """
 
         # Modify user's idx to have multiple of log_lines
-        idx = int(idx + np.mod(idx, self.log_lines))
+        idx = int(idx + (self.log_lines - np.mod(idx, self.log_lines)))
 
         # Choose your own starting Index for a single plot
         if self.vis_options['b_idx'] > 0:
@@ -455,45 +444,6 @@ class VisVP_Logs:
                     self.sol_options[key]['Time'].append(t_op_osqp * 1000)
                     self.sol_options[key]['SolStatus'].append(sol_status_osqp)
                     print('Overall OSQP runtime:', t_op_osqp * 1000)
-
-                ########################################################################################################
-                # --- Calculate MOSEK-solution
-                ########################################################################################################
-
-                if self.sol_options[key]['Solver'] == "MOSEK":
-                    v_op_mosek, \
-                        F_op_mosek, \
-                        P_op_mosek, \
-                        ax_op_mosek, \
-                        ay_op_mosek, \
-                        F_xzf_op_mosek, \
-                        F_yzf_op_mosek, \
-                        F_xzr_op_mosek, \
-                        F_yzr_op_mosek, \
-                        t_op_mosek, \
-                        sol_status_mosek = \
-                        self.sol_options[key]['Create_Solver'].calc_v_mosek(N=self.m,
-                                                                            kappa=kappa,
-                                                                            ds=delta_s,
-                                                                            x0_v=x0_v,
-                                                                            v_max=v_max,
-                                                                            v_end=v_end,
-                                                                            ax_max=ax_max_new,
-                                                                            ay_max=ay_max_new,
-                                                                            F_ini=F_ini,
-                                                                            P_max=P_max)
-
-                    self.sol_options[key].update({'Velocity': v_op_mosek})
-                    self.sol_options[key].update({'Force': F_op_mosek})
-                    self.sol_options[key].update({'Power': P_op_mosek})
-                    self.sol_options[key].update({'Acc_x': ax_op_mosek})
-                    self.sol_options[key].update({'Acc_y': ay_op_mosek})
-                    self.sol_options[key].update({'F_xzf': F_xzf_op_mosek})
-                    self.sol_options[key].update({'F_yzf': F_yzf_op_mosek})
-                    self.sol_options[key].update({'F_xzr': F_xzr_op_mosek})
-                    self.sol_options[key].update({'F_yzr': F_yzr_op_mosek})
-                    self.sol_options[key]['Time'].append(t_op_mosek * 1000)
-                    self.sol_options[key]['SolStatus'].append(sol_status_mosek)
 
                 ########################################################################################################
                 # --- Calculate qpOASES-solution

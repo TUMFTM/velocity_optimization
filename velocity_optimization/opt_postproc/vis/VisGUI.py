@@ -194,8 +194,6 @@ class VisVP_Logs_GUI:
                     self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
                 if self.sol_options[key]['Solver'] == "qpOASES":
                     self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-                if self.sol_options[key]['Solver'] == "MOSEK":
-                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
 
             elif self.vis_options['b_vis_fric_model']:
                 if self.sol_options[key]['Friction'] == "Circle":
@@ -596,7 +594,7 @@ class VisVP_Logs_GUI:
         ################################################################################################################
         # --- Front Axle Tire usage
         ################################################################################################################
-        ax = self.main_fig.add_subplot(4, 4, 7)
+        ax = self.main_fig.add_subplot(4, 5, 9)
         ax.set_xlim([- 1, 1])
         ax.set_ylim([- 1, 1])
 
@@ -639,7 +637,7 @@ class VisVP_Logs_GUI:
         ################################################################################################################
         # --- Rear Axle Tire usage
         ################################################################################################################
-        ax = self.main_fig.add_subplot(4, 4, 8)
+        ax = self.main_fig.add_subplot(4, 5, 10)
         ax.set_xlim([- 1, 1])
         ax.set_ylim([- 1, 1])
 
@@ -670,7 +668,6 @@ class VisVP_Logs_GUI:
                 legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
 
         plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
-        plt.ylabel(r'$F_\mathrm{x,r} / F_\mathrm{z,r}$')
         plt.title('Rear Tire')
 
         ax.axis('equal')
