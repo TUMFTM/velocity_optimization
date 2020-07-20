@@ -56,7 +56,12 @@ Debugging
 
 Our package come with a powerful debugging tool. Create an empty file and copy the following content to this file.
 Adapt `csv_name`, `params_path` and `input_path` to your specific paths. A debug window will show up, plotting the
-most important values of the velocity SQP that have been logged.
+most important values of the velocity SQP that have been logged. The following combinations of solvers and vehicle
+models are available:
+IPOPT + PM (Diamond + Circle + var fric + var power)
+IPOPT + KM (Diamond + Circle + var fric + var power)
+IPOPT + DM (Circles + var power)
+IPOPT + FW (Circles + var power)
 
 .. code-block:: python
 

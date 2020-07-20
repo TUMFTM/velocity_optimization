@@ -11,7 +11,6 @@ from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.opt_postproc.src.VOptIPOPT import VOptIPOPT
 from velocity_optimization.opt_postproc.src.VOptOSQP import VOptOSQP
 from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
-from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES2
 from velocity_optimization.opt_postproc.src.online_qp_postproc import online_qp_postproc
 from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
 from velocity_optimization.opt_postproc.vis.VisGUI import VisVP_Logs_GUI
@@ -65,8 +64,6 @@ class VisVP_Logs:
                  'sol_status_osqp_km',
                  'sol_status_osqp_dm',
                  'sol_status_qpoases_pm',
-                 'sol_status_qpoases_km',
-                 'sol_status_qpoases_dm',
                  'P_max')
 
     def __init__(self,
@@ -165,12 +162,10 @@ class VisVP_Logs:
 
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
-                self.sol_options[key].update({'Create_Solver': VOpt_qpOASES2(m=m,
-                                                                             sid=sid,
-                                                                             params_path=params_path,
-                                                                             sol_options=sol_options,
-                                                                             key=key
-                                                                             )})
+                # self.vp_qpOASES = VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
+                #                               Am=self.velqp_bench.Am)
+                self.sol_options[key].update({'Create_Solver': VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
+                                                                            Am=self.velqp_bench.Am)})
 
         # For movie tool
         self.b_vis_triggered = False
@@ -237,7 +232,7 @@ class VisVP_Logs:
 
         # Choose your own starting Index for a single plot
         if self.vis_options['b_idx'] > 0:
-            number = self.vis_options['b_idx']  # 552 #180, 245 552 (used for single plots in MA) #3000, 3200
+            number = self.vis_options['b_idx']
             idx = 4 * number
 
         # --- Read specific lines in logs
@@ -338,7 +333,7 @@ class VisVP_Logs:
                 print("OSQP rerun v_mps:", v_op_rerun)
 
             ############################################################################################################
-            # --- Calculate Solver-solution (Dictionnary
+            # --- Calculate Solver-solution (Dictionary)
             ############################################################################################################
             for key, value in self.sol_options.items():
 
@@ -409,7 +404,7 @@ class VisVP_Logs:
                 # --- Calculate OSQP-solution
                 ########################################################################################################
 
-                if self.sol_options[key]['Solver'] == "OSQP":
+                if self.sol_options[key]['Solver'] == "OSQP":  # TODO: call own OSQP-solver here
                     v_op_osqp, \
                         F_op_osqp, \
                         P_op_osqp, \
@@ -517,7 +512,7 @@ class VisVP_Logs:
                                        ay_max=ay_max_new,
                                        P_max=P_max)
 
-                # OVerall SQP runtime using qpOASES [ms]
+                # Overall SQP runtime using qpOASES [ms]
                 dt_sqp_qpoases = (time.perf_counter() - t_start) * 1000
 
                 # Store qpOASES runtime

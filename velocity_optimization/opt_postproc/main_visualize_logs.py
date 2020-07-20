@@ -47,7 +47,7 @@ if __name__ == "__main__":
     # Choose Starting Idx of Log-File
     b_idx = 0
     # Plot Race Course with planning horizon
-    b_plot_course = False
+    # b_plot_course = True
     # Select Legend Item (Model, Solver, Friction, Alpha)
     b_vis_model_name = False
     b_vis_solver_name = True
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                    'b_con_power': b_con_power,
                    'b_idx': b_idx,
                    'b_vis_model_name': b_vis_model_name,
-                   'b_plot_course': b_plot_course,
+                   # 'b_plot_course': b_plot_course,
                    'b_vis_solver_name': b_vis_solver_name,
                    'b_vis_fric_model': b_vis_fric_model,
                    'b_vis_alpha': b_vis_alpha,
@@ -84,17 +84,14 @@ if __name__ == "__main__":
                    'b_calc_time_plot': b_calc_time_plot,
                    'b_save_tikz': b_save_tikz}
 
-    # Define solver options
-    sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
-                                                            # DM (dynamisches Einspurmodell), FW (Zweispurmodell,
-                                                            # only for IPOPT available)
-                               'Solver': "IPOPT",            # IPOPT, OSQP, MOSEK, qpOASES
-                               'Friction': "Diamond",        # Circle, Diamond (only for PM and KM)
-                               'VarFriction': True,        # True, False
-                               'VarPower': False,           # True, False
-                               'Slack': True,              # True, False
-                               'Alpha': 0.1,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
-                                                            # alpha = 0.1 recommended for DM
+    # --- Define solver options for IPOPT as benchmark solution
+    sol_options = {'solver1': {'Model': "FW",               # PM (Pointmass), KM (Kinematic Single Track Model),
+                                                            # DM (Dynamic Single Track Model), FW (Double Track Model)
+                               'Solver': "IPOPT",           # IPOPT, OSQP, qpOASES
+                               'Friction': "Diamond",       # Circle, Diamond (only for PM and KM)
+                               'VarFriction': True,         # Variable friction: True, False
+                               'VarPower': False,           # Variable power: True, False
+                               'Slack': True,               # Usage of slack variables: True, False
                                }
                    }
 
