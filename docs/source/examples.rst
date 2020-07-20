@@ -175,6 +175,9 @@ v optimal (IPOPT) and v optimal (qpOASES) are shown:
 
 In addition, plots of the the driving force, motor power, slack variables and acceleration are visualized in the GUI:
 
+.. image:: GUI_Plot.png
+   :width: 600
+
 There are several options to select for the visualization which are described in the following table. These values are
 saved in the vis_options dictionnary.
 
@@ -278,3 +281,38 @@ E.g. the four-wheel model can only be solved with the IPOPT solver.
      - 0-1 (1)
      - Select the initial step length for the SQP methods (OSQP, MOSEK, qpOASES). For the PMM and kESM a value betweeen 0,4 and 1 is recommended. For the dESM alpha should be choosen to 0,1.
 
+.. code-block:: python
+
+    sol_options = {'solver1': {'Model': "PM",               # PM (Punktmasse), KM (kinematisches Einpsurmodell),
+                                                            # DM (dynamisches Einspurmodell), FW (Zweispurmodell,
+                                                            # only for IPOPT available)
+                               'Solver': "OSQP",            # IPOPT, OSQP, MOSEK, qpOASES
+                               'Friction': "Circle",        # Circle, Diamond (only for PM and KM)
+                               'VarFriction': True,        # True, False
+                               'VarPower': False,           # True, False
+                               'Slack': True,              # True, False
+                               'Alpha': 0.4,                # 0 < alpha < 1 (only for OSQP, qpOASES and Mosek necessary)
+                                                            # alpha = 0.1 recommended for DM
+                               },
+                   'solver2': {'Model': "FW",
+                               'Solver': "IPOPT",
+                               'Friction': "Diamond",
+                               'VarFriction': False,
+                               'VarPower': True,
+                               'Slack': True,
+                               'Alpha': 1,
+
+                               }
+                   }
+
+In the code above, two configurations are set to solve the optimization problem. Solver 1 contains the point-mass model (PMM)
+as the vehicle dynamic model, the solver OSQP and a circle to constraint the acceleration at the CoG. Variable Friction coefficients
+along the track are used but no variable power. In order to improe the calculation time, slack variables are used, too.
+The step length of the SQP algorithm is set to 0.4. Solver 2 uses a four-wheel model (FW) to describe the vehicle dynamics in
+combination with the solver IPOPT (attention: IPOPT is the only implemented solver to use the FW model). The setting of
+the friction model has no influence on the optimization problem using the FW model. Instead of variable friction coefficients,
+variable power is used along the track. Slack variable are set True but have no influence on this model, since the FW model
+is implemented without slack variables, yet. The step length alpha is used for SQP methods. Since IPOPT is a nonlinear solver,
+this parameter is not used for this solver.
+At this example, you can see that not every parameter is needed for every configuration, so better check the description behind
+the parameters.
