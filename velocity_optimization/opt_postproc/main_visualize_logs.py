@@ -1,6 +1,8 @@
 import os
 import sys
 import numpy as np
+import linecache
+import json
 
 # custom modules
 vel_opt_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -17,16 +19,27 @@ if __name__ == "__main__":
 
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
+
     csv_name = vel_opt_path + '/logs/sqp_perf_2020_07_03_16_12.log'
-    # csv_name = vel_opt_path + '/logs/sqp_perf_2020_06_27_21_15.log'
+
     csv_name_ltpl = vel_opt_path + '/logs/sqp_perf_2020_06_08_09_15.log'
-    # csv_name_ltpl = vel_opt_path + '/logs/ltpl/2020_04_09/14_13_12_data.csv'
 
-    # Number of velocity points, TODO: read from file name
-    m = 115
+    # Transform ID of used velocity planner into 'PerfSQP' or 'EmergSQP'
+    sid = csv_name.split('/')[-1].split('_')[1]
+    if sid == 'perf':
+        sid = 'PerfSQP'
+    elif sid == 'emerg':
+        sid = 'EmergSQP'
+    else:
+        print('Logs have been produced with illegal SID! Exiting.')
+        sys.exit(1)
 
-    # ID of used velocity planner 'PerfSQP' or 'EmergSQP'
-    sid = 'PerfSQP'
+    # --- Number of velocity points
+    # Get length of velocity array to determine parameter 'm' in velocity optimization
+    row_lc = linecache.getline(csv_name, 1)
+    row_lc = row_lc[:-1].rsplit(';')
+    velocity_dummy = json.loads(row_lc[2])
+    m = len(velocity_dummy)
 
     params_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
     input_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/inputs/'
@@ -37,10 +50,10 @@ if __name__ == "__main__":
     # visualize all logs consecutively?
     b_movie = False
     # re-calculate QP from log-input?
-    b_run_OSQP = True
+    b_run_OSQP = True  # TODO: combine with solver options below
 
     # run qpOASES solver?
-    b_calc_qpOASES = False
+    b_calc_qpOASES = False  # TODO: combine with solver options below
 
     # Constant(True)/Variable(False) Power
     b_con_power = False
@@ -63,7 +76,7 @@ if __name__ == "__main__":
     b_immediate_plot_update = True
 
     # show plot of solver runtimes?
-    b_calc_time_plot = True
+    b_calc_time_plot = False
 
     # save plots as tikz files?
     b_save_tikz = False
