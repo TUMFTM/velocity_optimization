@@ -941,11 +941,10 @@ class VOptOSQP:
                 F_ini = 0.0
 
             # Initialize max. Power
-            P_max = self.Car.P_max * np.ones(N)
-            '''if self.sol_options[self.key]['VarPower']:
+            if self.sol_options[self.key]['VarPower']:
                 pass
             else:
-                P_max = self.Car.P_max * np.ones(N)'''
+                P_max = self.Car.P_max * np.ones(N)
             # Initialize max. velocity
             if v_max == []:
                 v_max = self.Car.v_max * np.ones(N)
@@ -955,16 +954,6 @@ class VOptOSQP:
             if ay_max is None:
                 ay_max = self.Car.a_lat_max * np.ones(N)
 
-            '''# Choose step length
-            if self.sol_options[self.key]['Friction'] == "Diamond":
-                if self.sol_options[self.key]['VarPower']:
-                    alpha = 0.2
-                else:
-                    alpha = 1
-            elif self.sol_options[self.key]['Friction'] == "Circle":
-                alpha = 0.4
-            else:
-                alpha = 1'''
             # Choose step length
             alpha = self.sol_options[self.key]['Alpha']
             pass

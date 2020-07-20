@@ -276,7 +276,7 @@ E.g. the four-wheel model can only be solved with the IPOPT solver.
      - Choose if variable power constraint is uses to solve the optimization problem (True) or not (False).
    * - Slack
      - True/False
-     - Choose if slack variables are used in the optimization (True) or not (False). Only available for the PMM in combination with the solver IPOPT, OSQP and qpOASES.
+     - Choose if slack variables are used in the optimization (True) or not (False). Only available for the PMM and kESM in combination with the solver IPOPT.
    * - Alpha
      - 0-1 (1)
      - Select the initial step length for the SQP methods (OSQP, MOSEK, qpOASES). For the PMM and kESM a value betweeen 0,4 and 1 is recommended. For the dESM alpha should be choosen to 0,1.
