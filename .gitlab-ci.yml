@@ -35,8 +35,8 @@ Documentation:
   stage: pypi_deploy
   tags:
     - CI_TrackPerformanceLRZ
-  # only:
-  #     - master
+  only:
+    - master
   script:
     - ${CI_JOB_ID}-env/bin/sphinx-apidoc -f -o ./docs/source velocity_optimization
     - ${CI_JOB_ID}-env/bin/sphinx-build -b html docs/source docs/build
