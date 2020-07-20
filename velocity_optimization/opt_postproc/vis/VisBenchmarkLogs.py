@@ -716,7 +716,9 @@ class VisVP_Logs:
                     if self.sol_options[key]['VarFriction']:
                         file += "_VarFriction"
                     file += ".pkl"  # + "_Alpha_" + str(self.sol_dict[key]['Alpha'])
-                    filename = mod_local_trajectory_path + '/vp_MA/src/RuntimeSolStatus/' + file
+                    filedir = mod_local_trajectory_path + '/logs/RuntimeSolver/'
+                    filename = filedir + file
+                    os.makedirs(filedir, exist_ok=True)
 
                     dill.settings['recurse'] = True
                     dill.dump([self.sol_options[key]['Time'], self.sol_options[key]['SolStatus']], open(filename, "wb"))
