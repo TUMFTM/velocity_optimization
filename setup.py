@@ -8,11 +8,16 @@ setuptools.setup(
     version="0.4",
     author="Thomas Herrmann",
     author_email="thomas.herrmann@tum.de",
-    description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and runtime-variable input parameters.",  # noqa: E501
+    description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and"
+                "runtime-variable input parameters.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TUMFTM/velocity_optimization",
-    packages=setuptools.find_packages(),  # TODO: only necessary packages to run code on vehicle
+    packages=["numpy>=1.18.1",  # packages to run code on car
+              "osqp>=0.6.1",
+              "scipy>=1.3.3",
+              "matplotlib>=3.0.3",
+              "sympy>=1.6"],
     include_package_data=True,
     install_requires=[line.strip() for line in open("requirements.txt").readlines()],
     classifiers=[

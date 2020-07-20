@@ -20,26 +20,12 @@ if __name__ == "__main__":
     Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
     """
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # USER INPUT -------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     csv_name = vel_opt_path + '/logs/sqp_perf_2020_07_03_16_12.log'
 
     csv_name_ltpl = vel_opt_path + '/logs/sqp_perf_2020_06_08_09_15.log'
-
-    # Transform ID of used velocity planner into 'PerfSQP' or 'EmergSQP'
-    sid = csv_name.split('/')[-1].split('_')[1]
-    if sid == 'perf':
-        sid = 'PerfSQP'
-    elif sid == 'emerg':
-        sid = 'EmergSQP'
-    else:
-        print('Logs have been produced with illegal SID! Exiting.')
-        sys.exit(1)
-
-    # --- Number of velocity points
-    # Get length of velocity array to determine parameter 'm' in velocity optimization
-    row_lc = linecache.getline(csv_name, 1)
-    row_lc = row_lc[:-1].rsplit(';')
-    velocity_dummy = json.loads(row_lc[2])
-    m = len(velocity_dummy)
 
     params_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
     input_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/inputs/'
@@ -111,6 +97,23 @@ if __name__ == "__main__":
                                                             # alpha = 0.1 recommended for DM
                                }
                    }
+
+    # --- Transform ID of used velocity planner into 'PerfSQP' or 'EmergSQP'
+    sid = csv_name.split('/')[-1].split('_')[1]
+    if sid == 'perf':
+        sid = 'PerfSQP'
+    elif sid == 'emerg':
+        sid = 'EmergSQP'
+    else:
+        print('Logs have been produced with illegal SID! Exiting.')
+        sys.exit(1)
+
+    # --- Number of velocity points
+    # Get length of velocity array to determine parameter 'm' in velocity optimization
+    row_lc = linecache.getline(csv_name, 1)
+    row_lc = row_lc[:-1].rsplit(';')
+    velocity_dummy = json.loads(row_lc[2])
+    m = len(velocity_dummy)
 
     # --- Set up visualization object
     rL = VisVP_Logs(csv_name=csv_name,
