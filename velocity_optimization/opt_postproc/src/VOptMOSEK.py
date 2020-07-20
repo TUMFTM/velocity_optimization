@@ -1391,12 +1391,14 @@ class VOptMOSEK:
             v = sol
 
             # Calculate Acceleration
-            ax = (v[1:self.m] ** 2 - v[0:self.m - 1] ** 2) / (2 * ds[0:self.m - 1])
+            acc = (v[1:self.m] ** 2 - v[0:self.m - 1] ** 2) / (2 * ds[0:self.m - 1])
             ay = kappa[0:self.m - 1] * v[0:self.m - 1] ** 2
 
             # Calculate Force
-            F = self.sol_options[self.key]['Create_Solver'].Car.m * ax - \
+            F = self.sol_options[self.key]['Create_Solver'].Car.m * acc - \
                 self.sol_options[self.key]['Create_Solver'].Car.q * 0.001 * v[1:self.m] ** 2
+
+            ax = F / self.sol_options[self.key]['Create_Solver'].Car.m
 
             # Calculate Power
             P = F * v[0:-1]
@@ -1405,12 +1407,14 @@ class VOptMOSEK:
             v = sol
 
             # Calculate Acceleration
-            ax = (v[1:self.m] ** 2 - v[0:self.m - 1] ** 2) / (2 * ds[0:self.m - 1])
+            acc = (v[1:self.m] ** 2 - v[0:self.m - 1] ** 2) / (2 * ds[0:self.m - 1])
             ay = kappa[0:self.m - 1] * v[0:self.m - 1] ** 2
 
             # Calculate Force
-            F = self.sol_options[self.key]['Create_Solver'].Car.m * ax - \
+            F = self.sol_options[self.key]['Create_Solver'].Car.m * acc - \
                 self.sol_options[self.key]['Create_Solver'].Car.q * 0.001 * v[1:self.m] ** 2
+
+            ax = F / self.sol_options[self.key]['Create_Solver'].Car.m
 
             # Calculate Power
             P = F * v[0:-1]

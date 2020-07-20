@@ -77,7 +77,7 @@ class VisVP_Logs_GUI:
                  'but_next',
                  'but_prev',
                  'vel_dict', 'F_dict', 'P_dict', 'a_dict', 'ax_dict', 'ay_dict', 'F_f_dict', 'F_r_dict', 'F_fl_dict',
-                 'F_fr_dict', 'F_rl_dict', 'F_rr_dict',
+                 'F_fr_dict', 'F_rl_dict', 'F_rr_dict', 'slack_dict',
                  'p1_1', 'p1_2', 'p1_3', 'p1_4', 'p1_5', 'p1_6', 'p1_7', 'p1_8', 'p1_9', 'p1_10', 'p1_11', 'p1_11',
                  'p1_12', 'p1_13', 'p1_14', 'p1_15', 'p1_16', 'p1_17', 'p1_18',
                  'p3_1', 'p3_2', 'p3_3', 'p3_4', 'p3_5', 'p3_6', 'p3_7', 'p3_8', 'p3_9', 'p3_10', 'p3_11', 'p3_12',
@@ -142,6 +142,7 @@ class VisVP_Logs_GUI:
 
         # Initialize dictionary
         self.vel_dict = {}
+        self.slack_dict = {}
         self.F_dict = {}
         self.P_dict = {}
         self.a_dict = {}
@@ -461,6 +462,11 @@ class VisVP_Logs_GUI:
         ################################################################################################################
         ax = self.main_fig.add_subplot(5, 2, 2)
         ax.set_ylim([Y_SLACK_TRE_MIN, Y_SLACK_TRE_MAX])
+        legend = [r'$\epsilon_\mathrm{o,OSQP}$',
+                  r'$\epsilon_\mathrm{ini}$',
+                  r'$\epsilon_\mathrm{max}$',
+                  r'$\epsilon_\mathrm{o,IPOPT_PM}$',
+                  r'$\epsilon_\mathrm{o,qpOASES}$']
 
         p1, = ax.plot(np.zeros((self.n, 1)),
                       color='black', linewidth=LW, linestyle='-')
@@ -473,6 +479,17 @@ class VisVP_Logs_GUI:
         p5, = ax.plot(np.zeros((self.n, 1)),
                       color='red', linewidth=LW, linestyle=':')
 
+        for key, value in self.sol_options.items():
+            if (self.sol_options[key]['Model'] == "PM" or self.sol_options[key]['Model'] == "KM") and \
+                    self.sol_options[key]['Solver'] == "IPOPT":
+                self.slack_dict[key], = ax.plot(np.zeros((self.n, 1)), color=self.sol_options[key]["Color"],
+                                                linewidth=LW,
+                                                linestyle=self.sol_options[key]["Linestyle"])
+                if self.vis_options['b_vis_model_name']:
+                    legend.append(r'$\epsilon_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
+                elif self.vis_options['b_vis_solver_name']:
+                    legend.append(r'$\epsilon_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+
         self.p7_1 = p1
         self.p7_2 = p2
         self.p7_3 = p3
@@ -482,11 +499,7 @@ class VisVP_Logs_GUI:
         plt.xlabel(r'$s_{\mathrm{loc},k}$')
         plt.ylabel(r'$\epsilon$')
 
-        plt.legend([r'$\epsilon_\mathrm{o,OSQP}$',
-                    r'$\epsilon_\mathrm{ini}$',
-                    r'$\epsilon_\mathrm{max}$',
-                    r'$\epsilon_\mathrm{o,IPOPT_{PM}}$',
-                    r'$\epsilon_\mathrm{o,qpOASES}$'],
+        plt.legend(legend,
                    mode='expand', ncol=5)
 
         ########################################################################################################
