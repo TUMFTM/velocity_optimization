@@ -396,7 +396,7 @@ class VisVP_Logs:
                                                                                vis_options=self.vis_options)
 
                     self.sol_options[key].update({'Velocity': v_op_ipopt})
-                    self.sol_options[key].update({'Slack': s_t_op_ipopt})
+                    self.sol_options[key].update({'Slack_Sol': s_t_op_ipopt})
                     self.sol_options[key].update({'Force': F_op_ipopt})
                     self.sol_options[key].update({'Power': P_op_ipopt})
                     self.sol_options[key].update({'Acc_x': ax_op_ipopt})
@@ -681,7 +681,7 @@ class VisVP_Logs:
                 for key, value in self.sol_options.items():
                     if (self.sol_options[key]['Model'] == "PM" or self.sol_options[key]['Model'] == "KM") and \
                             self.sol_options[key]['Solver'] == "IPOPT":
-                        self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack'])
+                        self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack_Sol'])
 
                 if self.vis_options['b_calc_qpOASES']:
                     self.vis_gui.p7_5.set_ydata(eps_op_qpoases)
