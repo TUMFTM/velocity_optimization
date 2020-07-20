@@ -13,13 +13,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TUMFTM/velocity_optimization",
-    packages=["numpy>=1.18.1",  # packages to run code on car
-              "osqp>=0.6.1",
-              "scipy>=1.3.3",
-              "matplotlib>=3.0.3",
-              "sympy>=1.6"],
+    packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=[line.strip() for line in open("requirements.txt").readlines()],
+    install_requires=["numpy>=1.18.1",  # packages to run code on car
+                      "osqp>=0.6.1",
+                      "scipy>=1.3.3",
+                      "matplotlib>=3.0.3",
+                      "sympy>=1.6"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
