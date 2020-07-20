@@ -226,7 +226,7 @@ class VOptIPOPT:
         # Weights
         s_eps_tre_lin = opt_config.getfloat(set_sec, 'penalty_slack_tire_lin')
         s_eps_tre_quad = opt_config.getfloat(set_sec, 'penalty_slack_tire_quad')
-        penalty_jerk = opt_config. getfloat(set_sec, 'penalty_jerk')
+        penalty_jerk = opt_config.getfloat(set_sec, 'penalty_jerk')
 
         # --- Variable friction
         if self.sol_dict[self.key]['VarFriction']:
@@ -249,7 +249,9 @@ class VOptIPOPT:
 
         J = 0
 
-        # Point mass model to describe the vehicle dynamics
+        #################################################################################################################
+        # PM -----------------------------------------------------------------------------------------------------------
+        ################################################################################################################
         if self.sol_dict[self.key]['Model'] == "PM":
 
             ############################################################################################################
@@ -380,7 +382,7 @@ class VOptIPOPT:
                     lbg.append([- np.inf] * n)
                 else:
                     # variable acceleration limit
-                    tire_cst1 = acc ** 2 / ax_max**2 + (kappa_param[: - 1]
+                    tire_cst1 = acc ** 2 / ax_max ** 2 + (kappa_param[: - 1]
                                                         * (v[: - 1] ** 2))**2 / ay_max**2 - oneone_vec_short
                     g.append(tire_cst1)
                     ubg.append([0] * n)
@@ -549,6 +551,10 @@ class VOptIPOPT:
             self.lbg = lbg
             self.ubg = ubg
             self.J = 0
+
+        ################################################################################################################
+        # KM -----------------------------------------------------------------------------------------------------------
+        ################################################################################################################
 
         elif self.sol_dict[self.key]['Model'] == "KM":
             ############################################################################################################
@@ -859,6 +865,10 @@ class VOptIPOPT:
             self.ubg = ubg
             self.J = 0
 
+        ################################################################################################################
+        # DM -----------------------------------------------------------------------------------------------------------
+        ################################################################################################################
+
         elif self.sol_dict[self.key]['Model'] == "DM":
             ############################################################################################################
             # Optimization Variables
@@ -990,7 +1000,7 @@ class VOptIPOPT:
                                v[: - 1] * cs.cos(beta[: - 1]))
 
             # air resistance
-            F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
+            F_d = 0.001 * c_res * v[: - 1] ** 2
 
             # force at axle in x-direction (front & rear)
             F_xf = k_dr * F_dr + k_br * F_br - F_roll_f
@@ -1178,7 +1188,9 @@ class VOptIPOPT:
             self.ubg = ubg
             self.J = 0
 
-            pass
+        ################################################################################################################
+        # FW -----------------------------------------------------------------------------------------------------------
+        ################################################################################################################
 
         elif self.sol_dict[self.key]['Model'] == "FW":
             ############################################################################################################
@@ -1321,7 +1333,7 @@ class VOptIPOPT:
                                 v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
             # air resistance [kN]
-            F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
+            F_d = 0.001 * c_res * v[: - 1] ** 2
 
             # tire force in x-direction (front & rear/ left & right) [kN]
             F_xfl = 0.5 * k_dr * F_dr + 0.5 * k_br * F_br - F_roll_fl
@@ -1828,6 +1840,7 @@ class VOptIPOPT:
 
         # vehicle mass [t]
         m_t = opt_config.getfloat('VEHICLE', 'mass_t')
+        c_res = opt_config.getfloat('VEHICLE', 'c_res')
 
         # Initialization of output vector
         eps_tre = []
@@ -1894,7 +1907,7 @@ class VOptIPOPT:
             for k in range(self.m - 1):
                 acc.append((v[k + 1] ** 2 - v[k] ** 2) / (2 * delta_s[k]))
                 ay.append(kappa[k] * v[k] ** 2)
-                F_p.append(1.16 * acc[k] - 0.854 * 0.001 * v[k] ** 2)
+                F_p.append(m_t * acc[k] - c_res * 0.001 * v[k] ** 2)
                 ax.append(F_p[k] / m_t)
             # Calculate engine power
             P_p = F_p * v[0:-1]
@@ -1938,8 +1951,6 @@ class VOptIPOPT:
             l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
             # length from CoG to Rear Axle [m]
             l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
-            # Air Resistance Coefficient [-]
-            c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
             # Front Surface [m²]
             A = opt_config.getfloat('CAR_PARAMETER', 'A')
             # Air Density [kg/m³]
@@ -1979,7 +1990,7 @@ class VOptIPOPT:
             alpha_r = cs.atan2(l_r * kappa[: - 1] * v[: - 1] / (2 * np.pi) - v[: - 1] * cs.sin(beta[: - 1]),
                                v[: - 1] * cs.cos(beta[: - 1]))
 
-            F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
+            F_d = 0.001 * c_res * v[: - 1] ** 2
 
             F_xf = k_dr * F_dr + k_br * F_br - F_roll_f
             F_xr = (1 - k_dr) * F_dr + (1 - k_br) * F_br - F_roll_r
@@ -2065,8 +2076,6 @@ class VOptIPOPT:
             l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
             # length from CoG to Rear Axle [m]
             l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
-            # Air Resistance Coefficient [-]
-            c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
             # Front Surface [m²]
             A = opt_config.getfloat('CAR_PARAMETER', 'A')
             # Air Density [kg/m³]
@@ -2122,7 +2131,7 @@ class VOptIPOPT:
                                 v[: - 1] * cs.cos(beta[: - 1]) + 0.5 * tw_r * kappa[: - 1] * v[: - 1] / (2 * np.pi))
 
             # air resistance [kN]
-            F_d = 0.5 * c_w * rho * A * v[: - 1] ** 2
+            F_d = 0.001 * c_res * v[: - 1] ** 2
 
             # tire force in x-direction (front & rear/ left & right) [kN]
             F_xfl = 0.5 * k_dr * F_dr + 0.5 * k_br * F_br - F_roll_fl
