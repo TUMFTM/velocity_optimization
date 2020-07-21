@@ -57,13 +57,29 @@ Debugging
 Our package come with a powerful debugging tool. Create an empty file and copy the following content to this file.
 Adapt `csv_name`, `params_path` and `input_path` to your specific paths. A debug window will show up, plotting the
 most important values of the velocity SQP that have been logged. The following combinations of solvers and vehicle
-models are available:
-IPOPT + PM (Diamond + Circle + var fric + var power)
-IPOPT + KM (Diamond + Circle + var fric + var power)
-IPOPT + DM (Circles + var power)
-IPOPT + FW (Circles + var power)
+models are available, the words in the cells indicate the available combined acceleration models:
 
-qpOASES + PM (Diamond + Circle + var fric + var power)
++------------+------------+-----------+
+|            | IPOPT      | qpOASES   |
++============+============+===========+
+| **PM**     | * Diamond  | * Diamond |
+|            | * Circle   | * Circle  |
++------------+------------+-----------+
+| **KM**     | * Diamond  |           |
+|            | * Circle   |           |
++------------+------------+-----------+
+| **DM**     | * Circles  |           |
++------------+------------+-----------+
+| **FW**     | * Circles  |           |
++------------+------------+-----------+
+
+**Important notes:**
+
+- All combinations support variable power. The DM and FW models do currently not support variable friction.
+- | The solver OSQP is running online in the velocity optimization algoritm. It is therefore not provided as a
+  | benchmark solver as its outputs are already given in the logs. Still, the logged input data can be used to rerun
+  | the first SQP (OSQP)-iteration to detect, e.g., infeasibility of the given problem.
+
 
 .. code-block:: python
 

@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 import linecache
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.opt_postproc.src.VOptIPOPT import VOptIPOPT
-from velocity_optimization.opt_postproc.src.VOptOSQP import VOptOSQP
 from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
 from velocity_optimization.opt_postproc.src.online_qp_postproc import online_qp_postproc
 from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
@@ -56,14 +55,6 @@ class VisVP_Logs:
                  'b_vis_triggered',
                  'dt_ipopt_arr',
                  'dt_sqp_qpoases_arr',
-                 'sol_status_ipopt_pm',
-                 'sol_status_ipopt_km',
-                 'sol_status_ipopt_dm',
-                 'sol_status_ipopt_fw',
-                 'sol_status_osqp_pm',
-                 'sol_status_osqp_km',
-                 'sol_status_osqp_dm',
-                 'sol_status_qpoases_pm',
                  'P_max')
 
     def __init__(self,
@@ -140,6 +131,7 @@ class VisVP_Logs:
 
         # --- Create Solver Objects
         for key, value in self.sol_options.items():
+
             # --- Create IPOPT solver object
             if self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Create_Solver': VOptIPOPT(m=m,
@@ -149,13 +141,6 @@ class VisVP_Logs:
                                                                          vis_options=vis_options,
                                                                          sol_dict=sol_options,
                                                                          key=key)})
-            # --- Create OSQP solver object
-            if self.sol_options[key]['Solver'] == "OSQP":
-                self.sol_options[key].update({'Create_Solver': VOptOSQP(m=m,
-                                                                        sid=sid,
-                                                                        params_path=params_path,
-                                                                        sol_options=sol_options,
-                                                                        key=key)})
 
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
@@ -638,9 +623,10 @@ class VisVP_Logs:
                     dill.settings['recurse'] = True
                     dill.dump([self.sol_options[key]['Time'], self.sol_options[key]['SolStatus']], open(filename, "wb"))
 
-                    self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
-                                            dt_solver=np.array(self.sol_options[key]['Time']),
-                                            vis_options=self.vis_options)
+                    if self.vis_options['b_calc_time_plot']:
+                        self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
+                                                dt_solver=np.array(self.sol_options[key]['Time']),
+                                                vis_options=self.vis_options)
 
                 plt.ioff()
 
