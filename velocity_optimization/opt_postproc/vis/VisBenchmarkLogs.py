@@ -1,7 +1,5 @@
 import csv
 import json
-import sys
-import os
 import numpy as np
 import datetime
 import time
@@ -392,8 +390,8 @@ class VisVP_Logs:
                     t_start = time.perf_counter()
 
                     v_op_qpoases, \
-                    eps_op_qpoases, \
-                    F_op_qpoases = \
+                        eps_op_qpoases, \
+                        F_op_qpoases = \
                         online_qp_postproc(velqp=self.velqp_bench,
                                            vp_qpOASES=self.sol_options[key]['Create_Solver'],
                                            v_ini=v_ini,
@@ -420,10 +418,10 @@ class VisVP_Logs:
                               np.square(v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])
 
                     ax_op_qpoases = (np.square(v_op_qpoases[1:self.velqp.sqp_stgs['m']]) - np.square(
-                        v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) / (2 * np.array(delta_s)) + \
-                              (self.velqp.sym_sc_['c_res_'] * np.square(
-                                  v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) / \
-                              (1000 * self.velqp.sym_sc_['m_t_'])
+                        v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) / (2 * np.array(delta_s)) \
+                        + (self.velqp.sym_sc_['c_res_']
+                           * np.square(v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) /\
+                          (1000 * self.velqp.sym_sc_['m_t_'])
 
                     self.sol_options[key].update({'Velocity': v_op_qpoases})
                     self.sol_options[key].update({'Slack_Sol': eps_op_qpoases})

@@ -487,7 +487,7 @@ class VisVP_Logs_GUI:
                                         linestyle=self.sol_options[key]["Linestyle"],
                                         marker=self.sol_options[key]["Marker"], markevery=2)
             legend.append(r'$\mu_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
-                                                    self.sol_options[key]["Model"]))
+                                                       self.sol_options[key]["Model"]))
 
         ax.axis('equal')
 
@@ -543,7 +543,7 @@ class VisVP_Logs_GUI:
                                                       linestyle=self.sol_options[key]["Linestyle"],
                                                       marker=self.sol_options[key]["Marker"], markevery=2)
                         legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Model"],
-                                                                self.sol_options[key]["Solver"]))
+                                                                 self.sol_options[key]["Solver"]))
 
                     elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
                         self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),

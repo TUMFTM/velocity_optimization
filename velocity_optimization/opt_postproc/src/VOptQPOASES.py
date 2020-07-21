@@ -2,10 +2,6 @@ try:
     import casadi as cs
 except ImportError:
     print('Warning: No module CasADi found. Not necessary on car but for development.')
-try:
-    import sympy as sym
-except ImportError:
-    print('Warning: No module sympy found. Not necessary on car but for development.')
 import numpy as np
 import time
 

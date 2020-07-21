@@ -172,8 +172,6 @@ class VOptIPOPT:
         l_f = opt_config.getfloat('CAR_PARAMETER', 'l_f')
         # length from CoG to Rear Axle [m]
         l_r = opt_config.getfloat('CAR_PARAMETER', 'l_r')
-        # Air Resistance Coefficient [-]
-        c_w = opt_config.getfloat('CAR_PARAMETER', 'c_w')
         # Front Surface [m²]
         A = opt_config.getfloat('CAR_PARAMETER', 'A')
         # Air Density [kg/m³]
@@ -249,7 +247,7 @@ class VOptIPOPT:
 
         J = 0
 
-        #################################################################################################################
+        ################################################################################################################
         # PM -----------------------------------------------------------------------------------------------------------
         ################################################################################################################
         if self.sol_dict[self.key]['Model'] == "PM":
@@ -383,7 +381,7 @@ class VOptIPOPT:
                 else:
                     # variable acceleration limit
                     tire_cst1 = acc ** 2 / ax_max ** 2 + (kappa_param[: - 1]
-                                                        * (v[: - 1] ** 2))**2 / ay_max**2 - oneone_vec_short
+                                                          * (v[: - 1] ** 2))**2 / ay_max**2 - oneone_vec_short
                     g.append(tire_cst1)
                     ubg.append([0] * n)
                     lbg.append([- np.inf] * n)
