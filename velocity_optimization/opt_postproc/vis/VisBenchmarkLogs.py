@@ -414,8 +414,8 @@ class VisVP_Logs:
 
                     P_op_qpoases = F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1]
 
-                    ay_op_qpoases = kappa[0:self.velqp.sqp_stgs['m'] - 1] * \
-                              np.square(v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])
+                    ay_op_qpoases = kappa[0:self.velqp.sqp_stgs['m'] - 1] \
+                        * np.square(v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])
 
                     ax_op_qpoases = (np.square(v_op_qpoases[1:self.velqp.sqp_stgs['m']]) - np.square(
                         v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) / (2 * np.array(delta_s)) \

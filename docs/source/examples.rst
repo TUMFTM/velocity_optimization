@@ -1,10 +1,11 @@
+********
 Examples
-========
+********
 
 This section describes how to use the velocity_optimization package.
 
 Velocity optimization
-*********************
+=====================
 
 The following class `VelOpt` configures a velocity optimizer object `v_sqp`. `VelOpt` also contains a function
 `vsqp_online`that needs the input of e.g., the road curvature `kappa` and the step length between the
@@ -52,7 +53,10 @@ and the force `F_ini` from the first velocity point (to avoid oscillations in su
             return v_op, s_t_op, qp_status
 
 Debugging
-*********
+=========
+
+.. image:: GUI_Plot.png
+   :width: 700
 
 Our package comes with a powerful debugging tool. Create an empty file and copy the following content to this file.
 Adapt `csv_name`, `params_path` and `input_path` to your specific paths. A debug window will show up, plotting the
@@ -171,45 +175,8 @@ most important values of the velocity SQP that have been logged.
         # --- Start GUI
         rL.vis_log(int(0))
 
-Additionally, the following combinations of debugging solvers and vehicle models are available to compare the solution
-that
-was
-calculated using OSQP during driving. The word in the cells below indicate the available combined acceleration models:
-
-+------------+------------+-----------+
-|            | IPOPT      | qpOASES   |
-+============+============+===========+
-| **PM**     | * Diamond  | * Diamond |
-|            | * Circle   | * Circle  |
-+------------+------------+-----------+
-| **KM**     | * Diamond  |           |
-|            | * Circle   |           |
-+------------+------------+-----------+
-| **DM**     | * Circles  |           |
-+------------+------------+-----------+
-| **FW**     | * Circles  |           |
-+------------+------------+-----------+
-
-- PM: point mass model
-- KM: kinematic bicycle model
-- DM: dynamic bicycle model
-- FW: double track model
-
-**Important notes:**
-
-- All combinations of solvers and models support variable max. input power. The **DM** and **FW** models do currently
-not support variable friction between tires and ground.
-
-- | The solver OSQP is running online in the velocity optimization algoritm. OSQP is therefore not provided as a
-  | benchmark solver as its outputs are already given in the logs. Still, the logged input data can be used to rerun
-  | the first SQP (OSQP)-iteration to detect, e.g., infeasibility of the given problem.
-
-As an example, the optimized velocity (OSQP) is plotted together with the solutions by different solvers,
-that are calculated during debugging (depending on the chosen options above). Plots for the driving force, motor power,
-slack variables and combined accelerations are visualized:
-
-.. image:: GUI_Plot.png
-   :width: 600
+General options
+---------------
 
 There are several user options that can be changed for the visualization:
 
@@ -261,6 +228,51 @@ There are several user options that can be changed for the visualization:
      - True/False
      - Save the solver runtime histograms.
 
+Available solver and model combinations
+---------------------------------------
+
+Additionally, the following combinations of debugging solvers and vehicle models are available to compare the solution
+that
+was
+calculated using OSQP during driving. The word in the cells below indicate the available combined acceleration models:
+
++------------+------------+-----------+
+|            | IPOPT      | qpOASES   |
++============+============+===========+
+| **PM**     | * Diamond  | * Diamond |
+|            | * Circle   | * Circle  |
++------------+------------+-----------+
+| **KM**     | * Diamond  |           |
+|            | * Circle   |           |
++------------+------------+-----------+
+| **DM**     | * Circles  |           |
++------------+------------+-----------+
+| **FW**     | * Circles  |           |
++------------+------------+-----------+
+
+- PM: point mass model
+- KM: kinematic bicycle model
+- DM: dynamic bicycle model
+- FW: double track model
+
+**Important notes:**
+
+- | All combinations of solvers and models support variable max. input power. The **DM** and **FW** models do currently
+  | not support variable friction between tires and ground.
+
+- | The solver OSQP is running online in the velocity optimization algoritm. OSQP is therefore not provided as a
+  | benchmark solver as its outputs are already given in the logs. Still, the logged input data can be used to rerun
+  | the first SQP (OSQP)-iteration to detect, e.g., infeasibility of the given problem.
+
+As an example, the optimized velocity (OSQP) is plotted at the top of this page together with the solutions by
+different solvers and vehicle
+dynamics model (IPOPT + doulbe track model and qpOASES + point mass model in this case),
+that are calculated during debugging (depending on the chosen options above). Plots for the driving force, motor power,
+slack variables and combined accelerations are visualized:
+
+Solver configurations
+---------------------
+
 The solver configurations can be selected in the sol_options dictionary.
 
 .. list-table:: Visualization Options (Default values in brackets)
@@ -291,6 +303,10 @@ The solver configurations can be selected in the sol_options dictionary.
      - | Choose if slack variables are used in the optimization (True) or not (False). Only available for the PM and
        | KM in combination with the solver IPOPT.
 
+In the code below, two configurations are set to solve the optimization problem and compare the OSQP-solution to. |br|
+Solver 1 contains the point-mass model (FW) as the vehicle dynamics model, solved by IPOPT.The second solver contains
+a PM model, where qpOASES is used to solve the problem.
+
 .. code-block:: python
 
     sol_options = {'solver1': {'Model': "FW",               # PM (Pointmass), KM (Kinematic Single Track Model),
@@ -313,7 +329,3 @@ The solver configurations can be selected in the sol_options dictionary.
                                                             # reasonable on simple models like PM and KM): Keep True!
                                }
                    }
-
-In the code above, two configurations are set to solve the optimization problem and compare the OSQP-solution to. |br|
-Solver 1 contains the point-mass model (FW) as the vehicle dynamics model, solved by IPOPT.The second solver contains
-a PM model, where qpOASES is used to solve the problem.
