@@ -63,6 +63,8 @@ IPOPT + KM (Diamond + Circle + var fric + var power)
 IPOPT + DM (Circles + var power)
 IPOPT + FW (Circles + var power)
 
+qpOASES + PM (Diamond + Circle + var fric + var power)
+
 .. code-block:: python
 
     import os

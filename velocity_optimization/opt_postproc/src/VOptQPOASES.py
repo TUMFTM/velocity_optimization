@@ -130,7 +130,7 @@ class VOpt_qpOASES:
 
         return x_opt
 
-
+'''
 class Car:
 
     def __init__(self,
@@ -198,7 +198,7 @@ class Car:
 
         self.g = opt_config.getfloat('CAR_PARAMETER', 'g')  # [m/s²] Gravitational Constant on Earth
         self.rho = opt_config.getfloat('CAR_PARAMETER', 'rho')  # [kg/m³] Air Density
-
+'''
 
 if __name__ == '__main__':
     pass

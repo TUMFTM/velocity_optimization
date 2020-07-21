@@ -62,6 +62,8 @@ class VisVP_Runtime:
         if vis_options['b_save_tikz']:
             tikzplotlib.save('SQP_' + name_solver + '_runtime.tex')
 
+        plt.legend(['mean', 'median'])
+
         # --- Show histogram
         # plt.show()
 

@@ -140,7 +140,7 @@ class VisVP_Logs_GUI:
         self.but_next = None
         self.but_prev = None
 
-        # Initialize dictionary
+        # Initialize solution dictionaries
         self.vel_dict = {}
         self.slack_dict = {}
         self.F_dict = {}
@@ -178,38 +178,21 @@ class VisVP_Logs_GUI:
     def line_definition(self):
         # Define Color, Line Style and Marker
         for key, value in self.sol_options.items():
-            if self.vis_options['b_vis_model_name']:
-                if self.sol_options[key]['Model'] == "PM":
-                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                if self.sol_options[key]['Model'] == "KM":
-                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-                if self.sol_options[key]['Model'] == "DM":
-                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-                if self.sol_options[key]['Model'] == "FW":
-                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
-            elif self.vis_options['b_vis_solver_name']:
-                if self.sol_options[key]['Solver'] == "IPOPT":
-                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                if self.sol_options[key]['Solver'] == "OSQP":
-                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-                if self.sol_options[key]['Solver'] == "qpOASES":
-                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
+            if self.sol_options[key]['Model'] == "PM":
+                self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
+            if self.sol_options[key]['Model'] == "KM":
+                self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
+            if self.sol_options[key]['Model'] == "DM":
+                self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
+            if self.sol_options[key]['Model'] == "FW":
+                self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
 
-            elif self.vis_options['b_vis_fric_model']:
-                if self.sol_options[key]['Friction'] == "Circle":
-                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                if self.sol_options[key]['Friction'] == "Diamond":
-                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-
-            elif self.vis_options['b_vis_alpha']:
-                if self.sol_options[key]['Alpha'] == 1:
-                    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                if self.sol_options[key]['Alpha'] == 0.75:
-                    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-                if self.sol_options[key]['Alpha'] == 0.5:
-                    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-                if self.sol_options[key]['Alpha'] == 0.25:
-                    self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
+                #if self.sol_options[key]['Solver'] == "IPOPT":
+                #    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
+                #if self.sol_options[key]['Solver'] == "OSQP":
+                #    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
+                #if self.sol_options[key]['Solver'] == "qpOASES":
+                #    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
 
     def draw_gui(self):
 
@@ -318,10 +301,8 @@ class VisVP_Logs_GUI:
             self.vel_dict[key], = ax.plot(np.zeros((self.m, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
                                           linestyle=self.sol_options[key]["Linestyle"],
                                           marker=self.sol_options[key]["Marker"], markevery=5)
-            if self.vis_options['b_vis_model_name']:
-                legend.append(r'$v_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-            elif self.vis_options['b_vis_solver_name']:
-                legend.append(r'$v_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+            legend.append(r'$v_\mathrm{o,{%s,%s}}$' % (self.sol_options[key]["Solver"], self.sol_options[key][
+                "Model"]))
 
         self.p1_1 = p1
         self.p1_2 = p2
@@ -478,15 +459,12 @@ class VisVP_Logs_GUI:
                       color='red', linewidth=LW, linestyle=':')
 
         for key, value in self.sol_options.items():
-            if (self.sol_options[key]['Model'] == "PM" or self.sol_options[key]['Model'] == "KM") and \
-                    self.sol_options[key]['Solver'] == "IPOPT":
+            if self.sol_options[key]['Slack'] is True:
                 self.slack_dict[key], = ax.plot(np.zeros((self.n, 1)), color=self.sol_options[key]["Color"],
                                                 linewidth=LW,
                                                 linestyle=self.sol_options[key]["Linestyle"])
-                if self.vis_options['b_vis_model_name']:
-                    legend.append(r'$\epsilon_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-                elif self.vis_options['b_vis_solver_name']:
-                    legend.append(r'$\epsilon_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+                legend.append(r'$\epsilon_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
+                                                                  self.sol_options[key]["Model"]))
 
         self.p7_1 = p1
         self.p7_2 = p2
