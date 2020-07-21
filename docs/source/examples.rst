@@ -198,7 +198,7 @@ v optimal (IPOPT) and v optimal (qpOASES) are shown:
 
 In addition, plots of the the driving force, motor power, slack variables and acceleration are visualized in the GUI:
 
-.. image:: GUI_Plot.png
+.. image:: GUI_Plot.pdf
    :width: 600
 
 There are several options to select for the visualization which are described in the following table. These values are

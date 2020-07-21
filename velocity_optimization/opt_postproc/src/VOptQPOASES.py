@@ -6,17 +6,8 @@ try:
     import sympy as sym
 except ImportError:
     print('Warning: No module sympy found. Not necessary on car but for development.')
-try:
-    import dill
-except ImportError:
-    print('Warning: No module dill found. Not necessary on car but for development.')
-import os
-import sys
 import numpy as np
 import time
-import configparser
-from scipy import sparse
-import matplotlib.pyplot as plt
 
 
 class VOpt_qpOASES:

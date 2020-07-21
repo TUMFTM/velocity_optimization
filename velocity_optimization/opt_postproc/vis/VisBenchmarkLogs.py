@@ -20,10 +20,6 @@ try:
     import tikzplotlib
 except ImportError:
     print('Warning: No module tikzplotlib found. Not necessary on car but for development.')
-try:
-    import dill
-except ImportError:
-    print('Warning: No module dill found. Not necessary on car but for development.')
 
 # Font sizes
 SMALL_SIZE = 14
@@ -310,7 +306,7 @@ class VisVP_Logs:
 
                 # s_t_op_rerun = sol[self.velqp.m - 1:] + x0_s_t
 
-                print("OSQP rerun v_mps:", v_op_rerun)
+                print("OSQP rerun v_mps:\n", v_op_rerun)
 
             ############################################################################################################
             # --- Calculate Solver-solution (Dictionary)
@@ -436,7 +432,7 @@ class VisVP_Logs:
                     self.sol_options[key].update({'Acc_x': ax_op_qpoases})
                     self.sol_options[key].update({'Acc_y': ay_op_qpoases})
                     self.sol_options[key]['Time'].append(dt_sqp_qpoases)
-                    #self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
+                    # self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
 
             if self.vis_options['b_immediate_plot_update']:
 
@@ -559,29 +555,8 @@ class VisVP_Logs:
                     self.vis_gui.slider_vel.set_val(int(i))
                     print("\n*** Progress: " + str("%.2f" % round((i / self.row_count) * 100, 2)) + " %")
 
-                # --- Plot IPOPT runtimes
-                # Save Data to File
-
-                # Save Runtime and Solver Status for extern Plots
-
-                mod_local_trajectory_path = os.path.dirname(
-                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-                sys.path.append(mod_local_trajectory_path)
+                # --- Plot runtimes
                 for key, value in self.sol_options.items():
-
-                    file = str(self.sol_options[key]['Solver']) + "_" + str(self.sol_options[key]['Model']) \
-                        + "_" + str(self.sol_options[key]['Friction']) \
-                        + "_" + str(self.m) + "_Model" \
-
-                    if self.sol_options[key]['VarFriction']:
-                        file += "_VarFriction"
-                    file += ".pkl"  # + "_Alpha_" + str(self.sol_dict[key]['Alpha'])
-                    filedir = mod_local_trajectory_path + '/logs/RuntimeSolver/'
-                    filename = filedir + file
-                    os.makedirs(filedir, exist_ok=True)
-
-                    dill.settings['recurse'] = True
-                    dill.dump([self.sol_options[key]['Time'], self.sol_options[key]['SolStatus']], open(filename, "wb"))
 
                     if self.vis_options['b_calc_time_plot']:
                         self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
