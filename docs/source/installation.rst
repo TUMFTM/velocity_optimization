@@ -1,4 +1,4 @@
 Installation
 ============
 
-Docu on how to install this package ...
+Set up a virtual envrionment using `virtualenv` and install the requirements given in `requirements.txt`.
