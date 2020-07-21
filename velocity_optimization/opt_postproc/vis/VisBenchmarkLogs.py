@@ -602,7 +602,6 @@ class VisVP_Logs:
                 for key, value in self.sol_options.items():
                     if self.sol_options[key]['Slack'] is True:
                         self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack_Sol'])
-                        print(self.sol_options[key]['Slack_Sol'])
 
                 # self.vis_gui.main_fig.canvas.draw()
 

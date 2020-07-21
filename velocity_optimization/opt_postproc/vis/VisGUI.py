@@ -331,10 +331,8 @@ class VisVP_Logs_GUI:
             self.F_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
                                         linestyle=self.sol_options[key]["Linestyle"],
                                         marker=self.sol_options[key]["Marker"], markevery=5)
-            if self.vis_options['b_vis_model_name']:
-                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-            elif self.vis_options['b_vis_solver_name']:
-                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+            legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
+                                                     self.sol_options[key]["Model"]))
 
         self.p3_1 = p1
         self.p3_2 = p2
@@ -386,10 +384,8 @@ class VisVP_Logs_GUI:
             self.P_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
                                         linestyle=self.sol_options[key]["Linestyle"],
                                         marker=self.sol_options[key]["Marker"], markevery=5)
-            if self.vis_options['b_vis_model_name']:
-                legend.append(r'$P_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-            elif self.vis_options['b_vis_solver_name']:
-                legend.append(r'$P_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+            legend.append(r'$P_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
+                                                     self.sol_options[key]["Model"]))
 
         self.p5_1 = p1
         self.p5_2 = p2
@@ -413,9 +409,7 @@ class VisVP_Logs_GUI:
         ax.set_ylim([Y_SLACK_TRE_MIN, Y_SLACK_TRE_MAX])
         legend = [r'$\epsilon_\mathrm{o,OSQP}$',
                   r'$\epsilon_\mathrm{ini}$',
-                  r'$\epsilon_\mathrm{max}$',
-                  r'$\epsilon_\mathrm{o,IPOPT_PM}$',
-                  r'$\epsilon_\mathrm{o,qpOASES}$']
+                  r'$\epsilon_\mathrm{max}$']
 
         p1, = ax.plot(np.zeros((self.n, 1)),
                       color='black', linewidth=LW, linestyle='-')
@@ -423,10 +417,6 @@ class VisVP_Logs_GUI:
                       color='gray', linewidth=LW, linestyle=':')
         p3, = ax.plot(np.zeros((self.n, 1)),
                       color='red', linewidth=LW, linestyle='--')
-        p4, = ax.plot(np.zeros((self.n, 1)),
-                      color='blue', linewidth=LW, linestyle=':')
-        p5, = ax.plot(np.zeros((self.n, 1)),
-                      color='red', linewidth=LW, linestyle=':')
 
         for key, value in self.sol_options.items():
             if self.sol_options[key]['Slack'] is True:
@@ -434,13 +424,11 @@ class VisVP_Logs_GUI:
                                                 linewidth=LW,
                                                 linestyle=self.sol_options[key]["Linestyle"])
                 legend.append(r'$\epsilon_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
-                                                                  self.sol_options[key]["Model"]))
+                                                                self.sol_options[key]["Model"]))
 
         self.p7_1 = p1
         self.p7_2 = p2
         self.p7_3 = p3
-        self.p7_4 = p4
-        self.p7_5 = p5
 
         plt.xlabel(r'$s_{\mathrm{loc},k}$')
         plt.ylabel(r'$\epsilon$')
@@ -497,10 +485,8 @@ class VisVP_Logs_GUI:
                                         color=self.sol_options[key]["Color"], linewidth=LW,
                                         linestyle=self.sol_options[key]["Linestyle"],
                                         marker=self.sol_options[key]["Marker"], markevery=2)
-            if self.vis_options['b_vis_model_name']:
-                legend.append(r'$\mu_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-            elif self.vis_options['b_vis_solver_name']:
-                legend.append(r'$\mu_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+            legend.append(r'$\mu_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
+                                                    self.sol_options[key]["Model"]))
 
         ax.axis('equal')
 
@@ -522,8 +508,6 @@ class VisVP_Logs_GUI:
         self.p6_1 = p
         self.p6_2 = p3
         self.p6_3 = p4
-
-        self.p6_4 = p5
 
         plt.xlabel(r'$a_\mathrm{y}$' + ' in ' + r'$\frac{m}{s^2}$')
         plt.ylabel(r'$a_\mathrm{x}$' + ' in ' + r'$\frac{m}{s^2}$')
