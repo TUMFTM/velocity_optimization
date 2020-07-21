@@ -501,72 +501,6 @@ class VisVP_Logs:
                     self.sol_options[key]['Time'].append(dt_sqp_qpoases)
                     #self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
 
-                '''
-                if self.sol_options[key]['Solver'] == "qpOASES":
-                    # qpOASES velocity [m/s]
-
-                    v_op_qpoases, \
-                        F_op_qpoases, \
-                        P_op_qpoases, \
-                        ax_op_qpoases, \
-                        ay_op_qpoases, \
-                        F_xzf_op_qpoases, \
-                        F_yzf_op_qpoases, \
-                        F_xzr_op_qpoases, \
-                        F_yzr_op_qpoases, \
-                        t_op_qpoases, \
-                        sol_status_qpoases \
-                        = self.sol_options[key]['Create_Solver'].calc_v_qpOASES(N=self.m,
-                                                                                kappa=kappa,
-                                                                                ds=delta_s,
-                                                                                x0_v=x0_v,
-                                                                                v_max=v_max,
-                                                                                v_end=v_end,
-                                                                                F_ini=F_ini,
-                                                                                ax_max=ax_max_new,
-                                                                                ay_max=ay_max_new,
-                                                                                P_max=P_max,
-                                                                                )'''
-
-            ############################################################################################################
-            # --- Calculate qpOASES-solution
-            ############################################################################################################
-            '''
-            # qpOASES velocity [m/s]
-            v_op_qpoases = None
-            # qpOASES force [kN]
-            F_op_qpoases = None
-            # qpOASES tire slacks [-]
-            eps_op_qpoases = None
-            if self.vis_options['b_calc_qpOASES']:
-
-                t_start = time.perf_counter()
-
-                v_op_qpoases, \
-                    eps_op_qpoases, \
-                    F_op_qpoases = \
-                    online_qp_postproc(velqp=self.velqp_bench,
-                                       vp_qpOASES=self.vp_qpOASES,
-                                       v_ini=v_ini,
-                                       kappa=kappa,
-                                       delta_s=delta_s,
-                                       x0_v=x0_v,
-                                       x0_s_t=x0_s_t,
-                                       v_max=v_max,
-                                       v_end=v_end,
-                                       F_ini=F_ini,
-                                       ax_max=ax_max_new,
-                                       ay_max=ay_max_new,
-                                       P_max=P_max)
-
-                # Overall SQP runtime using qpOASES [ms]
-                dt_sqp_qpoases = (time.perf_counter() - t_start) * 1000
-
-                # Store qpOASES runtime
-                print('Overall qpOASES runtime:', dt_sqp_qpoases)
-                self.dt_sqp_qpoases_arr.append(dt_sqp_qpoases)
-            '''
-
             if self.vis_options['b_immediate_plot_update']:
 
                 # --- SQP Status update
@@ -594,9 +528,6 @@ class VisVP_Logs:
                                              F_ini + self.velqp.sym_sc_['Fini_tol_'],
                                              F_ini - self.velqp.sym_sc_['Fini_tol_']])
 
-                #if self.vis_options['b_calc_qpOASES']:
-                #    self.vis_gui.p3_3.set_ydata(F_op_qpoases)
-
                 for key, value in self.sol_options.items():
                     self.vis_gui.F_dict[key].set_ydata(self.sol_options[key]['Force'])
 
@@ -607,15 +538,11 @@ class VisVP_Logs:
                 if self.velqp.sqp_stgs['b_var_power']:
                     self.vis_gui.p5_1.set_ydata(self.velqp.P_cst + P_max.reshape((self.velqp.m - 1, 1)))
                     self.vis_gui.p5_2.set_ydata(P_max)
-                    #if self.vis_options['b_calc_qpOASES']:
-                    #    self.vis_gui.p5_3.set_ydata(F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1])
                     for key, value in self.sol_options.items():
                         self.vis_gui.P_dict[key].set_ydata(np.around(self.sol_options[key]['Power'], 2))
                 else:
                     self.vis_gui.p5_1.set_ydata(self.velqp.P_cst + self.velqp.sym_sc_['Pmax_kW_'])
                     self.vis_gui.p5_2.set_ydata(self.velqp.sym_sc_['Pmax_kW_'] * np.ones((self.m - 1, 1)))
-                    #if self.vis_options['b_calc_qpOASES']:
-                    #    self.vis_gui.p5_3.set_ydata(F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1])
                     for key, value in self.sol_options.items():
                         self.vis_gui.P_dict[key].set_ydata(self.sol_options[key]['Power'])
 
@@ -677,9 +604,6 @@ class VisVP_Logs:
                         self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack_Sol'])
                         print(self.sol_options[key]['Slack_Sol'])
 
-                #if self.vis_options['b_calc_qpOASES']:
-                #    self.vis_gui.p7_5.set_ydata(eps_op_qpoases)
-
                 # self.vis_gui.main_fig.canvas.draw()
 
                 if self.vis_options['b_save_tikz']:
@@ -726,12 +650,6 @@ class VisVP_Logs:
                     self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
                                             dt_solver=np.array(self.sol_options[key]['Time']),
                                             vis_options=self.vis_options)
-
-                # --- Plot qpOASES runtimes
-                #if self.vis_options['b_calc_qpOASES'] and self.vis_options['b_calc_time_plot']:
-                #    self.runtimes.plot_hist(name_solver='qpOASES',
-                #                            dt_solver=np.array(self.dt_sqp_qpoases_arr),
-                #                            vis_options=self.vis_options)
 
                 plt.ioff()
 

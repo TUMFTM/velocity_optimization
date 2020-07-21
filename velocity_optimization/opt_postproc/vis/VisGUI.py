@@ -289,14 +289,6 @@ class VisVP_Logs_GUI:
                   r'$v_\mathrm{end}$',
                   r'$v_\mathrm{ini}$']
 
-        if self.vis_options['b_calc_qpOASES']:
-            p5, = ax.plot(np.zeros((self.m, 1)),
-                          color='gray', linewidth=LW, linestyle=':',
-                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
-            legend.append(r'$v_\mathrm{o,qpOASES}$')
-        else:
-            p5 = None
-
         for key, value in self.sol_options.items():
             self.vel_dict[key], = ax.plot(np.zeros((self.m, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
                                           linestyle=self.sol_options[key]["Linestyle"],
@@ -308,8 +300,6 @@ class VisVP_Logs_GUI:
         self.p1_2 = p2
         self.p1_3 = p3
         self.p1_4 = p4
-        if self.vis_options['b_calc_qpOASES']:
-            self.p1_5 = p5
 
         plt.ylabel(r'$v$' + ' in ' r'$\mathrm{\frac{m}{s}}$')
 
@@ -337,15 +327,6 @@ class VisVP_Logs_GUI:
                        0 - 1],
                       linestyle='-', marker='_', color='red', linewidth=LW, markersize=LW * 3)
 
-        if self.vis_options['b_calc_qpOASES']:
-            p3, = ax.plot(x_dots,
-                          np.zeros((self.m - 1, 1)),
-                          color='orange', linewidth=LW, linestyle=':',
-                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
-            legend.append(r'$F_\mathrm{o,qpOASES}$')
-        else:
-            p3 = None
-
         for key, value in self.sol_options.items():
             self.F_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
                                         linestyle=self.sol_options[key]["Linestyle"],
@@ -357,8 +338,6 @@ class VisVP_Logs_GUI:
 
         self.p3_1 = p1
         self.p3_2 = p2
-        if self.vis_options['b_calc_qpOASES']:
-            self.p3_3 = p3
 
         plt.ylabel(r'$F$' + ' in ' r'$\mathrm{kN}$')
         plt.legend(legend,
@@ -402,15 +381,6 @@ class VisVP_Logs_GUI:
         # P_max_kW-limit
         p2, = ax.plot(np.zeros((self.m - 1, 1)),
                       color='red', linewidth=LW, linestyle='--')
-
-        if self.vis_options['b_calc_qpOASES']:
-            p3, = ax.plot(x_dots,
-                          np.zeros((self.m - 1, 1)),
-                          color='orange', linewidth=LW, linestyle=':',
-                          marker='s', markersize=LW * 2, fillstyle='none', markevery=10)
-            legend.append(r'$P_\mathrm{o,qpOASES}$')
-        else:
-            p3 = None
 
         for key, value in self.sol_options.items():
             self.P_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
@@ -521,9 +491,6 @@ class VisVP_Logs_GUI:
 
         p, = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
                      marker='x', linestyle='', markersize=LW * 3, color='black')
-        if self.vis_options['b_calc_qpOASES']:
-            p5, = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                          marker='x', linestyle='', markersize=LW * 3, color='orange')
 
         for key, value in self.sol_options.items():
             self.a_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
