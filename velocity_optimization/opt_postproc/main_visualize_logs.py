@@ -30,70 +30,43 @@ if __name__ == "__main__":
     params_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
     input_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/inputs/'
 
-    # Number of log lines spanning one data block
-    log_lines = 4
+    b_movie = False                      # visualize all logs consecutively?
 
-    # visualize all logs consecutively?
-    b_movie = False
-    # re-calculate QP from log-input?
-    b_run_OSQP = True  # TODO: combine with solver options below
+    b_run_OSQP = False                   # re-calculate QP from log-input?
 
-    # run qpOASES solver?
-    b_calc_qpOASES = False  # TODO: combine with solver options below
+    b_idx = 0                            # Choose Starting Idx of Log-File
 
-    # Constant(True)/Variable(False) Power
-    b_con_power = False
-
-    # Choose Starting Idx of Log-File
-    b_idx = 0
-    # Plot Race Course with planning horizon
-    # b_plot_course = True
-    # Select Legend Item (Model, Solver, Friction, Alpha)
-    b_vis_model_name = False
-    b_vis_solver_name = True
-    b_vis_fric_model = False
-    b_vis_alpha = False
-
-    # do global plot of states for entire log?
-    b_global_plot = False
+    b_global_plot = False                # do global plot of states for entire log?
     glob_lim = np.inf
 
-    # plot immediately or only solver data replay?
-    b_immediate_plot_update = True
+    b_immediate_plot_update = True       # plot immediately or only solver data replay?
 
-    # show plot of solver runtimes?
-    b_calc_time_plot = False
+    b_calc_time_plot = True              # show plot of solver runtimes?
 
-    # save plots as tikz files?
-    b_save_tikz = False
-
-    # visulaization options
-    vis_options = {'b_movie': b_movie,
-                   'b_run_OSQP': b_run_OSQP,
-                   'b_calc_qpOASES': b_calc_qpOASES,
-                   'b_con_power': b_con_power,
-                   'b_idx': b_idx,
-                   'b_vis_model_name': b_vis_model_name,
-                   # 'b_plot_course': b_plot_course,
-                   'b_vis_solver_name': b_vis_solver_name,
-                   'b_vis_fric_model': b_vis_fric_model,
-                   'b_vis_alpha': b_vis_alpha,
-                   'b_global_plot': b_global_plot,
-                   'glob_lim': glob_lim,
-                   'b_immediate_plot_update': b_immediate_plot_update,
-                   'b_calc_time_plot': b_calc_time_plot,
-                   'b_save_tikz': b_save_tikz}
+    b_save_tikz = False                  # save plots as tikz files?
 
     # --- Define solver options for IPOPT as benchmark solution
     sol_options = {'solver1': {'Model': "FW",               # PM (Pointmass), KM (Kinematic Single Track Model),
                                                             # DM (Dynamic Single Track Model), FW (Double Track Model)
-                               'Solver': "IPOPT",           # IPOPT, OSQP, qpOASES
-                               'Friction': "Diamond",       # Circle, Diamond (only for PM and KM)
+                               'Solver': "IPOPT",           # IPOPT, qpOASES
+                               'Friction': "Diamond",       # Circle, Diamond (only for PM and KM, rest have Circles)
                                'VarFriction': True,         # Variable friction: True, False
                                'VarPower': False,           # Variable power: True, False
-                               'Slack': True,               # Usage of slack variables: True, False
+                               'Slack': True,               # Usage of slack variables on comb. acceleration (only
+                                                            # reasonable on simple models like PM and KM): Keep True!
                                }
                    }
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # END USER INPUT ---------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
+
+    for key, value in sol_options.items():
+        if sol_options[key]['Slack'] and (sol_options[key]['Model'] == 'DM' or sol_options[key]['Model'] == 'FW'):
+            sol_options[key]['Slack'] = False
+
+    # Number of log lines spanning one data block
+    log_lines = 4
 
     # --- Transform ID of used velocity planner into 'PerfSQP' or 'EmergSQP'
     sid = csv_name.split('/')[-1].split('_')[1]
@@ -111,6 +84,16 @@ if __name__ == "__main__":
     row_lc = row_lc[:-1].rsplit(';')
     velocity_dummy = json.loads(row_lc[2])
     m = len(velocity_dummy)
+
+    # visulaization options
+    vis_options = {'b_movie': b_movie,
+                   'b_run_OSQP': b_run_OSQP,
+                   'b_idx': b_idx,
+                   'b_global_plot': b_global_plot,
+                   'glob_lim': glob_lim,
+                   'b_immediate_plot_update': b_immediate_plot_update,
+                   'b_calc_time_plot': b_calc_time_plot,
+                   'b_save_tikz': b_save_tikz}
 
     # --- Set up visualization object
     rL = VisVP_Logs(csv_name=csv_name,

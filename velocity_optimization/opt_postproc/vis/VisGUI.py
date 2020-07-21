@@ -2,6 +2,7 @@ import numpy as np
 import datetime
 import time
 from matplotlib import pyplot as plt
+import matplotlib.patches as pltpatches
 from matplotlib.widgets import Slider, Button
 from velocity_optimization.src.params_vp_sqp import params_vp_sqp
 from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
@@ -187,13 +188,6 @@ class VisVP_Logs_GUI:
             if self.sol_options[key]['Model'] == "FW":
                 self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
 
-                #if self.sol_options[key]['Solver'] == "IPOPT":
-                #    self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-                #if self.sol_options[key]['Solver'] == "OSQP":
-                #    self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-                #if self.sol_options[key]['Solver'] == "qpOASES":
-                #    self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-
     def draw_gui(self):
 
         """
@@ -293,8 +287,8 @@ class VisVP_Logs_GUI:
             self.vel_dict[key], = ax.plot(np.zeros((self.m, 1)), color=self.sol_options[key]["Color"], linewidth=LW,
                                           linestyle=self.sol_options[key]["Linestyle"],
                                           marker=self.sol_options[key]["Marker"], markevery=5)
-            legend.append(r'$v_\mathrm{o,{%s,%s}}$' % (self.sol_options[key]["Solver"], self.sol_options[key][
-                "Model"]))
+            legend.append(r'$v_\mathrm{o,{%s,%s}}$' % (self.sol_options[key]["Solver"],
+                                                       self.sol_options[key]["Model"]))
 
         self.p1_1 = p1
         self.p1_2 = p2
@@ -365,8 +359,8 @@ class VisVP_Logs_GUI:
         ax = ax4
 
         ax.set_ylim([Y_POWER_MIN_KW, Y_POWER_MAX_KW])
-        legend = [r'$P_\Sigma$',
-                  r'$P_\mathrm{\Sigma,max}$']
+        legend = [r'$P$',
+                  r'$P_\mathrm{max}$']
         if self.params_opt['b_var_power']:
             p1, = ax.plot(x_dots,
                           np.zeros((self.m - 1, 1)),
@@ -477,6 +471,13 @@ class VisVP_Logs_GUI:
                        0],
                       color='green', linestyle='--', linewidth=LW)
 
+        # Plot ellipse
+        for key, value in self.sol_options.items():
+            if self.sol_options[key]['Friction'] == 'Circle':
+                ax.add_patch(pltpatches.Ellipse((0, 0), self.constants_opt.params['aymax_mps2_'] * 2,
+                                                self.constants_opt.params['axmax_mps2_'] * 2,
+                                                facecolor='none', edgecolor='green', linewidth=LW, alpha=0.5))
+
         p, = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
                      marker='x', linestyle='', markersize=LW * 3, color='black')
 
@@ -520,85 +521,83 @@ class VisVP_Logs_GUI:
                  self.constants_opt.params['Fmax_kN_'] / self.constants_opt.params['m_t_']],
                 linestyle='--', color='red', linewidth=LW)
 
-        ################################################################################################################
-        # --- Front Axle Tire usage
-        ################################################################################################################
-        ax = self.main_fig.add_subplot(4, 5, 9)
-        ax.set_xlim([- 1, 1])
-        ax.set_ylim([- 1, 1])
-
-        circle = plt.Circle((0, 0), 1, facecolor='none',
-                            edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
-        legend = []
-        ax.add_patch(circle)
-
         for key, value in self.sol_options.items():
-            if self.sol_options[key]['Model'] == "DM":
-                self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                              color=self.sol_options[key]["Color"], linewidth=LW,
-                                              linestyle=self.sol_options[key]["Linestyle"],
-                                              marker=self.sol_options[key]["Marker"], markevery=2)
-                if self.vis_options['b_vis_model_name']:
-                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-                elif self.vis_options['b_vis_solver_name']:
-                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
 
-            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
-                self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker=self.sol_options[key]["Marker"], markevery=2)
-                self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker='*', markevery=2)
-            legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
-                                                     self.sol_options[key]["Model"]))
+            if self.sol_options[key]['Model'] == "DM" or self.sol_options[key]['Model'] == "FW":
 
-        plt.xlabel(r'$F_\mathrm{y,f} / F_\mathrm{z,f}$')
-        plt.ylabel(r'$F_\mathrm{x,f} / F_\mathrm{z,f}$')
-        plt.title('Front Tire')
+                ########################################################################################################
+                # --- Front Axle Tire usage
+                ########################################################################################################
+                ax = self.main_fig.add_subplot(4, 5, 9)
+                ax.set_xlim([- 1, 1])
+                ax.set_ylim([- 1, 1])
 
-        ax.axis('equal')
+                circle = plt.Circle((0, 0), 1, facecolor='none',
+                                    edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
+                ax.add_patch(circle)
 
-        ################################################################################################################
-        # --- Rear Axle Tire usage
-        ################################################################################################################
-        ax = self.main_fig.add_subplot(4, 5, 10)
-        ax.set_xlim([- 1, 1])
-        ax.set_ylim([- 1, 1])
+                for key, value in self.sol_options.items():
+                    if self.sol_options[key]['Model'] == "DM":
+                        self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                      color=self.sol_options[key]["Color"], linewidth=LW,
+                                                      linestyle=self.sol_options[key]["Linestyle"],
+                                                      marker=self.sol_options[key]["Marker"], markevery=2)
+                        legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Model"],
+                                                                self.sol_options[key]["Solver"]))
 
-        circle = plt.Circle((0, 0), 1, facecolor='none',
-                            edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
-        legend = []
-        ax.add_patch(circle)
+                    elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                        self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=self.sol_options[key]["Color"], linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker=self.sol_options[key]["Marker"], markevery=2)
+                        self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=TUMGreen, linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker='*', markevery=2)
 
-        for key, value in self.sol_options.items():
-            if self.sol_options[key]['Model'] == "DM":
-                self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                              color=self.sol_options[key]["Color"], linewidth=LW,
-                                              linestyle=self.sol_options[key]["Linestyle"],
-                                              marker=self.sol_options[key]["Marker"], markevery=2)
-            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
-                self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker=self.sol_options[key]["Marker"], markevery=2)
-                self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker='*', markevery=2)
+                plt.xlabel(r'$F_\mathrm{y,f} / F_\mathrm{z,f}$')
+                plt.ylabel(r'$F_\mathrm{x,f} / F_\mathrm{z,f}$')
+                plt.title('Front Tire')
+                if self.sol_options[key]['Model'] == "FW":
+                    plt.legend(['left', 'right'])
 
-                legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
-                                                         self.sol_options[key]["Model"]))
+                ax.axis('equal')
 
+                ########################################################################################################
+                # --- Rear Axle Tire usage
+                ########################################################################################################
+                ax = self.main_fig.add_subplot(4, 5, 10)
+                ax.set_xlim([- 1, 1])
+                ax.set_ylim([- 1, 1])
 
-        plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
-        plt.title('Rear Tire')
+                circle = plt.Circle((0, 0), 1, facecolor='none',
+                                    edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
+                ax.add_patch(circle)
 
-        ax.axis('equal')
-        # --- Show main window
-        # plt.show()
+                for key, value in self.sol_options.items():
+                    if self.sol_options[key]['Model'] == "DM":
+                        self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                      color=self.sol_options[key]["Color"], linewidth=LW,
+                                                      linestyle=self.sol_options[key]["Linestyle"],
+                                                      marker=self.sol_options[key]["Marker"], markevery=2)
+                    elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                        self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=self.sol_options[key]["Color"], linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker=self.sol_options[key]["Marker"], markevery=2)
+                        self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=TUMGreen, linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker='*', markevery=2)
+
+                plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
+                plt.title('Rear Tire')
+                if self.sol_options[key]['Model'] == "FW":
+                    plt.legend(['left', 'right'])
+
+                ax.axis('equal')
+                # --- Show main window
+                # plt.show()
 
 
 if __name__ == '__main__':

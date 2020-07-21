@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 import linecache
 from velocity_optimization.src.VelQP import VelQP
 from velocity_optimization.opt_postproc.src.VOptIPOPT import VOptIPOPT
-from velocity_optimization.opt_postproc.src.VOptOSQP import VOptOSQP
 from velocity_optimization.opt_postproc.src.VOptQPOASES import VOpt_qpOASES
 from velocity_optimization.opt_postproc.src.online_qp_postproc import online_qp_postproc
 from velocity_optimization.opt_postproc.src.CalcObjective import CalcObjective
@@ -21,10 +20,6 @@ try:
     import tikzplotlib
 except ImportError:
     print('Warning: No module tikzplotlib found. Not necessary on car but for development.')
-try:
-    import dill
-except ImportError:
-    print('Warning: No module dill found. Not necessary on car but for development.')
 
 # Font sizes
 SMALL_SIZE = 14
@@ -56,14 +51,6 @@ class VisVP_Logs:
                  'b_vis_triggered',
                  'dt_ipopt_arr',
                  'dt_sqp_qpoases_arr',
-                 'sol_status_ipopt_pm',
-                 'sol_status_ipopt_km',
-                 'sol_status_ipopt_dm',
-                 'sol_status_ipopt_fw',
-                 'sol_status_osqp_pm',
-                 'sol_status_osqp_km',
-                 'sol_status_osqp_dm',
-                 'sol_status_qpoases_pm',
                  'P_max')
 
     def __init__(self,
@@ -140,6 +127,7 @@ class VisVP_Logs:
 
         # --- Create Solver Objects
         for key, value in self.sol_options.items():
+
             # --- Create IPOPT solver object
             if self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Create_Solver': VOptIPOPT(m=m,
@@ -149,13 +137,6 @@ class VisVP_Logs:
                                                                          vis_options=vis_options,
                                                                          sol_dict=sol_options,
                                                                          key=key)})
-            # --- Create OSQP solver object
-            if self.sol_options[key]['Solver'] == "OSQP":
-                self.sol_options[key].update({'Create_Solver': VOptOSQP(m=m,
-                                                                        sid=sid,
-                                                                        params_path=params_path,
-                                                                        sol_options=sol_options,
-                                                                        key=key)})
 
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
@@ -325,7 +306,7 @@ class VisVP_Logs:
 
                 # s_t_op_rerun = sol[self.velqp.m - 1:] + x0_s_t
 
-                print("OSQP rerun v_mps:", v_op_rerun)
+                print("OSQP rerun v_mps:\n", v_op_rerun)
 
             ############################################################################################################
             # --- Calculate Solver-solution (Dictionary)
@@ -396,46 +377,6 @@ class VisVP_Logs:
                     self.sol_options[key]['SolStatus'].append(sol_status_ipopt)
 
                 ########################################################################################################
-                # --- Calculate OSQP-solution
-                ########################################################################################################
-
-                if self.sol_options[key]['Solver'] == "OSQP":  # TODO: call own OSQP-solver here
-                    v_op_osqp, \
-                        F_op_osqp, \
-                        P_op_osqp, \
-                        ax_op_osqp, \
-                        ay_op_osqp, \
-                        F_xzf_op_osqp, \
-                        F_yzf_op_osqp, \
-                        F_xzr_op_osqp, \
-                        F_yzr_op_osqp, \
-                        t_op_osqp, \
-                        sol_status_osqp = \
-                        self.sol_options[key]['Create_Solver'].calc_v_osqp(N=self.m,
-                                                                           kappa=kappa,
-                                                                           ds=delta_s,
-                                                                           x0_v=x0_v,
-                                                                           v_max=v_max,
-                                                                           v_end=v_end,
-                                                                           ax_max=ax_max_new,
-                                                                           ay_max=ay_max_new,
-                                                                           F_ini=F_ini,
-                                                                           P_max=P_max)
-
-                    self.sol_options[key].update({'Velocity': v_op_osqp})
-                    self.sol_options[key].update({'Force': F_op_osqp})
-                    self.sol_options[key].update({'Power': P_op_osqp})
-                    self.sol_options[key].update({'Acc_x': ax_op_osqp})
-                    self.sol_options[key].update({'Acc_y': ay_op_osqp})
-                    self.sol_options[key].update({'F_xzf': F_xzf_op_osqp})
-                    self.sol_options[key].update({'F_yzf': F_yzf_op_osqp})
-                    self.sol_options[key].update({'F_xzr': F_xzr_op_osqp})
-                    self.sol_options[key].update({'F_yzr': F_yzr_op_osqp})
-                    self.sol_options[key]['Time'].append(t_op_osqp * 1000)
-                    self.sol_options[key]['SolStatus'].append(sol_status_osqp)
-                    print('Overall OSQP runtime:', t_op_osqp * 1000)
-
-                ########################################################################################################
                 # --- Calculate qpOASES-solution
                 ########################################################################################################
 
@@ -491,7 +432,7 @@ class VisVP_Logs:
                     self.sol_options[key].update({'Acc_x': ax_op_qpoases})
                     self.sol_options[key].update({'Acc_y': ay_op_qpoases})
                     self.sol_options[key]['Time'].append(dt_sqp_qpoases)
-                    #self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
+                    # self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
 
             if self.vis_options['b_immediate_plot_update']:
 
@@ -536,7 +477,7 @@ class VisVP_Logs:
                     self.vis_gui.p5_1.set_ydata(self.velqp.P_cst + self.velqp.sym_sc_['Pmax_kW_'])
                     self.vis_gui.p5_2.set_ydata(self.velqp.sym_sc_['Pmax_kW_'] * np.ones((self.m - 1, 1)))
                     for key, value in self.sol_options.items():
-                        self.vis_gui.P_dict[key].set_ydata(self.sol_options[key]['Power'])
+                        self.vis_gui.P_dict[key].set_ydata(np.array(self.sol_options[key]['Power'] * 1.0))
 
                 # --- Tire usage update
                 ay_mps2 = kappa[0:self.velqp.sqp_stgs['m'] - 1] * \
@@ -593,7 +534,7 @@ class VisVP_Logs:
                 self.vis_gui.p7_3.set_ydata([self.velqp.sym_sc_['s_v_t_lim_']] * len(s_t_op_osqp))
                 for key, value in self.sol_options.items():
                     if self.sol_options[key]['Slack'] is True:
-                        self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack_Sol'])
+                        self.vis_gui.slack_dict[key].set_ydata(np.array(self.sol_options[key]['Slack_Sol']))
 
                 # self.vis_gui.main_fig.canvas.draw()
 
@@ -614,33 +555,13 @@ class VisVP_Logs:
                     self.vis_gui.slider_vel.set_val(int(i))
                     print("\n*** Progress: " + str("%.2f" % round((i / self.row_count) * 100, 2)) + " %")
 
-                # --- Plot IPOPT runtimes
-                # Save Data to File
-
-                # Save Runtime and Solver Status for extern Plots
-
-                mod_local_trajectory_path = os.path.dirname(
-                    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-                sys.path.append(mod_local_trajectory_path)
+                # --- Plot runtimes
                 for key, value in self.sol_options.items():
 
-                    file = str(self.sol_options[key]['Solver']) + "_" + str(self.sol_options[key]['Model']) \
-                        + "_" + str(self.sol_options[key]['Friction']) \
-                        + "_" + str(self.m) + "_Model" \
-
-                    if self.sol_options[key]['VarFriction']:
-                        file += "_VarFriction"
-                    file += ".pkl"  # + "_Alpha_" + str(self.sol_dict[key]['Alpha'])
-                    filedir = mod_local_trajectory_path + '/logs/RuntimeSolver/'
-                    filename = filedir + file
-                    os.makedirs(filedir, exist_ok=True)
-
-                    dill.settings['recurse'] = True
-                    dill.dump([self.sol_options[key]['Time'], self.sol_options[key]['SolStatus']], open(filename, "wb"))
-
-                    self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
-                                            dt_solver=np.array(self.sol_options[key]['Time']),
-                                            vis_options=self.vis_options)
+                    if self.vis_options['b_calc_time_plot']:
+                        self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
+                                                dt_solver=np.array(self.sol_options[key]['Time']),
+                                                vis_options=self.vis_options)
 
                 plt.ioff()
 
