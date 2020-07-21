@@ -138,9 +138,6 @@ class VisVP_Logs:
                                  params_path=params_path,
                                  input_path=input_path)
 
-        self.vp_qpOASES = VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
-                                       Am=self.velqp_bench.Am)
-
         # --- Create Solver Objects
         for key, value in self.sol_options.items():
             # --- Create IPOPT solver object
@@ -162,9 +159,6 @@ class VisVP_Logs:
 
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
-                # self.vp_qpOASES = VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
-                #                               Am=self.velqp_bench.Am)
-                # TODO: adapt to qpOASES class
                 self.sol_options[key].update({'Create_Solver': VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
                                                                             Am=self.velqp_bench.Am)})
 
@@ -460,8 +454,7 @@ class VisVP_Logs:
                     eps_op_qpoases, \
                     F_op_qpoases = \
                         online_qp_postproc(velqp=self.velqp_bench,
-                                           vp_qpOASES=self.vp_qpOASES,  # TODO: add solver object here that was
-                                           # created above using dicts
+                                           vp_qpOASES=self.sol_options[key]['Create_Solver'],
                                            v_ini=v_ini,
                                            kappa=kappa,
                                            delta_s=delta_s,
@@ -479,7 +472,6 @@ class VisVP_Logs:
 
                     # Store qpOASES runtime
                     print('Overall qpOASES runtime:', dt_sqp_qpoases)
-                    self.dt_sqp_qpoases_arr.append(dt_sqp_qpoases)  # TODO: rm as also added to dicts
 
                     P_op_qpoases = F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1]
 
