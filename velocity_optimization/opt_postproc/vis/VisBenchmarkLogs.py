@@ -381,46 +381,6 @@ class VisVP_Logs:
                     self.sol_options[key]['SolStatus'].append(sol_status_ipopt)
 
                 ########################################################################################################
-                # --- Calculate OSQP-solution
-                ########################################################################################################
-
-                if self.sol_options[key]['Solver'] == "OSQP":  # TODO: call own OSQP-solver here
-                    v_op_osqp, \
-                        F_op_osqp, \
-                        P_op_osqp, \
-                        ax_op_osqp, \
-                        ay_op_osqp, \
-                        F_xzf_op_osqp, \
-                        F_yzf_op_osqp, \
-                        F_xzr_op_osqp, \
-                        F_yzr_op_osqp, \
-                        t_op_osqp, \
-                        sol_status_osqp = \
-                        self.sol_options[key]['Create_Solver'].calc_v_osqp(N=self.m,
-                                                                           kappa=kappa,
-                                                                           ds=delta_s,
-                                                                           x0_v=x0_v,
-                                                                           v_max=v_max,
-                                                                           v_end=v_end,
-                                                                           ax_max=ax_max_new,
-                                                                           ay_max=ay_max_new,
-                                                                           F_ini=F_ini,
-                                                                           P_max=P_max)
-
-                    self.sol_options[key].update({'Velocity': v_op_osqp})
-                    self.sol_options[key].update({'Force': F_op_osqp})
-                    self.sol_options[key].update({'Power': P_op_osqp})
-                    self.sol_options[key].update({'Acc_x': ax_op_osqp})
-                    self.sol_options[key].update({'Acc_y': ay_op_osqp})
-                    self.sol_options[key].update({'F_xzf': F_xzf_op_osqp})
-                    self.sol_options[key].update({'F_yzf': F_yzf_op_osqp})
-                    self.sol_options[key].update({'F_xzr': F_xzr_op_osqp})
-                    self.sol_options[key].update({'F_yzr': F_yzr_op_osqp})
-                    self.sol_options[key]['Time'].append(t_op_osqp * 1000)
-                    self.sol_options[key]['SolStatus'].append(sol_status_osqp)
-                    print('Overall OSQP runtime:', t_op_osqp * 1000)
-
-                ########################################################################################################
                 # --- Calculate qpOASES-solution
                 ########################################################################################################
 
@@ -521,7 +481,7 @@ class VisVP_Logs:
                     self.vis_gui.p5_1.set_ydata(self.velqp.P_cst + self.velqp.sym_sc_['Pmax_kW_'])
                     self.vis_gui.p5_2.set_ydata(self.velqp.sym_sc_['Pmax_kW_'] * np.ones((self.m - 1, 1)))
                     for key, value in self.sol_options.items():
-                        self.vis_gui.P_dict[key].set_ydata(self.sol_options[key]['Power'])
+                        self.vis_gui.P_dict[key].set_ydata(np.array(self.sol_options[key]['Power'] * 1.0))
 
                 # --- Tire usage update
                 ay_mps2 = kappa[0:self.velqp.sqp_stgs['m'] - 1] * \
@@ -578,7 +538,7 @@ class VisVP_Logs:
                 self.vis_gui.p7_3.set_ydata([self.velqp.sym_sc_['s_v_t_lim_']] * len(s_t_op_osqp))
                 for key, value in self.sol_options.items():
                     if self.sol_options[key]['Slack'] is True:
-                        self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack_Sol'])
+                        self.vis_gui.slack_dict[key].set_ydata(np.array(self.sol_options[key]['Slack_Sol']))
 
                 # self.vis_gui.main_fig.canvas.draw()
 

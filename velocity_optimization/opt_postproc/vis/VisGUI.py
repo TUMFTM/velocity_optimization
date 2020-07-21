@@ -520,85 +520,81 @@ class VisVP_Logs_GUI:
                  self.constants_opt.params['Fmax_kN_'] / self.constants_opt.params['m_t_']],
                 linestyle='--', color='red', linewidth=LW)
 
-        ################################################################################################################
-        # --- Front Axle Tire usage
-        ################################################################################################################
-        ax = self.main_fig.add_subplot(4, 5, 9)
-        ax.set_xlim([- 1, 1])
-        ax.set_ylim([- 1, 1])
-
-        circle = plt.Circle((0, 0), 1, facecolor='none',
-                            edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
-        legend = []
-        ax.add_patch(circle)
-
         for key, value in self.sol_options.items():
-            if self.sol_options[key]['Model'] == "DM":
-                self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                              color=self.sol_options[key]["Color"], linewidth=LW,
-                                              linestyle=self.sol_options[key]["Linestyle"],
-                                              marker=self.sol_options[key]["Marker"], markevery=2)
-                if self.vis_options['b_vis_model_name']:
-                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-                elif self.vis_options['b_vis_solver_name']:
-                    legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+            if self.sol_options[key]['Model'] == "DM" or self.sol_options[key]['Model'] == "FW":
+                ############################################################################################################
+                # --- Front Axle Tire usage
+                ############################################################################################################
+                ax = self.main_fig.add_subplot(4, 5, 9)
+                ax.set_xlim([- 1, 1])
+                ax.set_ylim([- 1, 1])
 
-            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
-                self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker=self.sol_options[key]["Marker"], markevery=2)
-                self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker='*', markevery=2)
-            legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
-                                                     self.sol_options[key]["Model"]))
+                circle = plt.Circle((0, 0), 1, facecolor='none',
+                                    edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
+                ax.add_patch(circle)
 
-        plt.xlabel(r'$F_\mathrm{y,f} / F_\mathrm{z,f}$')
-        plt.ylabel(r'$F_\mathrm{x,f} / F_\mathrm{z,f}$')
-        plt.title('Front Tire')
+                for key, value in self.sol_options.items():
+                    if self.sol_options[key]['Model'] == "DM":
+                        self.F_f_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                      color=self.sol_options[key]["Color"], linewidth=LW,
+                                                      linestyle=self.sol_options[key]["Linestyle"],
+                                                      marker=self.sol_options[key]["Marker"], markevery=2)
+                        legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Model"],
+                                                                self.sol_options[key]["Solver"]))
 
-        ax.axis('equal')
+                    elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                        self.F_fl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=self.sol_options[key]["Color"], linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker=self.sol_options[key]["Marker"], markevery=2)
+                        self.F_fr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=TUMGreen, linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker='*', markevery=2)
 
-        ################################################################################################################
-        # --- Rear Axle Tire usage
-        ################################################################################################################
-        ax = self.main_fig.add_subplot(4, 5, 10)
-        ax.set_xlim([- 1, 1])
-        ax.set_ylim([- 1, 1])
+                plt.xlabel(r'$F_\mathrm{y,f} / F_\mathrm{z,f}$')
+                plt.ylabel(r'$F_\mathrm{x,f} / F_\mathrm{z,f}$')
+                plt.title('Front Tire')
+                if self.sol_options[key]['Model'] == "FW":
+                    plt.legend(['left', 'right'])
 
-        circle = plt.Circle((0, 0), 1, facecolor='none',
-                            edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
-        legend = []
-        ax.add_patch(circle)
+                ax.axis('equal')
 
-        for key, value in self.sol_options.items():
-            if self.sol_options[key]['Model'] == "DM":
-                self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                              color=self.sol_options[key]["Color"], linewidth=LW,
-                                              linestyle=self.sol_options[key]["Linestyle"],
-                                              marker=self.sol_options[key]["Marker"], markevery=2)
-            elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
-                self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker=self.sol_options[key]["Marker"], markevery=2)
-                self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
-                                               color=self.sol_options[key]["Color"], linewidth=LW,
-                                               linestyle=self.sol_options[key]["Linestyle"],
-                                               marker='*', markevery=2)
+                ############################################################################################################
+                # --- Rear Axle Tire usage
+                ############################################################################################################
+                ax = self.main_fig.add_subplot(4, 5, 10)
+                ax.set_xlim([- 1, 1])
+                ax.set_ylim([- 1, 1])
 
-                legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
-                                                         self.sol_options[key]["Model"]))
+                circle = plt.Circle((0, 0), 1, facecolor='none',
+                                    edgecolor=TUMGray1, linewidth=LW, alpha=0.5)
+                ax.add_patch(circle)
 
+                for key, value in self.sol_options.items():
+                    if self.sol_options[key]['Model'] == "DM":
+                        self.F_r_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                      color=self.sol_options[key]["Color"], linewidth=LW,
+                                                      linestyle=self.sol_options[key]["Linestyle"],
+                                                      marker=self.sol_options[key]["Marker"], markevery=2)
+                    elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                        self.F_rl_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=self.sol_options[key]["Color"], linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker=self.sol_options[key]["Marker"], markevery=2)
+                        self.F_rr_dict[key], = ax.plot(np.zeros((self.m - 1, 1)), np.zeros((self.m - 1, 1)),
+                                                       color=TUMGreen, linewidth=LW,
+                                                       linestyle=self.sol_options[key]["Linestyle"],
+                                                       marker='*', markevery=2)
 
-        plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
-        plt.title('Rear Tire')
+                plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
+                plt.title('Rear Tire')
+                if self.sol_options[key]['Model'] == "FW":
+                    plt.legend(['left', 'right'])
 
-        ax.axis('equal')
-        # --- Show main window
-        # plt.show()
+                ax.axis('equal')
+                # --- Show main window
+                # plt.show()
 
 
 if __name__ == '__main__':
