@@ -552,10 +552,8 @@ class VisVP_Logs_GUI:
                                                color=self.sol_options[key]["Color"], linewidth=LW,
                                                linestyle=self.sol_options[key]["Linestyle"],
                                                marker='*', markevery=2)
-            if self.vis_options['b_vis_model_name']:
-                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-            elif self.vis_options['b_vis_solver_name']:
-                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+            legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
+                                                     self.sol_options[key]["Model"]))
 
         plt.xlabel(r'$F_\mathrm{y,f} / F_\mathrm{z,f}$')
         plt.ylabel(r'$F_\mathrm{x,f} / F_\mathrm{z,f}$')
@@ -591,10 +589,9 @@ class VisVP_Logs_GUI:
                                                linestyle=self.sol_options[key]["Linestyle"],
                                                marker='*', markevery=2)
 
-            if self.vis_options['b_vis_model_name']:
-                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Model"]))
-            elif self.vis_options['b_vis_solver_name']:
-                legend.append(r'$F_\mathrm{o,%s}$' % (self.sol_options[key]["Solver"]))
+                legend.append(r'$F_\mathrm{o,%s,%s}$' % (self.sol_options[key]["Solver"],
+                                                         self.sol_options[key]["Model"]))
+
 
         plt.xlabel(r'$F_\mathrm{y,r} / F_\mathrm{z,r}$')
         plt.title('Rear Tire')
