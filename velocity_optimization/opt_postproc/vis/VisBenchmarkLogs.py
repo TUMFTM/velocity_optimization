@@ -138,9 +138,6 @@ class VisVP_Logs:
                                  params_path=params_path,
                                  input_path=input_path)
 
-        self.vp_qpOASES = VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
-                                       Am=self.velqp_bench.Am)
-
         # --- Create Solver Objects
         for key, value in self.sol_options.items():
             # --- Create IPOPT solver object
@@ -162,8 +159,6 @@ class VisVP_Logs:
 
             # --- Create qpOASES solver object
             if self.sol_options[key]['Solver'] == "qpOASES":
-                # self.vp_qpOASES = VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
-                #                               Am=self.velqp_bench.Am)
                 self.sol_options[key].update({'Create_Solver': VOpt_qpOASES(Hm=self.velqp_bench.J_Hess[1:, 1:],
                                                                             Am=self.velqp_bench.Am)})
 
@@ -445,79 +440,58 @@ class VisVP_Logs:
                 ########################################################################################################
 
                 if self.sol_options[key]['Solver'] == "qpOASES":
+
                     # qpOASES velocity [m/s]
+                    v_op_qpoases = None
+                    # qpOASES force [kN]
+                    F_op_qpoases = None
+                    # qpOASES tire slacks [-]
+                    eps_op_qpoases = None
+
+                    t_start = time.perf_counter()
 
                     v_op_qpoases, \
-                        F_op_qpoases, \
-                        P_op_qpoases, \
-                        ax_op_qpoases, \
-                        ay_op_qpoases, \
-                        F_xzf_op_qpoases, \
-                        F_yzf_op_qpoases, \
-                        F_xzr_op_qpoases, \
-                        F_yzr_op_qpoases, \
-                        t_op_qpoases, \
-                        sol_status_qpoases \
-                        = self.sol_options[key]['Create_Solver'].calc_v_qpOASES(N=self.m,
-                                                                                kappa=kappa,
-                                                                                ds=delta_s,
-                                                                                x0_v=x0_v,
-                                                                                v_max=v_max,
-                                                                                v_end=v_end,
-                                                                                F_ini=F_ini,
-                                                                                ax_max=ax_max_new,
-                                                                                ay_max=ay_max_new,
-                                                                                P_max=P_max,
-                                                                                )
+                    eps_op_qpoases, \
+                    F_op_qpoases = \
+                        online_qp_postproc(velqp=self.velqp_bench,
+                                           vp_qpOASES=self.sol_options[key]['Create_Solver'],
+                                           v_ini=v_ini,
+                                           kappa=kappa,
+                                           delta_s=delta_s,
+                                           x0_v=x0_v,
+                                           x0_s_t=x0_s_t,
+                                           v_max=v_max,
+                                           v_end=v_end,
+                                           F_ini=F_ini,
+                                           ax_max=ax_max_new,
+                                           ay_max=ay_max_new,
+                                           P_max=P_max)
+
+                    # Overall SQP runtime using qpOASES [ms]
+                    dt_sqp_qpoases = (time.perf_counter() - t_start) * 1000
+
+                    # Store qpOASES runtime
+                    print('Overall qpOASES runtime:', dt_sqp_qpoases)
+
+                    P_op_qpoases = F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1]
+
+                    ay_op_qpoases = kappa[0:self.velqp.sqp_stgs['m'] - 1] * \
+                              np.square(v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])
+
+                    ax_op_qpoases = (np.square(v_op_qpoases[1:self.velqp.sqp_stgs['m']]) - np.square(
+                        v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) / (2 * np.array(delta_s)) + \
+                              (self.velqp.sym_sc_['c_res_'] * np.square(
+                                  v_op_qpoases[0:self.velqp.sqp_stgs['m'] - 1])) / \
+                              (1000 * self.velqp.sym_sc_['m_t_'])
 
                     self.sol_options[key].update({'Velocity': v_op_qpoases})
+                    self.sol_options[key].update({'Slack_Sol': eps_op_qpoases})
                     self.sol_options[key].update({'Force': F_op_qpoases})
                     self.sol_options[key].update({'Power': P_op_qpoases})
                     self.sol_options[key].update({'Acc_x': ax_op_qpoases})
                     self.sol_options[key].update({'Acc_y': ay_op_qpoases})
-                    self.sol_options[key].update({'F_xzf': F_xzf_op_qpoases})
-                    self.sol_options[key].update({'F_yzf': F_yzf_op_qpoases})
-                    self.sol_options[key].update({'F_xzr': F_xzr_op_qpoases})
-                    self.sol_options[key].update({'F_yzr': F_yzr_op_qpoases})
-                    self.sol_options[key]['Time'].append(t_op_qpoases)
-                    self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
-
-            ############################################################################################################
-            # --- Calculate qpOASES-solution
-            ############################################################################################################
-            # qpOASES velocity [m/s]
-            v_op_qpoases = None
-            # qpOASES force [kN]
-            F_op_qpoases = None
-            # qpOASES tire slacks [-]
-            eps_op_qpoases = None
-            if self.vis_options['b_calc_qpOASES']:
-
-                t_start = time.perf_counter()
-
-                v_op_qpoases, \
-                    eps_op_qpoases, \
-                    F_op_qpoases = \
-                    online_qp_postproc(velqp=self.velqp_bench,
-                                       vp_qpOASES=self.vp_qpOASES,
-                                       v_ini=v_ini,
-                                       kappa=kappa,
-                                       delta_s=delta_s,
-                                       x0_v=x0_v,
-                                       x0_s_t=x0_s_t,
-                                       v_max=v_max,
-                                       v_end=v_end,
-                                       F_ini=F_ini,
-                                       ax_max=ax_max_new,
-                                       ay_max=ay_max_new,
-                                       P_max=P_max)
-
-                # Overall SQP runtime using qpOASES [ms]
-                dt_sqp_qpoases = (time.perf_counter() - t_start) * 1000
-
-                # Store qpOASES runtime
-                print('Overall qpOASES runtime:', dt_sqp_qpoases)
-                self.dt_sqp_qpoases_arr.append(dt_sqp_qpoases)
+                    self.sol_options[key]['Time'].append(dt_sqp_qpoases)
+                    #self.sol_options[key]['SolStatus'].append(sol_status_qpoases)
 
             if self.vis_options['b_immediate_plot_update']:
 
@@ -536,8 +510,9 @@ class VisVP_Logs:
                 self.vis_gui.p1_3.set_ydata(v_end)
                 self.vis_gui.p1_4.set_ydata(x0_v)
 
+                # debugging solver updates
                 for key, value in self.sol_options.items():
-                    self.vis_gui.vel_dict[key].set_ydata(np.around(self.sol_options[key]['Velocity'], 2))
+                    self.vis_gui.vel_dict[key].set_ydata(self.sol_options[key]['Velocity'])
 
                 # --- Force update
                 self.vis_gui.p3_1.set_ydata(self.velqp.F_cst + self.velqp.sym_sc_['Fmax_kN_'])
@@ -545,11 +520,8 @@ class VisVP_Logs:
                                              F_ini + self.velqp.sym_sc_['Fini_tol_'],
                                              F_ini - self.velqp.sym_sc_['Fini_tol_']])
 
-                if self.vis_options['b_calc_qpOASES']:
-                    self.vis_gui.p3_3.set_ydata(F_op_qpoases)
-
                 for key, value in self.sol_options.items():
-                    self.vis_gui.F_dict[key].set_ydata(np.around(self.sol_options[key]['Force'], 2))
+                    self.vis_gui.F_dict[key].set_ydata(self.sol_options[key]['Force'])
 
                 # --- Delta Force update
                 self.vis_gui.p4_1.set_ydata(self.velqp.dF_cst + self.velqp.sym_sc_['dF_kN_pos_'])
@@ -558,17 +530,13 @@ class VisVP_Logs:
                 if self.velqp.sqp_stgs['b_var_power']:
                     self.vis_gui.p5_1.set_ydata(self.velqp.P_cst + P_max.reshape((self.velqp.m - 1, 1)))
                     self.vis_gui.p5_2.set_ydata(P_max)
-                    if self.vis_options['b_calc_qpOASES']:
-                        self.vis_gui.p5_3.set_ydata(F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1])
                     for key, value in self.sol_options.items():
                         self.vis_gui.P_dict[key].set_ydata(np.around(self.sol_options[key]['Power'], 2))
                 else:
                     self.vis_gui.p5_1.set_ydata(self.velqp.P_cst + self.velqp.sym_sc_['Pmax_kW_'])
                     self.vis_gui.p5_2.set_ydata(self.velqp.sym_sc_['Pmax_kW_'] * np.ones((self.m - 1, 1)))
-                    if self.vis_options['b_calc_qpOASES']:
-                        self.vis_gui.p5_3.set_ydata(F_op_qpoases[0:self.m - 1] * v_op_qpoases[0:self.m - 1])
                     for key, value in self.sol_options.items():
-                        self.vis_gui.P_dict[key].set_ydata(np.around(self.sol_options[key]['Power'], 2))
+                        self.vis_gui.P_dict[key].set_ydata(self.sol_options[key]['Power'])
 
                 # --- Tire usage update
                 ay_mps2 = kappa[0:self.velqp.sqp_stgs['m'] - 1] * \
@@ -599,10 +567,10 @@ class VisVP_Logs:
 
                 # --- Front Axle Tire usage update
                 for key, value in self.sol_options.items():
-                    if self.sol_options[key]['Model'] == "DM":
+                    if self.sol_options[key]['Model'] == "DM" and self.sol_options[key]['Solver'] == "IPOPT":
                         self.vis_gui.F_f_dict[key].set_xdata(self.sol_options[key]['F_yzf'])
                         self.vis_gui.F_f_dict[key].set_ydata(self.sol_options[key]['F_xzf'])
-                    if self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                    elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
                         self.vis_gui.F_fl_dict[key].set_xdata(self.sol_options[key]['F_yzfl'])
                         self.vis_gui.F_fl_dict[key].set_ydata(self.sol_options[key]['F_xzfl'])
                         self.vis_gui.F_fr_dict[key].set_xdata(self.sol_options[key]['F_yzfr'])
@@ -610,10 +578,10 @@ class VisVP_Logs:
 
                 # --- Rear Axle Tire usage update
                 for key, value in self.sol_options.items():
-                    if self.sol_options[key]['Model'] == "DM":
+                    if self.sol_options[key]['Model'] == "DM" and self.sol_options[key]['Solver'] == "IPOPT":
                         self.vis_gui.F_r_dict[key].set_xdata(self.sol_options[key]['F_yzr'])
                         self.vis_gui.F_r_dict[key].set_ydata(self.sol_options[key]['F_xzr'])
-                    if self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
+                    elif self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
                         self.vis_gui.F_rl_dict[key].set_xdata(self.sol_options[key]['F_yzrl'])
                         self.vis_gui.F_rl_dict[key].set_ydata(self.sol_options[key]['F_xzrl'])
                         self.vis_gui.F_rr_dict[key].set_xdata(self.sol_options[key]['F_yzrr'])
@@ -624,12 +592,8 @@ class VisVP_Logs:
                 self.vis_gui.p7_2.set_ydata(x0_s_t)
                 self.vis_gui.p7_3.set_ydata([self.velqp.sym_sc_['s_v_t_lim_']] * len(s_t_op_osqp))
                 for key, value in self.sol_options.items():
-                    if (self.sol_options[key]['Model'] == "PM" or self.sol_options[key]['Model'] == "KM") and \
-                            self.sol_options[key]['Solver'] == "IPOPT":
+                    if self.sol_options[key]['Slack'] is True:
                         self.vis_gui.slack_dict[key].set_ydata(self.sol_options[key]['Slack_Sol'])
-
-                if self.vis_options['b_calc_qpOASES']:
-                    self.vis_gui.p7_5.set_ydata(eps_op_qpoases)
 
                 # self.vis_gui.main_fig.canvas.draw()
 
@@ -646,7 +610,7 @@ class VisVP_Logs:
                 # --- Allow interactive mode
                 plt.ion()
 
-                for i in range(0, self.row_count, self.log_lines):
+                for i in range(0, self.row_count - self.log_lines, self.log_lines):
                     self.vis_gui.slider_vel.set_val(int(i))
                     print("\n*** Progress: " + str("%.2f" % round((i / self.row_count) * 100, 2)) + " %")
 
@@ -658,12 +622,11 @@ class VisVP_Logs:
                 mod_local_trajectory_path = os.path.dirname(
                     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
                 sys.path.append(mod_local_trajectory_path)
-                course = 'zalazone'
                 for key, value in self.sol_options.items():
 
                     file = str(self.sol_options[key]['Solver']) + "_" + str(self.sol_options[key]['Model']) \
                         + "_" + str(self.sol_options[key]['Friction']) \
-                        + "_" + str(course) + "_" + str(self.m) + "_Model" \
+                        + "_" + str(self.m) + "_Model" \
 
                     if self.sol_options[key]['VarFriction']:
                         file += "_VarFriction"
@@ -677,12 +640,6 @@ class VisVP_Logs:
 
                     self.runtimes.plot_hist(name_solver=self.sol_options[key]['Solver'],
                                             dt_solver=np.array(self.sol_options[key]['Time']),
-                                            vis_options=self.vis_options)
-
-                # --- Plot qpOASES runtimes
-                if self.vis_options['b_calc_qpOASES'] and self.vis_options['b_calc_time_plot']:
-                    self.runtimes.plot_hist(name_solver='qpOASES',
-                                            dt_solver=np.array(self.dt_sqp_qpoases_arr),
                                             vis_options=self.vis_options)
 
                 plt.ioff()
