@@ -184,10 +184,8 @@ class VelQP:
                           m_perf=m,
                           m_emerg=m)
 
-            src = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + \
-                '/logs/vp_sqp/sparsity/.'
-            dst = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + \
-                '/params/'
+            src = logging_path + '/sparsity/.'
+            dst = params_path
 
             os.system("cp -r -n " + src + " " + dst)
 
