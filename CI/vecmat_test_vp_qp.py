@@ -1,5 +1,12 @@
 import numpy as np
 import os
+import sys
+
+# custom modules
+mod_vo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) \
+    + "/velocity_optimization"
+sys.path.append(mod_vo)
+
 import velocity_optimization as vo
 
 ########################################################################################################################
@@ -25,12 +32,12 @@ def conv_test(d1, d2):
 # --- Global parameters for Vector-Matrix Check
 # m, random integer from 15 .. 115
 m = 15 + np.random.randint(100)
-# m = 11  # fix value for manual testing
+m = 11  # fix value for manual testing
 sid = 'PerfSQP'
 
-params_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'params/')
-input_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'inputs/veh_dyn_info/')
-logging_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'logs/vp_sqp')
+params_path = os.path.join(mod_vo, 'velocity_optimization', 'params/')
+input_path = os.path.join(mod_vo, 'velocity_optimization',  'inputs/')
+logging_path = os.path.join(mod_vo, 'velocity_optimization', 'logs/vp_sqp')
 
 # --- Create SymQP-instance
 symqp = vo.src.SymQP.SymQP(m=m,
