@@ -8,6 +8,7 @@ after_script:
 
 stages:
   - style_guide_checks
+  - sqp_performance_check
   - pypi_deploy
 
 Flake8Checks:
@@ -17,6 +18,15 @@ Flake8Checks:
   script:
     - ${CI_JOB_ID}-env/bin/flake8
   allow_failure: true
+
+VectorMatrixCheck:
+  stage: sqp_performance_check
+  tags:
+    - CI_TrackPerformanceLRZ
+  script:
+    - "sed -i '/b_sparse_matrix_fill=/c\ b_sparse_matrix_fill=1' params/sqp_config.ini"
+    - ${CI_JOB_ID}-env/bin/python3 CI/vecmat_test_vp_qp.py
+  allow_failure: false
 
 Deploy:
   stage: pypi_deploy
