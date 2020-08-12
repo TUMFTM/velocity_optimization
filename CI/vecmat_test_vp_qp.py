@@ -16,6 +16,7 @@ import velocity_optimization as vo
 ########################################################################################################################
 # TODO: unit-check of filled matrices
 
+
 # --- Conversion and test function
 def conv_test(d1, d2):
     perc = 1e-4
@@ -36,7 +37,7 @@ m = 11  # fix value for manual testing
 sid = 'PerfSQP'
 
 params_path = os.path.join(mod_vo, 'velocity_optimization', 'params/')
-input_path = os.path.join(mod_vo, 'velocity_optimization',  'inputs/')
+input_path = os.path.join(mod_vo, 'velocity_optimization', 'inputs/')
 logging_path = os.path.join(mod_vo, 'velocity_optimization', 'logs/vp_sqp')
 
 # --- Create SymQP-instance

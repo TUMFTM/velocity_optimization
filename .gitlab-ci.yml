@@ -9,6 +9,7 @@ after_script:
 stages:
   - style_guide_checks
   - sqp_performance_check
+  - tpc_checks
   - pypi_deploy
 
 Flake8Checks:
@@ -37,6 +38,13 @@ SQPPerformanceCheck:
     - ${CI_JOB_ID}-env/bin/python3 velocity_optimization/main_vp_sqp.py
   timeout: 15m
   allow_failure: false
+
+TPCChecks:
+  stage: tpc_checks
+  tags:
+    - CI_TrackPerformanceLRZ
+  script:
+    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://gitlab.lrz.de/api/v4/projects/16891/trigger/pipeline
 
 Deploy:
   stage: pypi_deploy
