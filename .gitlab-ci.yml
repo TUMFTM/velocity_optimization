@@ -44,7 +44,7 @@ TPCChecks:
   tags:
     - CI_TrackPerformanceLRZ
   script:
-    - curl --request POST --form "token=$CI_JOB_TOKEN" --form ref=master https://gitlab.lrz.de/api/v4/projects/16891/trigger/pipeline
+    - "curl -X POST -F token=ed9e5b0a78462e5da5605e9850ccbf -F ref=develop https://gitlab.lrz.de/api/v4/projects/16891/trigger/pipeline"
 
 Deploy:
   stage: pypi_deploy
