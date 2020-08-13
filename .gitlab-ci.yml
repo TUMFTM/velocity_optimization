@@ -56,7 +56,7 @@ DeployInternal:
 TPCChecks:
   stage: tpc_checks
   trigger:
-    project: roborace/mod_local_trajectory
+    project: roborace/modules/mod_local_trajectory
     branch: develop
     strategy: depend
 
