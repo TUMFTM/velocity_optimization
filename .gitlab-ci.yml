@@ -55,10 +55,8 @@ DeployInternal:
 
 TPCChecks:
   stage: tpc_checks
-  tags:
-    - CI_TrackPerformanceLRZ
   trigger:
-    project: mod_local_trajectory
+    project: roborace/mod_local_trajectory
     branch: develop
     strategy: depend
 
