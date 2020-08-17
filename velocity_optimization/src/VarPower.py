@@ -2,6 +2,13 @@ import numpy as np
 from scipy import interpolate
 import json
 import csv
+import os
+import sys
+
+module_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(module_path)
+from velocity_optimization.interface.Receiver import ZMQReceiver as Rec
+from velocity_optimization.interface.Sender import ZMQSender as Snd
 
 
 class VarPowerLimits:
@@ -10,7 +17,9 @@ class VarPowerLimits:
                  '__s_var_pwr',
                  's_max_var_pwr',
                  '__P_var_pwr',
-                 'f_pwr_intp')
+                 'f_pwr_intp',
+                 'rec_recalc',
+                 'snd_recalc')
 
     def __init__(self,
                  input_path: str):
@@ -49,7 +58,15 @@ class VarPowerLimits:
 
             self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr)
 
+    def init_interface_recalc(self):
+        self.rec_recalc = Rec(theme='sender_imp_vplanner')  # TODO: check themes with raceline_driving example!
+        self.snd_recalc = Snd(theme='receiver_exp_vplanner')
+
 
 if __name__ == '__main__':
-    vpl = VarPowerLimits()
+
+    vpl = VarPowerLimits(module_path + '/velocity_optimization/inputs/')
     print(vpl.f_pwr_intp([2, 3, 400]))
+
+    # check ZMQ interfaces
+    vpl.init_interface_recalc()
