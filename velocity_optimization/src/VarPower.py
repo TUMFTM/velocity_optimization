@@ -62,7 +62,7 @@ class VarPowerLimits:
     def init_interface_recalc(self):
 
         # --- Initialize sender to trigger ESIM recalculation
-        self.snd_recalc = Snd(theme='receiver_exp_vplanner')
+        self.snd_recalc = Snd(theme='receiver_exp_esim')
 
         # --- Initialize receiver for information from ESIM
         self.rec_recalc = Rec(theme='sender_imp_vplanner')
