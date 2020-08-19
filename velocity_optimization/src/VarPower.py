@@ -87,8 +87,6 @@ class VarPowerLimits:
                 # close and leave loop
                 b_esim_ready = True
 
-        self.snd_recalc.send(data=True)
-
 
 if __name__ == '__main__':
 
