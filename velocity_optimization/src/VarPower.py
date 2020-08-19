@@ -12,6 +12,11 @@ from velocity_optimization.interface.Receiver import ZMQReceiver as Rec
 from velocity_optimization.interface.Sender import ZMQSender as Snd
 
 
+ESIM_FINISHED = 0
+ESIM_CALCULATING = 1
+ESIM_UPDATED = 0
+ESIM_OUTDATED = 1
+
 class VarPowerLimits:
 
     __slots__ = ('input_path',
@@ -92,6 +97,37 @@ class VarPowerLimits:
 
         # trigger ESIM recalculation with current vehicle position
         self.snd_recalc.send(data=s_pos)
+
+    def receive_esim_finished(self):
+        """Function to check whether ESIM recalculation has finished. This function should be triggered manually
+        instead of a while loop as the calculation time of the energy strategy can differ between subsequent calls."""
+
+        b_recalc_finished = self.rec_recalc.run()
+
+        if b_recalc_finished is True:
+            print('*** ESIM recalc finished ***')
+            return ESIM_FINISHED
+        else:
+            return ESIM_CALCULATING
+
+    def receive_esim_update(self):
+        """Function to receive ESIM update. Call this function manually instead of a while loop in order not to block
+        the velocity planner function."""
+
+        # receive updates from ESIM
+        update_esim = self.rec_recalc.run()
+
+        if update_esim is not None:
+            print('*** ESIM update finished ***')
+
+            # TODO: update values in VarPower-class with recalculated ESIM values:
+            self.__s_var_pwr = None
+            self.__P_var_pwr = None
+
+            return ESIM_UPDATED
+
+        else:
+            return ESIM_OUTDATED
 
 
 if __name__ == '__main__':
