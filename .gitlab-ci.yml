@@ -44,8 +44,6 @@ DeployInternal:
   stage: pypi_deploy_internal
   tags:
     - CI_TrackPerformanceLRZ
-  only:
-      - master
   script:
     - ${CI_JOB_ID}-env/bin/python3 -m pip install --upgrade setuptools wheel
     - ${CI_JOB_ID}-env/bin/python3 setup.py sdist bdist_wheel
@@ -59,6 +57,16 @@ TPCChecks:
     project: roborace/modules/mod_local_trajectory
     branch: develop
     strategy: depend
+
+DeployExternal:
+  stage: pypi_deploy_external
+  tags:
+    - CI_TrackPerformanceLRZ
+  only:
+    - master
+  script:
+    - echo "This could have been your external package deploy job on the master branch."
+  allow_failure: false
 
 Documentation:
   stage: pypi_deploy_external
