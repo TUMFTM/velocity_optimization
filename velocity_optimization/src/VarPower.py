@@ -4,6 +4,7 @@ import json
 import csv
 import os
 import sys
+import time
 
 module_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(module_path)
@@ -59,8 +60,34 @@ class VarPowerLimits:
             self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr)
 
     def init_interface_recalc(self):
-        self.rec_recalc = Rec(theme='sender_imp_vplanner')  # TODO: check themes with raceline_driving example!
+
+        # --- Initialize sender to trigger ESIM recalculation
         self.snd_recalc = Snd(theme='receiver_exp_vplanner')
+
+        # --- Initialize receiver for information from ESIM
+        self.rec_recalc = Rec(theme='sender_imp_vplanner')
+
+        # Handshake with ESIM
+        b_esim_ready = False
+        while not b_esim_ready:
+
+            rec_esim = self.rec_recalc.run()
+            print("Handshake with ESIM:", rec_esim)
+
+            if rec_esim is not None:
+
+                # Acknowledge message with response
+                self.snd_recalc.send(data=True)
+                time.sleep(0.5)
+
+                # Clear cache
+                while self.rec_recalc.run() is not None:
+                    pass
+
+                # close and leave loop
+                b_esim_ready = True
+
+        self.snd_recalc.send(data=True)
 
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ class ZMQSender:
         parser = configparser.ConfigParser()
         pars = {}
 
-        if not parser.read(os.path.join(repo_path, "../data/params/interface_config.ini")):
+        if not parser.read(os.path.join(repo_path, "../params/interface_config.ini")):
             raise ValueError('Specified config file does not exist or is empty!')
 
         pars["receiver_exp_zmq"] = json.loads(parser.get('INTERFACE_SPEC_SENDER', theme))
