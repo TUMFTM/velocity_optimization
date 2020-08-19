@@ -87,6 +87,12 @@ class VarPowerLimits:
                 # close and leave loop
                 b_esim_ready = True
 
+    def trigger_recalc(self,
+                       s_pos: float):
+
+        # trigger ESIM recalculation with current vehicle position
+        self.snd_recalc.send(data=s_pos)
+
 
 if __name__ == '__main__':
 
