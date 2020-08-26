@@ -278,8 +278,8 @@ class VisVP_Logs:
                 ay_max_new_ipopt = ay_max_new[:-1]
 
             # --- Update OSQP expressions
-            self.velqp.osqp_update_online(x0_v=x0_v,
-                                          x0_s_t=x0_s_t,
+            self.velqp.osqp_update_online(x0_v=np.array(v_op_osqp),
+                                          x0_s_t=np.array(s_t_op_osqp),
                                           v_ini=v_ini,
                                           v_max=v_max,
                                           v_end=v_end,
