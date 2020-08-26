@@ -3,6 +3,8 @@ osqp>=0.6.1
 scipy>=1.3.3
 matplotlib>=3.0.3
 sympy>=1.6
+ad_interface_functions>=0.19
+zmq>=0.0.0
 # Only for debugging
 mpmath>=1.1.0
 casadi>=3.5.1
