@@ -202,7 +202,15 @@ class VisVP_Logs:
         """
 
         # Modify user's idx to have multiple of log_lines
-        idx = int(idx + (self.log_lines - np.mod(idx, self.log_lines)))
+        print(idx)
+        if idx != 0 and np.mod(idx, self.log_lines) != 0:
+            idx = int(idx + (self.log_lines - np.mod(idx, self.log_lines)))
+        elif idx == self.row_count:
+            pass
+
+        # don't extract entries corresponding to index out of bounds
+        if idx >= self.row_count:
+            idx -= self.log_lines
 
         # Choose your own starting Index for a single plot
         if self.vis_options['b_idx'] > 0:
