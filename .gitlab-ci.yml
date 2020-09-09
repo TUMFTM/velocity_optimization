@@ -19,7 +19,7 @@ DeployExternal:
     - ${CI_JOB_ID}-env/bin/python3 -m pip install --upgrade setuptools wheel
     - ${CI_JOB_ID}-env/bin/python3 setup.py sdist bdist_wheel
     - ${CI_JOB_ID}-env/bin/pip3 install --upgrade twine
-    - python3 -m twine upload --username ${PYPI_USER_HERRMANN} --password ${PYPI_TOKEN_HERRMANN} dist/*
+    - ${CI_JOB_ID}-env/bin/python3 -m twine upload --username ${PYPI_USER_HERRMANN} --password ${PYPI_TOKEN_HERRMANN} dist/*
   allow_failure: false
 
 Documentation:
