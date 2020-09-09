@@ -7,10 +7,6 @@ after_script:
   - rm -rf ${CI_JOB_ID}-env
 
 stages:
-  - style_guide_checks
-  - sqp_performance_check
-  - pypi_deploy_internal
-  - tpc_checks
   - pypi_deploy_external
 
 Flake8Checks:
@@ -65,7 +61,10 @@ DeployExternal:
   only:
     - master
   script:
-    - echo "This could have been your external package deploy job on the master branch."
+    - ${CI_JOB_ID}-env/bin/python3 -m pip install --upgrade setuptools wheel
+    - ${CI_JOB_ID}-env/bin/python3 setup.py sdist bdist_wheel
+    - ${CI_JOB_ID}-env/bin/pip3 install --upgrade twine
+    - python3 -m twine upload --username ${PYPI_USER_HERRMANN} --password ${PYPI_TOKEN_HERRMANN} dist/*
   allow_failure: false
 
 Documentation:
