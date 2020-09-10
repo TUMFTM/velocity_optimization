@@ -5,3 +5,5 @@ power input can be space-variable (for, e.g., energy strategy purposes).
 
 The corresponding repository will be available soon on https://github.com/, the documentation on
 https://readthedocs.org/.
+
+The internal development documentation can be found in https://roborace.pages.gitlab.lrz.de/modules/velocity_optimization/index.html
