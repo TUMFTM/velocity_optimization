@@ -16,6 +16,7 @@ Velocity Optimization Documentation
    installation
    modules
    examples
+   configuration
    citing
 
 Indices and tables
