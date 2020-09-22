@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import linecache
 import json
+from matplotlib import pyplot as plt
 
 # custom modules
 vel_opt_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -61,6 +62,8 @@ if __name__ == "__main__":
     # END USER INPUT ---------------------------------------------------------------------------------------------------
     # ------------------------------------------------------------------------------------------------------------------
 
+    csv_name_ltpl = None
+
     for key, value in sol_options.items():
         if sol_options[key]['Slack'] and (sol_options[key]['Model'] == 'DM' or sol_options[key]['Model'] == 'FW'):
             sol_options[key]['Slack'] = False
@@ -108,3 +111,6 @@ if __name__ == "__main__":
 
     # --- Start GUI
     rL.vis_log(int(0))
+
+    # --- Show main window
+    plt.show()
