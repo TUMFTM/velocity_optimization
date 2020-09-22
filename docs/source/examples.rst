@@ -15,21 +15,25 @@ and the force `F_ini` from the first velocity point (to avoid oscillations in su
 
 .. code-block:: python
 
+    import os
+    import sys
+    import numpy as np
+    import velocity_optimization
+
+
     class VelOpt():
 
         def __init__(self,
                      m: int):
-
             self.vsqp_setup(m=m)
 
         def vsqp_setup(self,
                        m: int):
-
-            self.v_sqp = velocity_optimization.src.VelQP.\
+            self.v_sqp = velocity_optimization.src.VelQP. \
                 VelQP(m=m,
                       sid='PerfSQP',
                       params_path=os.path.dirname(os.path.abspath(__file__)) + '/params/',
-                      input_path=os.path.dirname(os.path.abspath(__file__)) + '/inputs/veh_dyn_info/',
+                      input_path=os.path.dirname(os.path.abspath(__file__)) + '/inputs/',
                       logging_path=os.path.dirname(os.path.abspath(__file__)) + '/logs/')
 
         def vsqp_online(self,
@@ -39,7 +43,7 @@ and the force `F_ini` from the first velocity point (to avoid oscillations in su
                         x0_v: np.ndarray,
                         F_ini: float):
 
-            v_op, s_t_op, qp_status = velocity_optimization.src.online_qp.\
+            v_op, s_t_op, qp_status = velocity_optimization.src.online_qp. \
                 online_qp(velqp=self.v_sqp,
                           v_ini=v_ini,
                           kappa=kappa,
@@ -48,9 +52,25 @@ and the force `F_ini` from the first velocity point (to avoid oscillations in su
                           v_max=np.array([70] * self.v_sqp.m),
                           v_end=5,
                           F_ini=F_ini,
-                          s_glob=0)
+                          s_glob=0,
+                          ax_max=10 * np.ones((self.v_sqp.m, )),
+                          ay_max=10 * np.ones((self.v_sqp.m, )))
 
             return v_op, s_t_op, qp_status
+
+
+    if __name__ == '__main__':
+        m = 115
+        v = VelOpt(m=m)
+
+        v_op, _, qp_status = v.vsqp_online(v_ini=10,
+                                           kappa=0.0001 * np.ones((m,)),
+                                           delta_s=2 * np.ones((m - 1,)),
+                                           x0_v=25 * np.ones((m,)),
+                                           F_ini=3)
+
+        print("Optimized velocity profile:\n", v_op)
+
 
 Debugging
 =========
