@@ -179,14 +179,22 @@ class VisVP_Logs_GUI:
     def line_definition(self):
         # Define Color, Line Style and Marker
         for key, value in self.sol_options.items():
-            if self.sol_options[key]['Model'] == "PM":
+            if self.sol_options[key]['Model'] == "PM" and self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'o'})
-            if self.sol_options[key]['Model'] == "KM":
+            if self.sol_options[key]['Model'] == "KM" and self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': 'x'})
-            if self.sol_options[key]['Model'] == "DM":
+            if self.sol_options[key]['Model'] == "DM" and self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'v'})
-            if self.sol_options[key]['Model'] == "FW":
+            if self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "IPOPT":
                 self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': 's'})
+            if self.sol_options[key]['Model'] == "PM" and self.sol_options[key]['Solver'] == "qpOASES":
+                self.sol_options[key].update({'Color': TUMBlue, 'Linestyle': ':', 'Marker': 'd'})
+            if self.sol_options[key]['Model'] == "KM" and self.sol_options[key]['Solver'] == "qpOASES":
+                self.sol_options[key].update({'Color': TUMOrange, 'Linestyle': '--', 'Marker': '2'})
+            if self.sol_options[key]['Model'] == "DM" and self.sol_options[key]['Solver'] == "qpOASES":
+                self.sol_options[key].update({'Color': TUMGreen, 'Linestyle': '-.', 'Marker': 'H'})
+            if self.sol_options[key]['Model'] == "FW" and self.sol_options[key]['Solver'] == "qpOASES":
+                self.sol_options[key].update({'Color': TUMGray1, 'Linestyle': '-', 'Marker': '^'})
 
     def draw_gui(self):
 
