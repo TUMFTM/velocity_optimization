@@ -16,7 +16,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=["numpy>=1.18.1",  # packages to run code on car
-                      "osqp>=0.6.1",
+                      "osqp>=1.0.0",
                       "scipy>=1.3.3",
                       "matplotlib>=3.0.3",
                       "sympy>=1.6"],
