@@ -1,6 +1,9 @@
 Introduction
 ============
 
+.. image:: vel.png
+   :width: 600
+
 ``velocity_optimization`` is a python package that optimizes the velocity for a vehicle (minimizes travelling time)
 with respect to necessary physical constraints, e.g., maximum available power, combined longitudinal and lateral
 acceleration, maximum available driving/braking force, calculation time, ... . The mathematical method behind is called
