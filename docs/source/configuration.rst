@@ -1,7 +1,7 @@
 Configuration
 =============
 
-The velocity planner is parametrized using some configuraiton scripts. Adapt the paths to your own configuration scripts
+The velocity planner is parametrized using some configuration scripts. Adapt the paths to your own configuration scripts
 as shown in the `examples`-section of this documentation. An example configuration-script can be found in this package
 in `velocity_optimization/params/sqp_config.ini`. Simply copy this file to any location on your machine. You may want
 to adapt the following vehicle parameters:
