@@ -1,6 +1,6 @@
 # Velocity optimization
 
-![Velocity Optimization.](vel.png)
+![Velocity Optimization.](https://raw.githubusercontent.com/TUMFTM/velocity_optimization/master/vel.png)
 
 Optimizes (Maximizes) the velocity profile for a vehicle in real-time respecting physical constraints (e.g., power,
 force, combined acceleration, ...). Takes into account a variable friction potential between road and tires. Max.

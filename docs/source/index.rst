@@ -12,12 +12,12 @@ Velocity Optimization Documentation
    :caption: Contents
 
    introduction
-   problem_formulation
    installation
-   modules
+   problem_formulation
    examples
    configuration
    citing
+   modules
 
 Indices and tables
 ==================

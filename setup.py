@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="velocity_optimization",
-    version="1.0.2",
+    version="1.0.3",
     author="Thomas Herrmann",
     author_email="thomas.herrmann@tum.de",
     description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and "
@@ -19,7 +19,8 @@ setuptools.setup(
                       "osqp>=0.6.1",
                       "scipy>=1.3.3",
                       "matplotlib>=3.0.3",
-                      "sympy>=1.6"],
+                      "sympy>=1.6",
+                      "ad-interface-functions>=0.21"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",

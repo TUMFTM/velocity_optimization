@@ -1,5 +1,5 @@
-velocity_optimization
-=====================
+Module documentation
+====================
 
 .. toctree::
    :maxdepth: 4

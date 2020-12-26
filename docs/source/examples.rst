@@ -89,9 +89,10 @@ most important values of the velocity SQP that have been logged.
     import numpy as np
     import linecache
     import json
+    from matplotlib import pyplot as plt
 
     # custom modules
-    vel_opt_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    vel_opt_path = os.path.dirname(os.path.abspath(__file__))
     sys.path.append(vel_opt_path)
     from velocity_optimization.opt_postproc.vis.VisBenchmarkLogs import VisVP_Logs
 
@@ -106,15 +107,14 @@ most important values of the velocity SQP that have been logged.
         Documentation: This function visualizes calculated velocity from the SQP-planner including its constraints.
         """
 
-        # --------------------------------------------------------------------------------------------------------------
-        # USER INPUT ---------------------------------------------------------------------------------------------------
-        # --------------------------------------------------------------------------------------------------------------
-        csv_name = vel_opt_path + '/logs/sqp_perf_2020_07_03_16_12.log'
+        # ------------------------------------------------------------------------------------------------------------------
+        # USER INPUT -------------------------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------------------------------------
+        csv_name = vel_opt_path + '/logs/sqp_perf_2020_12_26_10_33.log'
 
-        csv_name_ltpl = vel_opt_path + '/logs/sqp_perf_2020_06_08_09_15.log'
-
-        params_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/params/'
-        input_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/inputs/'
+        # TODO: check the paths to your 'params'- and 'inputs'-folders here and adapt if necessary!
+        params_path = vel_opt_path + '/params/'
+        input_path = vel_opt_path + '/inputs/'
 
         b_movie = False                      # visualize all logs consecutively?
 
@@ -143,9 +143,11 @@ most important values of the velocity SQP that have been logged.
                                    }
                        }
 
-        # --------------------------------------------------------------------------------------------------------------
-        # END USER INPUT -----------------------------------------------------------------------------------------------
-        # --------------------------------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------------------------------------
+        # END USER INPUT ---------------------------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------------------------------------------
+
+        csv_name_ltpl = None
 
         for key, value in sol_options.items():
             if sol_options[key]['Slack'] and (sol_options[key]['Model'] == 'DM' or sol_options[key]['Model'] == 'FW'):
@@ -171,7 +173,7 @@ most important values of the velocity SQP that have been logged.
         velocity_dummy = json.loads(row_lc[2])
         m = len(velocity_dummy)
 
-        # visulaization options
+        # visualization options
         vis_options = {'b_movie': b_movie,
                        'b_run_OSQP': b_run_OSQP,
                        'b_idx': b_idx,
@@ -194,6 +196,9 @@ most important values of the velocity SQP that have been logged.
 
         # --- Start GUI
         rL.vis_log(int(0))
+
+        # --- Show main window
+        plt.show()
 
 General options
 ---------------
