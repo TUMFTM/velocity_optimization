@@ -18,6 +18,10 @@ The internal development documentation can be found on [GitLab](https://roborace
 
 ### Publication
 
+The preprint of the accepted version of the corresponding paper is available on [arXiv](https://arxiv.org/abs/2012.13586).
+
+The paper will soon be available on IEEE eXplore and in the printed version of the IEEE Transactions on Intelligent Vehicles:
+
     @article{Herrmann2021,
      author = {Herrmann, Thomas and Wischnewski, Alexander and Hermansdorfer, Leonhard and Betz, Johannes and
      Lienkamp, Markus},

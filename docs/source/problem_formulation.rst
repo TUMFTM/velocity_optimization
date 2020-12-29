@@ -18,7 +18,7 @@ some of the hard constraints. The parameters :math:`\rho_i` can be used to tune 
 The detailed mathematical problem formulation behind the code and further explanations can be found in our publication.
 The preprint of this publication can be found on arXiv::
 
-    https://arxiv.org/
+    `https://arxiv.org/abs/2012.13586 <https://arxiv.org/abs/2012.13586>`_
 
 The online version of the printed article can be found on IEEE eXplore::
 
