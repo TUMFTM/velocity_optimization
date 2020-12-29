@@ -16,11 +16,11 @@ objective function. These are necessary to keep subsequent velocity optimization
 some of the hard constraints. The parameters :math:`\rho_i` can be used to tune the contribution of the single terms.
 
 The detailed mathematical problem formulation behind the code and further explanations can be found in our publication.
-The preprint of this publication can be found on arXiv::
+The preprint of this publication can be found on arXiv:
 
     `https://arxiv.org/abs/2012.13586 <https://arxiv.org/abs/2012.13586>`_
 
-The online version of the printed article can be found on IEEE eXplore::
+The paper will soon be available on IEEE eXplore and in the printed version of the IEEE Transactions on Intelligent Vehicles:
 
     https://ieeexplore.ieee.org/Xplore/home.jsp
 
