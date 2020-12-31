@@ -22,5 +22,4 @@ The preprint of this publication can be found on arXiv:
 
 The paper will soon be available on IEEE eXplore and in the printed version of the IEEE Transactions on Intelligent Vehicles:
 
-    https://ieeexplore.ieee.org/Xplore/home.jsp
-
+    https://doi.org/10.1109/TIV.2020.3047858
