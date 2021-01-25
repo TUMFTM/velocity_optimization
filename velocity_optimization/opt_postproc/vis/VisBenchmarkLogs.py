@@ -572,7 +572,7 @@ class VisVP_Logs:
                 plt.ioff()
 
             # --- Show all plots that have been calculated
-            plt.show()
+            plt.draw()
 
     def read_log_file(self,
                       csv_name: str,
