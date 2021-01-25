@@ -72,5 +72,11 @@ class ZMQReceiver:
 
 
 if __name__ == "__main__":
-    zmq_receiver = ZMQReceiver(theme="empty_theme")
-    zmq_receiver.run()
+    zr = ZMQReceiver(theme="sender_imp_vplanner")
+
+    # test receiver
+    while True:
+        r = zr.run()
+
+        if r is not None:
+            print(r)

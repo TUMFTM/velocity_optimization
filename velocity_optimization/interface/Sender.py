@@ -13,12 +13,12 @@ class ZMQSender:
         # IMPORT INTERFACE CONFIG PARAMETERS ---------------------------------------------------------------------------
         # --------------------------------------------------------------------------------------------------------------
 
-        repo_path = os.path.dirname(os.path.abspath(__file__))
+        repo_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
         parser = configparser.ConfigParser()
         pars = {}
 
-        if not parser.read(os.path.join(repo_path, "../params/interface_config.ini")):
+        if not parser.read(os.path.join(repo_path, "params/interface_config.ini")):
             raise ValueError('Specified config file does not exist or is empty!')
 
         pars["receiver_exp_zmq"] = json.loads(parser.get('INTERFACE_SPEC_SENDER', theme))
@@ -66,4 +66,6 @@ class ZMQSender:
 
 
 if __name__ == "__main__":
-    zs = ZMQSender(theme='receiver_exp_raceline_driving')
+    zs = ZMQSender(theme='receiver_exp_esim')
+    # test interface: start ESIM and v-planner afterwards: a message on the ESIM-side should appear.
+    zs.send("V-Planner ready!")
