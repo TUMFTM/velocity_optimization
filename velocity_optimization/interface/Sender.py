@@ -68,4 +68,5 @@ class ZMQSender:
 if __name__ == "__main__":
     zs = ZMQSender(theme='receiver_exp_esim')
     # test interface: start ESIM and v-planner afterwards: a message on the ESIM-side should appear.
-    zs.send("V-Planner ready!")
+    zs_data = 'v' + '_' + 'mnt' + '_' + str(12)
+    zs.send(zs_data)
