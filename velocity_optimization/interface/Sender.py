@@ -4,6 +4,7 @@ import configparser
 import zmq
 import time
 import ad_interface_functions
+import numpy as np
 
 
 class ZMQSender:
@@ -66,7 +67,21 @@ class ZMQSender:
 
 
 if __name__ == "__main__":
+
     zs = ZMQSender(theme='receiver_exp_esim')
+
     # test interface: start ESIM and v-planner afterwards: a message on the ESIM-side should appear.
-    zs_data = 'v' + '_' + 'mnt' + '_' + str(12)
+    # --- v_ref: 'v' + track-ID
+    phase = 'r'
+    track = 'mnt'
+    # --- init.: 'i' + track-ID + number of laps + initial state x0
+    laps = 12
+    x0 = np.array([1, 0, 0, 0.5, 35, 35, 35, 35, 35])
+
+    zs_data = dict()
+    zs_data['phase'] = phase
+    zs_data['track'] = track
+    zs_data['num_laps'] = laps
+    zs_data['x0'] = x0
+
     zs.send(zs_data)
