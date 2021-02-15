@@ -312,11 +312,11 @@ def online_qp(velqp: VelQP,
 
     if velqp.sqp_stgs['b_trajectory_check']:
         ax_norm = np.abs(kappa[0:velqp.sqp_stgs['m'] - 1] * v_op[0:velqp.sqp_stgs['m'] - 1] ** 2) / \
-            velqp.sym_sc_['ax_max_mps2']
+            velqp.sym_sc_['axmax_mps2_']
         ay_norm = np.abs(
             (v_op[1:velqp.sqp_stgs['m']] ** 2 - v_op[0:velqp.sqp_stgs['m'] - 1] ** 2) / (2 * np.array(delta_s))
             + (velqp.sym_sc_['c_res_'] * v_op[0:velqp.sqp_stgs['m'] - 1] ** 2) / (1000 * velqp.sym_sc_['m_t_'])) / \
-            velqp.sym_sc_['ay_max_mps2']
+            velqp.sym_sc_['aymax_mps2_']
 
         perf_check = (ax_norm + ay_norm) > 1
 
