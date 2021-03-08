@@ -9,7 +9,8 @@ import numpy as np
 
 class ZMQSender:
 
-    def __init__(self, theme):
+    def __init__(self,
+                 theme: str):
         # --------------------------------------------------------------------------------------------------------------
         # IMPORT INTERFACE CONFIG PARAMETERS ---------------------------------------------------------------------------
         # --------------------------------------------------------------------------------------------------------------
@@ -72,15 +73,15 @@ if __name__ == "__main__":
 
     # test interface: start ESIM and v-planner afterwards: a message on the ESIM-side should appear.
     # --- v_ref: 'v' + track-ID
-    phase = 'i'
+    phase = 'r'
     track = 'mnt'
     # --- init.: 'i' + track-ID + number of laps + initial state x0
     laps = 12
-    x0 = np.array([1, 0, 0, 1.0, 35, 35, 35, 35, 35])
+    x0 = np.array([1, 0, 0, 0.5, 35, 35, 35, 35, 35])
     # --- re-optim.: 'r' + global coordinate of measurement diff. [m] + measurement diff. [various]
     s_meas = 70
     # s [m], v[m/s], t[s], soc_batt [], temp_batt, temp_mach, temp_inv, temp_cool_mi, temp_cool_b [°C]
-    meas_diff = np.array([0, 0, 0, 0, 0.5, 30, 0, 0, 0])
+    meas_diff = np.array([0, 0, 0, 0, 0.5, 0, 0, 0, 0])
 
     zs_data = dict()
     zs_data['phase'] = phase

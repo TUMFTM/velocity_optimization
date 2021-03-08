@@ -17,6 +17,7 @@ ESIM_CALCULATING = 1
 ESIM_UPDATED = 0
 ESIM_OUTDATED = 1
 
+
 class VarPowerLimits:
 
     __slots__ = ('input_path',
@@ -44,6 +45,9 @@ class VarPowerLimits:
 
         self.input_path = input_path
 
+        self.snd_recalc = None
+        self.rec_recalc = None
+
         # s coordinate [m]
         self.__s_var_pwr = []
         # max. s coordinate [m]
@@ -62,7 +66,8 @@ class VarPowerLimits:
 
             self.s_max_var_pwr = np.max(self.__s_var_pwr)
 
-            self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr)
+            self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
+                                                   bounds_error=False)
 
     def init_interface_recalc(self):
 
@@ -72,44 +77,6 @@ class VarPowerLimits:
         # --- Initialize receiver for information from ESIM
         self.rec_recalc = Rec(theme='sender_imp_vplanner')
 
-        # Handshake with ESIM
-        b_esim_ready = False
-        while not b_esim_ready:
-
-            rec_esim = self.rec_recalc.run()
-            print("Handshake with ESIM:", rec_esim)
-
-            if rec_esim is not None:
-
-                # Acknowledge message with response
-                self.snd_recalc.send(data=True)
-                time.sleep(0.5)
-
-                # Clear cache
-                while self.rec_recalc.run() is not None:
-                    pass
-
-                # close and leave loop
-                b_esim_ready = True
-
-    def trigger_recalc(self,
-                       s_pos: float):
-
-        # trigger ESIM recalculation with current vehicle position
-        self.snd_recalc.send(data=s_pos)
-
-    def receive_esim_finished(self):
-        """Function to check whether ESIM recalculation has finished. This function should be triggered manually
-        instead of a while loop as the calculation time of the energy strategy can differ between subsequent calls."""
-
-        b_recalc_finished = self.rec_recalc.run()
-
-        if b_recalc_finished is True:
-            print('*** ESIM recalc finished ***')
-            return ESIM_FINISHED
-        else:
-            return ESIM_CALCULATING
-
     def receive_esim_update(self):
         """Function to receive ESIM update. Call this function manually instead of a while loop in order not to block
         the velocity planner function."""
@@ -118,22 +85,95 @@ class VarPowerLimits:
         update_esim = self.rec_recalc.run()
 
         if update_esim is not None:
-            print('*** ESIM update finished ***')
 
-            # TODO: update values in VarPower-class with recalculated ESIM values:
-            self.__s_var_pwr = None
-            self.__P_var_pwr = None
+            self.__s_var_pwr = update_esim[:, 0]
+            self.__P_var_pwr = update_esim[:, 1]
+
+            # --- Postprocess variable power array (no negative values)
+            self.__P_var_pwr[self.__P_var_pwr < 0] = 0
+
+            # re-interpolate
+            # TODO: append new values to last index of old solution to enforce smooth transition between old strategy
+            #  and update
+            self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
+                                                   bounds_error=False, assume_sorted=True)
 
             return ESIM_UPDATED
 
         else:
-            return ESIM_OUTDATED
+
+            return ESIM_CALCULATING
+
+    def trigger_recalc(self,
+                       s_meas: float,
+                       meas_diff: np.ndarray,
+                       phase: str = 'r',
+                       track: str = 'mnt',
+                       laps: int = 12,
+                       x0: np.ndarray = np.array([1, 0, 0, 0.5, 35, 35, 35, 35, 35])):
+
+        """Triggers energy strategy recalculation with measurement values.
+
+        :param s_meas: global s-coordinate where vehicle currently is
+        :param meas_diff: measurement values expressed as difference to energy strtaegy values at current position
+
+        Only necessary for the initialization phase are the following parameters:
+        :param phase: which ES phase to call: 'r', recalculation (default); 'i', init.; 'v', v-ref calculation
+        :param track: which track: 'mnt', Monteblanco (default), ...
+        :param laps: how many laps: any integer, 12 (default)
+        :param x0: starting values
+
+        :Authors:
+            Thomas Herrmann <thomas.herrmann@tum.de>
+
+        :Created on:
+            01.02.2020
+        """
+
+        # test interface: start ESIM and v-planner afterwards: a message on the ESIM-side should appear.
+        # --- v_ref: 'v' + track-ID
+        phase = phase
+        track = track
+        # --- init.: 'i' + track-ID + number of laps + initial state x0
+        laps = laps
+        x0 = x0
+        # --- re-optim.: 'r' + global coordinate of measurement diff. [m] + measurement diff. [various]
+        s_meas = s_meas
+        # s [m], v[m/s], t[s], soc_batt [], temp_batt, temp_mach, temp_inv, temp_cool_mi, temp_cool_b [°C]
+        meas_diff = meas_diff
+
+        zs_data = dict()
+        zs_data['phase'] = phase
+        zs_data['track'] = track
+        zs_data['num_laps'] = laps
+        zs_data['x0'] = x0
+        zs_data['s_meas'] = s_meas
+        zs_data['meas_diff'] = meas_diff
+
+        self.snd_recalc.send(zs_data)
 
 
 if __name__ == '__main__':
 
     vpl = VarPowerLimits(module_path + '/velocity_optimization/inputs/')
-    print(vpl.f_pwr_intp([2, 3, 400]))
 
-    # check ZMQ interfaces
+    # initialize interfaces to energy strategy
     vpl.init_interface_recalc()
+    # trigger recalculation
+    '''
+    vpl.trigger_recalc(s_meas=0.0,
+                       meas_diff=np.array(0),
+                       phase='i',
+                       track='mnt',
+                       laps=12,
+                       x0=np.array([1, 0, 0, 0.5, 35, 35, 35, 35, 35]))
+    '''
+    vpl.trigger_recalc(s_meas=70,
+                       meas_diff=np.array([0, 0, 0, 0, 0.5, 0, 0, 0, 0]))
+
+    # receive an update by the energy strategy if calculation has finished
+    r = ESIM_CALCULATING
+    while r is not ESIM_UPDATED:
+        r = vpl.receive_esim_update()
+        time.sleep(1)
+        print("Power on global coordinates 0, 1, 2 km: ", vpl.f_pwr_intp([0, 1000, 2000]))

@@ -80,3 +80,5 @@ if __name__ == "__main__":
 
         if r is not None:
             print(r)
+
+        time.sleep(1)
