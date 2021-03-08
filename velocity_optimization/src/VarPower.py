@@ -85,9 +85,25 @@ class VarPowerLimits:
         update_esim = self.rec_recalc.run()
 
         if update_esim is not None:
+            s_glo_old = self.__s_var_pwr
+            P_old = self.__P_var_pwr
+            # match first s-coordinate of new plan into indices of old plan
+            idx_old = (np.abs(s_glo_old - update_esim[0, 0])).argmin()
+            idx_old -= 1
+            if idx_old < 0:
+                idx_old = 0
+            # retrieve s-coordinate of old plan, which is a few meters behind starting s-coordinate of new plan
+            s_glo_old = s_glo_old[idx_old]
+            P_old = P_old[idx_old]
 
             self.__s_var_pwr = update_esim[:, 0]
             self.__P_var_pwr = update_esim[:, 1]
+
+            # if old last s coordinate is smaller than new first s-coordinate, reuse this value to enforce smooth
+            # transitions between updates
+            if s_glo_old < self.__s_var_pwr[0]:
+                self.__s_var_pwr = np.insert(self.__s_var_pwr, 0, s_glo_old)
+                self.__P_var_pwr = np.insert(self.__P_var_pwr, 0, P_old)
 
             # --- Postprocess variable power array (no negative values)
             self.__P_var_pwr[self.__P_var_pwr < 0] = 0
@@ -156,6 +172,7 @@ class VarPowerLimits:
 if __name__ == '__main__':
 
     vpl = VarPowerLimits(module_path + '/velocity_optimization/inputs/')
+    s_meas_ = 70  # meters
 
     # initialize interfaces to energy strategy
     vpl.init_interface_recalc()
@@ -168,7 +185,7 @@ if __name__ == '__main__':
                        laps=12,
                        x0=np.array([1, 0, 0, 0.5, 35, 35, 35, 35, 35]))
     '''
-    vpl.trigger_recalc(s_meas=70,
+    vpl.trigger_recalc(s_meas=s_meas_,
                        meas_diff=np.array([0, 0, 0, 0, 0.5, 0, 0, 0, 0]))
 
     # receive an update by the energy strategy if calculation has finished
@@ -176,4 +193,4 @@ if __name__ == '__main__':
     while r is not ESIM_UPDATED:
         r = vpl.receive_esim_update()
         time.sleep(1)
-        print("Power on global coordinates 0, 1, 2 km: ", vpl.f_pwr_intp([0, 1000, 2000]))
+        print("Power on global coordinates s_meas, 1, 2 km: ", vpl.f_pwr_intp([s_meas_, 1000, 2000]))
