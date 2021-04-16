@@ -1,6 +1,7 @@
 import numpy as np
 import configparser
 
+from velocity_optimization.src.VarPower import VarPowerLimits
 
 def params_vp_sqp(m: int,
                   sid: str,
@@ -106,7 +107,8 @@ def params_vp_sqp(m: int,
 
     # max. allowed power [kW]
     if sqp_stgs['b_var_power']:
-        P_max = 270 * np.ones((sqp_stgs['m'] - 1, ))
+        vpl = VarPowerLimits(input_path=params_path + '../inputs/')
+        P_max = vpl.f_pwr_intp(np.cumsum(delta_s) - delta_s[0])
     else:
         P_max = None
 
