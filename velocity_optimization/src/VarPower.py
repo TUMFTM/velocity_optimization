@@ -12,10 +12,10 @@ from velocity_optimization.interface.Receiver import ZMQReceiver as Rec
 from velocity_optimization.interface.Sender import ZMQSender as Snd
 
 
-ESIM_FINISHED = 0
-ESIM_CALCULATING = 1
-ESIM_UPDATED = 0
-ESIM_OUTDATED = 1
+ESIM_FINISHED = 1
+ESIM_CALCULATING = 0
+ESIM_UPDATED = 1
+ESIM_OUTDATED = 0
 
 
 class VarPowerLimits:
@@ -69,6 +69,9 @@ class VarPowerLimits:
             self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
                                                    bounds_error=False)
 
+        # open ZMQ interfaces
+        self.init_interface_recalc()
+
     def init_interface_recalc(self):
 
         # --- Initialize sender to trigger ESIM recalculation
@@ -109,8 +112,6 @@ class VarPowerLimits:
             self.__P_var_pwr[self.__P_var_pwr < 0] = 0
 
             # re-interpolate
-            # TODO: append new values to last index of old solution to enforce smooth transition between old strategy
-            #  and update
             self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
                                                    bounds_error=False, assume_sorted=True)
 

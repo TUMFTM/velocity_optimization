@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="velocity_optimization",
-    version="1.2.0",
+    version="1.2.1",
     author="Thomas Herrmann",
     author_email="thomas.herrmann@tum.de",
     description="Optimizes (Maximizes) the velocity profile for a vehicle respecting physical constraints and "
