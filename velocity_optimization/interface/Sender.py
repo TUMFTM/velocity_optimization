@@ -42,7 +42,7 @@ class ZMQSender:
 
         self.int_receiver_zmq = int_receiver_zmq
 
-        print("All sockets opened (sender)!")
+        print("ES socket opened (sender)!")
 
     def send(self, data):
         # --------------------------------------------------------------------------------------------------------------

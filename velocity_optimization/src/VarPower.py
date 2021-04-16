@@ -69,9 +69,6 @@ class VarPowerLimits:
             self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
                                                    bounds_error=False)
 
-        # open ZMQ interfaces
-        self.init_interface_recalc()
-
     def init_interface_recalc(self):
 
         # --- Initialize sender to trigger ESIM recalculation

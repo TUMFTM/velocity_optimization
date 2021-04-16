@@ -44,7 +44,7 @@ class ZMQReceiver:
 
         self.int_sender_zmq = int_sender_zmq
 
-        print("All sockets opened (receiver)!")
+        print("ES socket openend (receiver)!")
 
         # --------------------------------------------------------------------------------------------------------------
         # FETCH MESSAGES -----------------------------------------------------------------------------------------------
