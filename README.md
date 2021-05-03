@@ -35,3 +35,4 @@ version of the IEEE Transactions on Intelligent Vehicles:
      journal = {{IEEE Transactions on Intelligent Vehicles}},
      doi = {10.1109/TIV.2020.3047858}
     }
+
