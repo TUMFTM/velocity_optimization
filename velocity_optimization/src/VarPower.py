@@ -22,7 +22,6 @@ class VarPowerLimits:
 
     __slots__ = ('input_path',
                  '__s_var_pwr',
-                 's_max_var_pwr',
                  '__P_var_pwr',
                  'f_pwr_intp',
                  'rec_recalc',
@@ -48,26 +47,14 @@ class VarPowerLimits:
         self.snd_recalc = None
         self.rec_recalc = None
 
-        # s coordinate [m]
-        self.__s_var_pwr = []
-        # max. s coordinate [m]
-        self.s_max_var_pwr = 0
-        # max. power values [kW]
-        self.__P_var_pwr = []
+        # s coordinate [m], initialize randomly with 0 - 100 km
+        self.__s_var_pwr = [0, 100000]
+        # max. power values [kW], initialize randomly with 270 kW
+        self.__P_var_pwr = [270, 270]
 
-        with open(self.input_path + 'var_power_db.csv', newline='\n') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            for row in reader:
-                self.__s_var_pwr = np.append(self.__s_var_pwr, json.loads(row[0]))
-                self.__P_var_pwr = np.append(self.__P_var_pwr, json.loads(row[1]))
-
-            # --- Postprocess variable power array (no negative values)
-            self.__P_var_pwr[self.__P_var_pwr < 0] = 0
-
-            self.s_max_var_pwr = np.max(self.__s_var_pwr)
-
-            self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
-                                                   bounds_error=False)
+        # set up interpolation function
+        self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
+                                               bounds_error=False)
 
     def init_interface_recalc(self):
 
@@ -108,9 +95,10 @@ class VarPowerLimits:
             # --- Postprocess variable power array (no negative values)
             self.__P_var_pwr[self.__P_var_pwr < 0] = 0
 
-            # re-interpolate
+            # re-interpolate and fill bounds if s-value exceeds bounds to left or right
             self.f_pwr_intp = interpolate.interp1d(self.__s_var_pwr, self.__P_var_pwr,
-                                                   bounds_error=False, assume_sorted=True)
+                                                   bounds_error=False, assume_sorted=True,
+                                                   fill_value=(self.__P_var_pwr[0], self.__P_var_pwr[-1]))
 
             return ESIM_UPDATED
 
